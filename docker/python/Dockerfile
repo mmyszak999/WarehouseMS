@@ -7,7 +7,8 @@ ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update \
     && apt-get -y install libpq-dev gcc \
-    && apt-get install -yq netcat
+    && apt-get install -yq netcat \ 
+    && pip install asycopg
 
 COPY requirements.txt .
 
