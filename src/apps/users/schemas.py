@@ -4,6 +4,11 @@ from typing import Any, Optional
 from pydantic import BaseModel, EmailStr, Field, validator
 
 
+class UserLoginInputSchema(BaseModel):
+    email: EmailStr = Field()
+    password: str = Field(min_length=8, max_length=40)
+    
+
 class UserBaseSchema(BaseModel):
     first_name: str = Field(max_length=50)
     last_name: str = Field(max_length=75)
@@ -25,7 +30,7 @@ class UserInputSchema(UserBaseSchema):
         return birth_date
     
     @validator("employment_date")
-    def validate_birth_date(cls, employment_date: datetime.date, values: dict[str, Any]) -> datetime.date:
+    def validate_employment_date(cls, employment_date: datetime.date, values: dict[str, Any]) -> datetime.date:
         if employment_date <= values["birth_date"]:
             raise ValueError("Employment date can't be lower than birth date")
         return employment_date
