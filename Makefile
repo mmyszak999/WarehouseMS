@@ -29,5 +29,5 @@ db-bash:
 db-shell:
 		docker-compose exec db psql -U ${db-user}
 
-create-superuser:
+superuser:
 		docker-compose exec web bash -c "bash ./app_scripts/create_superuser.sh main_db"

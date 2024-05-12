@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from src.settings.db_settings import settings
 
 engine = create_async_engine(
-    settings.postgres_url, echo=False, future=True, pool_size=20, max_overflow=0
+    settings.postgres_url, echo=False, future=True, pool_size=20, max_overflow=64
 )
 
 async_session = sessionmaker(
@@ -17,8 +17,3 @@ async_session = sessionmaker(
 )
 
 Base = declarative_base()
-
-async def get_db() -> AsyncSession:
-    async with async_session() as session:
-        yield session
-        await session.commit()

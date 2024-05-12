@@ -1,4 +1,4 @@
-FROM python:3.11-slim-buster
+FROM python:3.9.6-slim-buster
 
 WORKDIR /code
 
@@ -8,7 +8,7 @@ ENV PYTHONUNBUFFERED 1
 RUN apt-get update \
     && apt-get -y install libpq-dev gcc \
     && apt-get install -yq netcat \ 
-    && pip install asycopg
+    && pip install asyncpg
 
 COPY requirements.txt .
 

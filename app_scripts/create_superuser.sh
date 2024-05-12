@@ -26,20 +26,12 @@ async def run():
 
         # Inserting user data
         user_insert_query = """INSERT INTO "user"
-            (ID, FIRST_NAME, LAST_NAME, EMAIL, USERNAME, PASSWORD, BIRTH_DATE, IS_SUPERUSER, IS_STAFF, IS_ACTIVE)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"""
-        await connection.execute(user_insert_query, user_id, "${SUPERUSER_FIRST_NAME}",
-                                 "${SUPERUSER_LAST_NAME}", "${SUPERUSER_EMAIL}",
-                                 "${SUPERUSER_USERNAME}", "${SUPERUSER_PASSWORD}",
-                                 "${SUPERUSER_BIRTHDATE}", True, True, True)
-
-        # Inserting user address data
-        address_id = uuid.uuid4()
-        address_insert_query = """INSERT INTO "user_address"
-            (ID, COUNTRY, STATE, CITY, POSTAL_CODE, STREET, HOUSE_NUMBER, APARTMENT_NUMBER, USER_ID)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"""
-        await connection.execute(address_insert_query, address_id, 'USA', 'Texas', 'Houston',
-                                 '34567', 'Walker Avenue', '35', '2', user_id)
+            (ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD, BIRTH_DATE, EMPLOYMENT_DATE,
+            IS_SUPERUSER, IS_STAFF, IS_ACTIVE, CAN_MOVE_GOODS, CAN_RECEPT_GOODS, CAN_ISSUE_GOODS)
+            VALUES ('{user_id}', '${SUPERUSER_FIRST_NAME}', '${SUPERUSER_LAST_NAME}', '${SUPERUSER_EMAIL}',
+        '${SUPERUSER_PASSWORD}', '${SUPERUSER_BIRTHDATE}', '${SUPERUSER_EMPLOYMENT_DATE}', 
+        TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)"""
+        await connection.execute(user_insert_query)
 
         print("successfully created superuser")
 
