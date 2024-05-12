@@ -29,11 +29,11 @@ class UserInputSchema(UserBaseSchema):
             raise ValueError("Birth date must be in the past")
         return birth_date
     
-    @validator("employment_date")
+    """@validator("employment_date")
     def validate_employment_date(cls, employment_date: datetime.date, values: dict[str, Any]) -> datetime.date:
         if employment_date <= values["birth_date"]:
-            raise ValueError("Employment date can't be lower than birth date")
-        return employment_date
+            raise ValueError("Employment date can't be earlier than birth date")
+        return employment_date"""
 
 
 class UserPasswordSchema(BaseModel):

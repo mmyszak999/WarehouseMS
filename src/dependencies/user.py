@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.apps.users.models import User
 from src.dependencies.get_db import get_db
 from src.settings.jwt_settings import AuthJWTSettings
+from src.core.exceptions import AuthenticationException
 
 
 async def authenticate_user(
@@ -17,9 +18,9 @@ async def authenticate_user(
         select(User).filter(User.email == jwt_subject).limit(1)
     )
     if not user:
-        raise Exception("Cannot find user")
-    if not user.is_active:
-        raise Exception("Already active")
+        raise AuthenticationException("Cannot find user")
+    """if not user.is_active:
+        raise Exception("Already active")"""
 
     return user
 

@@ -24,13 +24,13 @@ async def run():
 
         user_id = uuid.uuid4()
 
-        # Inserting user data
         user_insert_query = """INSERT INTO "user"
             (ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD, BIRTH_DATE, EMPLOYMENT_DATE,
-            IS_SUPERUSER, IS_STAFF, IS_ACTIVE, CAN_MOVE_GOODS, CAN_RECEPT_GOODS, CAN_ISSUE_GOODS)
+            IS_SUPERUSER, IS_STAFF, IS_ACTIVE, CAN_MOVE_GOODS, CAN_RECEPT_GOODS, CAN_ISSUE_GOODS,
+            HAS_PASSWORD_SET)
             VALUES ('{user_id}', '${SUPERUSER_FIRST_NAME}', '${SUPERUSER_LAST_NAME}', '${SUPERUSER_EMAIL}',
         '${SUPERUSER_PASSWORD}', '${SUPERUSER_BIRTHDATE}', '${SUPERUSER_EMPLOYMENT_DATE}', 
-        TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)"""
+        TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)""".format(user_id=user_id)
         await connection.execute(user_insert_query)
 
         print("successfully created superuser")

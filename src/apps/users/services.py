@@ -11,15 +11,17 @@ from src.apps.users.schemas import (
     UserOutputSchema,
     UserLoginInputSchema
 )
+from src.apps.jwt.schemas import AccessTokenOutputSchema
 from src.core.utils.crypt import passwd_context, hash_user_password
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
+from src.core.exceptions import AuthenticationException
 
 
-def authenticate(user_login_schema: UserLoginInputSchema, session: AsyncSession) -> User:
+async def authenticate(user_login_schema: UserLoginInputSchema, session: AsyncSession) -> User:
     login_data = user_login_schema.dict()
-    user = session.scalar(
+    user = await session.scalar(
         select(User).filter(User.email == login_data["email"]).limit(1)
     )
     if not (user or passwd_context.verify(login_data["password"], user.password)):
@@ -29,10 +31,10 @@ def authenticate(user_login_schema: UserLoginInputSchema, session: AsyncSession)
     return user
 
 
-def get_access_token_schema(
+async def get_access_token_schema(
     user_login_schema: UserLoginInputSchema, session: AsyncSession, auth_jwt: AuthJWT
-) -> str:
-    user = authenticate(user_login_schema, session=session)
+) -> AccessTokenOutputSchema:
+    user = await authenticate(user_login_schema, session=session)
     email = user.email
     access_token = auth_jwt.create_access_token(subject=email, algorithm="HS256")
 
