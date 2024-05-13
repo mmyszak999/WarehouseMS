@@ -40,6 +40,15 @@ class UserPasswordSchema(BaseModel):
             raise ValueError("Passwords are not identical")
         return rep_password
 
+class UserUpdateSchema(BaseModel):
+    first_name: Optional[str]
+    last_name: Optional[str]
+    employment_date: Optional[datetime.date]
+    birth_date: Optional[datetime.date]
+    can_move_goods: Optional[bool]
+    can_recept_goods: Optional[bool]
+    can_issue_goods: Optional[bool]
+
 
 class UserInfoOutputSchema(UserBaseSchema):
     is_active: bool
