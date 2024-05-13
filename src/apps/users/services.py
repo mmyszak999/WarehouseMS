@@ -29,18 +29,18 @@ from src.core.exceptions import (
 from src.core.utils.orm import if_exists
 
 
-async def register_user_base(session: AsyncSession, user_input: UserInputSchema) -> tuple[Any]:
+async def create_user_base(session: AsyncSession, user_input: UserInputSchema) -> tuple[Any]:
     user_data = user_input.dict()
     new_user = User(**user_data)
 
     return new_user
 
 
-async def register_user(
+async def create_single_user(
     session: AsyncSession, user_input: UserInputSchema, background_tasks: BackgroundTasks
 ) -> UserOutputSchema:
-    user_data = user_input.dict()
-    new_user = User(**user_data)
+    new_user = await create_user_base(session, user_input)
+    new_user.is_active = True #temporary
 
     session.add(new_user)
     await session.commit()
