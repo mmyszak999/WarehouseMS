@@ -33,7 +33,7 @@ class AccountNotActivatedException(ServiceException):
     def __init__(self, field: str, value: Any) -> None:
         super().__init__(
             f"The account of the user with {field}={value} has not been activated! "
-            "Please check your mailbox to find the message with activation link "
+            "Please check your mailbox to find the message with activation link. "
             "If you think this is a mistake, contact or mail our support team!"
         )
 
@@ -41,11 +41,5 @@ class AccountNotActivatedException(ServiceException):
 class AccountAlreadyDeactivatedException(ServiceException):
     def __init__(self, field: str, value: Any) -> None:
         super().__init__(
-            f"The account of the user with {field}={value} was already deactivated! "
+            f"The account of the user with {field}={value} was already deactivated!"
         )
-
-
-"""
-if not user.is_active:
-        raise AccountNotActivatedException("email", jwt_subject)
-"""

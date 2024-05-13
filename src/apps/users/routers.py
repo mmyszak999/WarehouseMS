@@ -1,6 +1,7 @@
 from typing import Union
 
 from fastapi import BackgroundTasks, Depends, Request, Response, status
+from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 from fastapi_jwt_auth import AuthJWT
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -32,7 +33,7 @@ user_router = APIRouter(prefix="/users", tags=["users"])
 
 
 @user_router.post(
-    "/register", response_model=UserOutputSchema, status_code=status.HTTP_201_CREATED
+    "/create", response_model=UserOutputSchema, status_code=status.HTTP_201_CREATED
 )
 async def create_user(
     user: UserInputSchema,
@@ -54,7 +55,7 @@ async def login_user(
 
 
 @user_router.get(
-    "/me",
+    "/user/me",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(authenticate_user)],
     response_model=UserOutputSchema,
@@ -103,7 +104,7 @@ async def update_user(
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
 ) -> UserOutputSchema:
-    await check_if_staff(request_user, "id", user_id)
+    await check_if_staff(request_user)
     return await update_single_user(session, user_input, user_id)
 
 
@@ -114,9 +115,9 @@ async def update_user(
 async def deactivate_user(
     user_id: str,
     request_user: User = Depends(authenticate_user),
-    session: Session = Depends(get_db),
+    session: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
-    await check_if_staff(request_user, "id", user_id)
+    await check_if_staff(request_user)
     await deactivate_single_user(session, user_id)
 
     return JSONResponse(

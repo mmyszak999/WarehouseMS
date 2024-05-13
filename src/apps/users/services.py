@@ -98,7 +98,7 @@ async def update_single_user(
     if not (await if_exists(User, "id", user_id, session)):
         raise DoesNotExist(User.__name__, "id", user_id)
 
-    user_data = user.dict(exclude_unset=True, exclude_none=True)
+    user_data = user_input.dict(exclude_unset=True, exclude_none=True)
     
     if user_data:
         statement = update(User).filter(User.id == user_id).values(**user_data)
@@ -116,7 +116,7 @@ async def deactivate_single_user(session: AsyncSession, user_id: int) -> None:
     if not user_object.is_active:
         raise AccountAlreadyDeactivatedException("email", user_object.email)
     
-    user_object.is_active = True
+    user_object.is_active = False
     session.add(user_object)
     
     await session.commit()
