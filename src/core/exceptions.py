@@ -43,3 +43,9 @@ class AccountAlreadyDeactivatedException(ServiceException):
         super().__init__(
             f"The account of the user with {field}={value} was already deactivated!"
         )
+
+class AccountAlreadyActivatedException(ServiceException):
+    def __init__(self, field: str, value: Any) -> None:
+        super().__init__(
+            f"The account of the user with {field}={value} was already activated!"
+        )

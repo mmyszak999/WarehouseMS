@@ -118,7 +118,7 @@ async def deactivate_user(
     session: AsyncSession = Depends(get_db),
 ) -> JSONResponse:
     await check_if_staff(request_user)
-    await deactivate_single_user(session, user_id)
+    await deactivate_single_user(session, user_id, request_user.id)
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,

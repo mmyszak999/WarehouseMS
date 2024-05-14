@@ -21,18 +21,27 @@ from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
 from src.core.exceptions import (
     AuthenticationException,
+    AlreadyExists,
     DoesNotExist,
     ServiceException,
     AccountAlreadyDeactivatedException,
-    AccountNotActivatedException 
+    AccountNotActivatedException,
+    AccountAlreadyActivatedException
 )
 from src.core.utils.orm import if_exists
+from src.apps.emails.services import send_activation_email
 
 
-async def create_user_base(session: AsyncSession, user_input: UserInputSchema) -> tuple[Any]:
+async def create_user_base(session: AsyncSession, user_input: UserInputSchema) -> User:
     user_data = user_input.dict()
+    
+    email_check = await session.scalar(
+        select(User).filter(User.email == user_data["email"]).limit(1)
+    )
+    if email_check:
+        raise AlreadyExists(User.__name__, "email", user_data["email"])
+    
     new_user = User(**user_data)
-
     return new_user
 
 
@@ -40,12 +49,11 @@ async def create_single_user(
     session: AsyncSession, user_input: UserInputSchema, background_tasks: BackgroundTasks
 ) -> UserOutputSchema:
     new_user = await create_user_base(session, user_input)
-    new_user.is_active = True #temporary
 
     session.add(new_user)
     await session.commit()
 
-    #send_activation_email(new_user.email, session, background_tasks)
+    await send_activation_email(new_user.email, session, background_tasks)
 
     return UserOutputSchema.from_orm(new_user)
 
@@ -93,7 +101,7 @@ async def get_all_users(
     )
 
 async def update_single_user(
-    session: AsyncSession, user_input: UserUpdateSchema, user_id: int
+    session: AsyncSession, user_input: UserUpdateSchema, user_id: str
 ) -> UserOutputSchema:
     if not (await if_exists(User, "id", user_id, session)):
         raise DoesNotExist(User.__name__, "id", user_id)
@@ -109,20 +117,7 @@ async def update_single_user(
     return await get_single_user(session, user_id=user_id)
 
 
-async def deactivate_single_user(session: AsyncSession, user_id: int) -> None:
-    if not (user_object := (await if_exists(User, "id", user_id, session))):
-        raise DoesNotExist(User.__name__, "id", user_id)
-    
-    if not user_object.is_active:
-        raise AccountAlreadyDeactivatedException("email", user_object.email)
-    
-    user_object.is_active = False
-    session.add(user_object)
-    
-    await session.commit()
-
-
-async def delete_single_user(session: AsyncSession, user_id: int):
+async def delete_single_user(session: AsyncSession, user_id: str):
     if not (user_object := (await if_exists(User, "id", user_id, session))):
         raise DoesNotExist(User.__name__, "id", user_id)
     
