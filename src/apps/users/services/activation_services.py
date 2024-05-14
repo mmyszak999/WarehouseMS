@@ -31,7 +31,6 @@ from src.core.exceptions import (
 from src.core.utils.orm import if_exists
 
 
-
 async def manage_activation_status(
     session: AsyncSession, field: str, value: Any,
     request_user_id: str = None, activate: bool = True) -> None:
@@ -65,3 +64,7 @@ async def activate_account_service(session: AsyncSession, token: str) -> None:
     emails = await confirm_token(token)
     current_email = emails[0]
     await activate_single_user(session, "email", current_email)
+
+
+async def set_user_password(session: AsyncSession, token):
+    pass

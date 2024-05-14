@@ -20,7 +20,7 @@ from src.settings.email_settings import EmailSettings
 
 
 
-async def email_config(settings: BaseSettings = EmailSettings):
+def email_config(settings: BaseSettings = EmailSettings):
     return ConnectionConfig(**settings().dict())
 
 

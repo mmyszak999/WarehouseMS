@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi_jwt_auth.exceptions import AuthJWTException
 
 from src.apps.users.routers import user_router
+from src.apps.emails.routers import email_router
 from src.core.exceptions import (
     AuthenticationException,
     AlreadyExists,
@@ -26,6 +27,7 @@ app = FastAPI(
 root_router = APIRouter(prefix="/api")
 
 root_router.include_router(user_router)
+root_router.include_router(email_router)
 
 app.include_router(root_router)
 

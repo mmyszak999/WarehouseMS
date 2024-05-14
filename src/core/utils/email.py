@@ -24,12 +24,12 @@ async def confirm_token(token: str, expiration=3600) -> list[str]:
     except Exception:
         return False
 
-def send_email(
+async def send_email(
     schema: BaseModel,
     body_schema: BaseModel,
     background_tasks: BackgroundTasks,
     settings: BaseSettings,
-) -> None:
+):
     email_message = MessageSchema(
         subject=schema.email_subject,
         recipients=schema.receivers,

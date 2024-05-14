@@ -15,14 +15,15 @@ from src.apps.users.schemas import (
     UserUpdateSchema,
     UserInfoOutputSchema
 )
-from src.apps.users.services import (
+from src.apps.users.services.user_services import (
     get_all_users,
     get_access_token_schema,
     get_single_user,
     create_single_user,
     update_single_user,
-    deactivate_single_user
+    create_single_user
 )
+from src.apps.users.services.activation_services import deactivate_single_user
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.permissions import check_if_staff
@@ -39,8 +40,10 @@ async def create_user(
     user: UserInputSchema,
     background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_db),
+    request_user: User = Depends(authenticate_user)
 ) -> UserOutputSchema:
-    return await register_user(session, user, background_tasks)
+    await check_if_staff(request_user)
+    return await create_single_user(session, user, background_tasks)
 
 
 @user_router.post(

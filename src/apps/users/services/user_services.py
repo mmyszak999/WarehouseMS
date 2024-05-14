@@ -52,6 +52,7 @@ async def create_single_user(
 
     session.add(new_user)
     await session.commit()
+    await session.refresh(new_user)
 
     await send_activation_email(new_user.email, session, background_tasks)
 
