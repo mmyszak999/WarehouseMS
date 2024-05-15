@@ -24,6 +24,12 @@ def email_config(settings: BaseSettings = EmailSettings):
     return ConnectionConfig(**settings().dict())
 
 
+async def retrieve_email_from_token(session: AsyncSession, token: str) -> str:
+    emails = await confirm_token(token)
+    current_email = emails[0]
+    return current_email
+
+
 async def send_activation_email(
     email: EmailStr, session: AsyncSession, background_tasks: BackgroundTasks
 ) -> None:

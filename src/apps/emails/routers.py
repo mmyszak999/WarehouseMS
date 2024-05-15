@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.users.models import User
 from src.apps.users.services.activation_services import activate_account_service
+from src.apps.users.schemas import UserPasswordSchema
 from src.dependencies.get_db import get_db
 from src.dependencies.user import authenticate_user
 
@@ -17,7 +18,8 @@ email_router = APIRouter(prefix="/email", tags=["emails"])
     status_code=status.HTTP_200_OK,
 )
 async def confirm_account_activation(
-    token: str, session: AsyncSession = Depends(get_db), auth_jwt: AuthJWT = Depends()
+    token: str, password_schema: UserPasswordSchema,
+    session: AsyncSession = Depends(get_db), auth_jwt: AuthJWT = Depends()
 ) -> JSONResponse:
     await activate_account_service(session, token)
     return JSONResponse(

@@ -12,9 +12,11 @@ from src.apps.users.schemas import (
     UserLoginInputSchema,
     UserInputSchema,
     UserInfoOutputSchema,
-    UserUpdateSchema
+    UserUpdateSchema,
+    UserPasswordSchema
 )
 from src.apps.jwt.schemas import AccessTokenOutputSchema
+from src.apps.emails.services import retrieve_email_from_token
 from src.core.utils.crypt import passwd_context, hash_user_password
 from src.core.utils.email import confirm_token
 from src.core.pagination.models import PageParams
@@ -26,7 +28,9 @@ from src.core.exceptions import (
     ServiceException,
     AccountAlreadyDeactivatedException,
     AccountNotActivatedException,
-    AccountAlreadyActivatedException
+    AccountAlreadyActivatedException,
+    UserCantDeactivateTheirAccountException,
+    PasswordAlreadySetException
 )
 from src.core.utils.orm import if_exists
 
@@ -55,16 +59,34 @@ async def activate_single_user(session: AsyncSession, field: str, value: Any) ->
 
 async def deactivate_single_user(session: AsyncSession, user_id: str, request_user_id: str) -> None:
     if user_id == request_user_id:
-        raise Exception("You can't deactivate your account!")
+        raise UserCantDeactivateTheirAccountException
     
     await manage_activation_status(session, "id", user_id, request_user_id=request_user_id, activate=False)
 
 
-async def activate_account_service(session: AsyncSession, token: str) -> None:
-    emails = await confirm_token(token)
-    current_email = emails[0]
-    await activate_single_user(session, "email", current_email)
+async def set_user_password(session: AsyncSession, user_email: str, password_schema: UserPasswordSchema) -> None:
+    if not (user_object := (await if_exists(User, "email", user_email, session))):
+        raise DoesNotExist(User.__name__, "email", user_email)
+    
+    if user_object.has_password_set:
+        raise PasswordAlreadySetException
+    
+    if user_data.pop("password_repeat"):
+        user_password = await hash_user_password(password=user_data.pop("password"))
+    
+    user_object.password = user_password
+    user_object.has_password_set = True
+    
+    session.add(user_object)
+    
+    await session.commit()
+    await session.refresh(user_object)
+    
 
-
-async def set_user_password(session: AsyncSession, token):
-    pass
+async def activate_account_service(
+    session: AsyncSession, token: str,
+    user_passwords: UserPasswordSchema
+    ) -> None:
+    user_email = await retrieve_email_from_token(session, token)
+    await set_user_password(session, user_email)
+    await activate_single_user(session, "email", user_email)
