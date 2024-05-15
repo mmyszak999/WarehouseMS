@@ -15,7 +15,8 @@ from src.core.exceptions import (
     ServiceException,
     AccountAlreadyActivatedException,
     UserCantDeactivateTheirAccountException,
-    PasswordAlreadySetException
+    PasswordAlreadySetException,
+    UserCantActivateTheirAccountException
     )
 
 
@@ -120,6 +121,15 @@ async def handle_account_already_activated_exception(
 @app.exception_handler(UserCantDeactivateTheirAccountException)
 async def handle_user_cant_deactivate_their_account_exception(
     request: Request, exception: UserCantDeactivateTheirAccountException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(UserCantActivateTheirAccountException)
+async def handle_user_cant_activate_their_account_exception(
+    request: Request, exception: UserCantActivateTheirAccountException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}

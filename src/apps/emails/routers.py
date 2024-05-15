@@ -21,8 +21,8 @@ async def confirm_account_activation(
     token: str, password_schema: UserPasswordSchema,
     session: AsyncSession = Depends(get_db), auth_jwt: AuthJWT = Depends()
 ) -> JSONResponse:
-    await activate_account_service(session, token)
+    await activate_account_service(session, token, password_schema)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content={"message": "Account activated successfully!"},
+        content={"message": "Your password was set and account was activated successfully!"}
     )

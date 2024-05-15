@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Union
 
 from fastapi import BackgroundTasks
 from fastapi_jwt_auth import AuthJWT
@@ -64,7 +64,7 @@ async def authenticate(user_login_schema: UserLoginInputSchema, session: AsyncSe
     user = await session.scalar(
         select(User).filter(User.email == login_data["email"]).limit(1)
     )
-    if not (user or passwd_context.verify(login_data["password"], user.password)):
+    if not (user.is_superuser or (user and passwd_context.verify(login_data["password"], user.password))):
         raise AuthenticationException("Invalid Credentials")
     if not user.is_active:
         raise AccountNotActivatedException("email", login_data["email"])
@@ -91,11 +91,19 @@ async def get_single_user(
 
 
 async def get_all_users(
-    session: AsyncSession, page_params: PageParams) -> PagedResponseSchema[UserOutputSchema]:
+    session: AsyncSession,
+    page_params: PageParams,
+    output_schema: BaseModel = UserOutputSchema,
+    only_active: bool=True) -> Union[
+    PagedResponseSchema[UserInfoOutputSchema],
+    PagedResponseSchema[UserOutputSchema]
+]:
     query = select(User)
+    if only_active:
+        query = query.filter(User.is_active==True)
     return await paginate(
         query=query,
-        response_schema=UserOutputSchema,
+        response_schema=output_schema,
         table=User,
         page_params=page_params,
         session=session,

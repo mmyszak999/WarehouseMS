@@ -53,7 +53,14 @@ async def manage_activation_status(
     await session.commit()
 
 
-async def activate_single_user(session: AsyncSession, field: str, value: Any) -> None:
+async def activate_single_user(session: AsyncSession, user_id: str, request_user_id: str) -> None:
+    if user_id == request_user_id:
+        raise UserCantActivateTheirAccountException
+    
+    await manage_activation_status(session, "id", user_id, request_user_id=request_user_id)
+
+
+async def activate_single_user_by_link(session: AsyncSession, field: str, value: Any) -> None:
     await manage_activation_status(session, field, value)
 
 
@@ -71,8 +78,10 @@ async def set_user_password(session: AsyncSession, user_email: str, password_sch
     if user_object.has_password_set:
         raise PasswordAlreadySetException
     
-    if user_data.pop("password_repeat"):
-        user_password = await hash_user_password(password=user_data.pop("password"))
+    user_passwords = password_schema.dict()
+    
+    if user_passwords.pop("password_repeat"):
+        user_password = await hash_user_password(password=user_passwords.pop("password"))
     
     user_object.password = user_password
     user_object.has_password_set = True
@@ -82,11 +91,11 @@ async def set_user_password(session: AsyncSession, user_email: str, password_sch
     await session.commit()
     await session.refresh(user_object)
     
-
+    
 async def activate_account_service(
     session: AsyncSession, token: str,
     user_passwords: UserPasswordSchema
     ) -> None:
     user_email = await retrieve_email_from_token(session, token)
-    await set_user_password(session, user_email)
-    await activate_single_user(session, "email", user_email)
+    await set_user_password(session, user_email, user_passwords)
+    await activate_single_user_by_link(session, "email", user_email)

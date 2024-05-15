@@ -52,14 +52,23 @@ class AccountAlreadyActivatedException(ServiceException):
 
 
 class UserCantDeactivateTheirAccountException(ServiceException):
-    def __init__(self, field: str, value: Any) -> None:
+    def __init__(self) -> None:
         super().__init__(
             f"User can't deactivate their account!"
         )
 
 
+class UserCantActivateTheirAccountException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"User can't activate their account by other way than using activation link when account created! "
+            "If necessary, please contact our support team! "
+            
+        )
+
+
 class PasswordAlreadySetException(ServiceException):
-    def __init__(self, field: str, value: Any) -> None:
+    def __init__(self) -> None:
         super().__init__(
             f"This account already has its password set"
         )

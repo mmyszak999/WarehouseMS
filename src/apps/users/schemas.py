@@ -13,6 +13,12 @@ class UserBaseSchema(BaseModel):
     first_name: str = Field(max_length=50)
     last_name: str = Field(max_length=75)
     employment_date: datetime.date
+    
+    @validator("employment_date")
+    def validate_employment_date(cls, employment_date: datetime.date) -> datetime.date:
+        if employment_date >= datetime.date.today():
+            raise ValueError("Employment date must be in the past")
+        return employment_date
 
 
 class UserInputSchema(UserBaseSchema):
@@ -63,6 +69,7 @@ class UserOutputSchema(UserInputSchema):
     is_active: bool
     is_superuser: bool
     is_staff: bool
+    has_password_set: bool
     
     class Config:
         orm_mode = True

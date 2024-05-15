@@ -23,7 +23,7 @@ from src.apps.users.services.user_services import (
     update_single_user,
     create_single_user
 )
-from src.apps.users.services.activation_services import deactivate_single_user
+from src.apps.users.services.activation_services import deactivate_single_user, activate_single_user
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.permissions import check_if_staff
@@ -58,7 +58,7 @@ async def login_user(
 
 
 @user_router.get(
-    "/user/me",
+    "/me",
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(authenticate_user)],
     response_model=UserOutputSchema,
@@ -67,6 +67,41 @@ async def get_logged_user(
     request_user: User = Depends(authenticate_user),
 ) -> UserOutputSchema:
     return UserOutputSchema.from_orm(request_user)
+
+@user_router.get(
+    "/",
+    response_model=Union[
+    PagedResponseSchema[UserOutputSchema],
+    PagedResponseSchema[UserInfoOutputSchema],
+],
+    status_code=status.HTTP_200_OK,
+)
+async def get_users(
+    session: AsyncSession = Depends(get_db),
+    page_params: PageParams = Depends(),
+    request_user: User = Depends(authenticate_user)
+) -> Union[
+    PagedResponseSchema[UserOutputSchema],
+    PagedResponseSchema[UserInfoOutputSchema],
+]:
+    if request_user.is_staff:
+        return await get_all_users(session, page_params)
+    print("ss")
+    return await get_all_users(session, page_params, output_schema=UserInfoOutputSchema)
+
+
+@user_router.get(
+    "/all",
+    response_model=PagedResponseSchema[UserOutputSchema],
+    status_code=status.HTTP_200_OK,
+)
+async def get_every_user(
+    session: AsyncSession = Depends(get_db),
+    page_params: PageParams = Depends(),
+    request_user: User = Depends(authenticate_user)
+) -> PagedResponseSchema[UserOutputSchema]:
+    await check_if_staff(request_user)
+    return await get_all_users(session, page_params, only_active=False)
 
 
 @user_router.get(
@@ -81,19 +116,6 @@ async def get_user(
     if request_user.is_staff:
         return await get_single_user(session, user_id)
     return await get_single_user(session, user_id, output_schema=UserInfoOutputSchema)
-
-
-@user_router.get(
-    "/",
-    response_model=PagedResponseSchema[UserOutputSchema],
-    status_code=status.HTTP_200_OK,
-)
-async def get_users(
-    session: AsyncSession = Depends(get_db),
-    page_params: PageParams = Depends(),
-    request_user: User = Depends(authenticate_user)
-) -> PagedResponseSchema[UserOutputSchema]:
-    return await get_all_users(session, page_params)
 
 
 @user_router.patch(
@@ -127,5 +149,25 @@ async def deactivate_user(
         status_code=status.HTTP_200_OK,
         content={
             "message": "The account has been deactivated!"
+        }
+    )
+
+
+@user_router.patch(
+    "/{user_id}/activate",
+    status_code=status.HTTP_200_OK,
+)
+async def activate_user(
+    user_id: str,
+    request_user: User = Depends(authenticate_user),
+    session: AsyncSession = Depends(get_db),
+) -> JSONResponse:
+    await check_if_staff(request_user)
+    await activate_single_user(session, user_id, request_user.id)
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "message": "The account has been activated!"
         }
     )
