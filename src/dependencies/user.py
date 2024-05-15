@@ -4,9 +4,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.users.models import User
+from src.core.exceptions import AccountNotActivatedException, AuthenticationException
 from src.dependencies.get_db import get_db
 from src.settings.jwt_settings import AuthJWTSettings
-from src.core.exceptions import AuthenticationException, AccountNotActivatedException
 
 
 async def authenticate_user(
@@ -21,6 +21,7 @@ async def authenticate_user(
         raise AccountNotActivatedException("email", user.email)
 
     return user
+
 
 @AuthJWT.load_config
 def get_config():

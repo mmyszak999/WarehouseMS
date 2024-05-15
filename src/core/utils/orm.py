@@ -1,9 +1,8 @@
-
 import uuid
 from typing import Any
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import Table, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def if_exists(model_class: Table, field: str, value: Any, session: AsyncSession):

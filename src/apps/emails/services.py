@@ -8,16 +8,9 @@ from src.apps.emails.schemas import EmailSchema
 from src.apps.jwt.schemas import ConfirmationTokenSchema
 from src.apps.users.models import User
 from src.core.exceptions import DoesNotExist, IsOccupied, ServiceException
-from src.core.utils.orm import (
-   if_exists
-)
-from src.core.utils.email import (
-    confirm_token,
-    generate_confirm_token,
-    send_email,
-)
+from src.core.utils.email import confirm_token, generate_confirm_token, send_email
+from src.core.utils.orm import if_exists
 from src.settings.email_settings import EmailSettings
-
 
 
 def email_config(settings: BaseSettings = EmailSettings):
@@ -40,4 +33,6 @@ async def send_activation_email(
     )
     token = await generate_confirm_token([email])
     body_schema = ConfirmationTokenSchema(token=token)
-    await send_email(email_schema, body_schema, background_tasks, settings=email_config())
+    await send_email(
+        email_schema, body_schema, background_tasks, settings=email_config()
+    )

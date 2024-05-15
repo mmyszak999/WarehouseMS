@@ -20,7 +20,9 @@ async def check_if_staff(request_user: User) -> bool:
     return True
 
 
-async def check_if_staff_or_owner(request_user: User, attribute: str, value: Any) -> bool:
+async def check_if_staff_or_owner(
+    request_user: User, attribute: str, value: Any
+) -> bool:
     if not (request_user.is_staff or getattr(request_user, attribute) == value):
         raise AuthorizationException(
             "You don't have permissions to access the resource"

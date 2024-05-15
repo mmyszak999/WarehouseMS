@@ -24,6 +24,7 @@ async def confirm_token(token: str, expiration=3600) -> list[str]:
     except Exception:
         return False
 
+
 async def send_email(
     schema: BaseModel,
     body_schema: BaseModel,

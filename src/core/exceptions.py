@@ -4,6 +4,7 @@ from typing import Any
 class ServiceException(Exception):
     pass
 
+
 class DoesNotExist(ServiceException):
     def __init__(self, class_name: str, field: str, value: Any) -> None:
         super().__init__(f"{class_name} with {field}={value} does not exist")
@@ -17,7 +18,7 @@ class AlreadyExists(ServiceException):
 class IsOccupied(ServiceException):
     def __init__(self, class_name: str, field: str, value: Any) -> None:
         super().__init__(f"{field}={value} value of {class_name} is occupied")
-        
+
 
 class AuthenticationException(ServiceException):
     def __init__(self, message: str) -> None:
@@ -44,6 +45,7 @@ class AccountAlreadyDeactivatedException(ServiceException):
             f"The account of the user with {field}={value} was already deactivated!"
         )
 
+
 class AccountAlreadyActivatedException(ServiceException):
     def __init__(self, field: str, value: Any) -> None:
         super().__init__(
@@ -53,9 +55,7 @@ class AccountAlreadyActivatedException(ServiceException):
 
 class UserCantDeactivateTheirAccountException(ServiceException):
     def __init__(self) -> None:
-        super().__init__(
-            f"User can't deactivate their account!"
-        )
+        super().__init__(f"User can't deactivate their account!")
 
 
 class UserCantActivateTheirAccountException(ServiceException):
@@ -63,12 +63,9 @@ class UserCantActivateTheirAccountException(ServiceException):
         super().__init__(
             f"User can't activate their account by other way than using activation link when account created! "
             "If necessary, please contact our support team! "
-            
         )
 
 
 class PasswordAlreadySetException(ServiceException):
     def __init__(self) -> None:
-        super().__init__(
-            f"This account already has its password set"
-        )
+        super().__init__(f"This account already has its password set")

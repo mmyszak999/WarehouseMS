@@ -9,21 +9,23 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.apps.jwt.schemas import AccessTokenOutputSchema
 from src.apps.users.models import User
 from src.apps.users.schemas import (
-    UserOutputSchema,
-    UserLoginInputSchema,
+    UserInfoOutputSchema,
     UserInputSchema,
+    UserLoginInputSchema,
+    UserOutputSchema,
     UserUpdateSchema,
-    UserInfoOutputSchema
+)
+from src.apps.users.services.activation_services import (
+    activate_single_user,
+    deactivate_single_user,
 )
 from src.apps.users.services.user_services import (
-    get_all_users,
-    get_access_token_schema,
-    get_single_user,
     create_single_user,
+    get_access_token_schema,
+    get_all_users,
+    get_single_user,
     update_single_user,
-    create_single_user
 )
-from src.apps.users.services.activation_services import deactivate_single_user, activate_single_user
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.permissions import check_if_staff
@@ -40,7 +42,7 @@ async def create_user(
     user: UserInputSchema,
     background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_db),
-    request_user: User = Depends(authenticate_user)
+    request_user: User = Depends(authenticate_user),
 ) -> UserOutputSchema:
     await check_if_staff(request_user)
     return await create_single_user(session, user, background_tasks)
@@ -68,25 +70,25 @@ async def get_logged_user(
 ) -> UserOutputSchema:
     return UserOutputSchema.from_orm(request_user)
 
+
 @user_router.get(
     "/",
     response_model=Union[
-    PagedResponseSchema[UserOutputSchema],
-    PagedResponseSchema[UserInfoOutputSchema],
-],
+        PagedResponseSchema[UserOutputSchema],
+        PagedResponseSchema[UserInfoOutputSchema],
+    ],
     status_code=status.HTTP_200_OK,
 )
 async def get_users(
     session: AsyncSession = Depends(get_db),
     page_params: PageParams = Depends(),
-    request_user: User = Depends(authenticate_user)
+    request_user: User = Depends(authenticate_user),
 ) -> Union[
     PagedResponseSchema[UserOutputSchema],
     PagedResponseSchema[UserInfoOutputSchema],
 ]:
     if request_user.is_staff:
         return await get_all_users(session, page_params)
-    print("ss")
     return await get_all_users(session, page_params, output_schema=UserInfoOutputSchema)
 
 
@@ -98,7 +100,7 @@ async def get_users(
 async def get_every_user(
     session: AsyncSession = Depends(get_db),
     page_params: PageParams = Depends(),
-    request_user: User = Depends(authenticate_user)
+    request_user: User = Depends(authenticate_user),
 ) -> PagedResponseSchema[UserOutputSchema]:
     await check_if_staff(request_user)
     return await get_all_users(session, page_params, only_active=False)
@@ -147,9 +149,7 @@ async def deactivate_user(
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content={
-            "message": "The account has been deactivated!"
-        }
+        content={"message": "The account has been deactivated!"},
     )
 
 
@@ -167,7 +167,5 @@ async def activate_user(
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
-        content={
-            "message": "The account has been activated!"
-        }
+        content={"message": "The account has been activated!"},
     )

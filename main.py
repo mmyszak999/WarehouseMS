@@ -2,28 +2,25 @@ from fastapi import APIRouter, FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi_jwt_auth.exceptions import AuthJWTException
 
-from src.apps.users.routers import user_router
 from src.apps.emails.routers import email_router
+from src.apps.users.routers import user_router
 from src.core.exceptions import (
-    AuthenticationException,
-    AlreadyExists,
-    DoesNotExist,
-    IsOccupied,
-    AuthorizationException,
+    AccountAlreadyActivatedException,
     AccountAlreadyDeactivatedException,
     AccountNotActivatedException,
-    ServiceException,
-    AccountAlreadyActivatedException,
-    UserCantDeactivateTheirAccountException,
+    AlreadyExists,
+    AuthenticationException,
+    AuthorizationException,
+    DoesNotExist,
+    IsOccupied,
     PasswordAlreadySetException,
-    UserCantActivateTheirAccountException
-    )
-
+    ServiceException,
+    UserCantActivateTheirAccountException,
+    UserCantDeactivateTheirAccountException,
+)
 
 app = FastAPI(
-    title="WarehouseMS",
-    description="Warehouse Management System",
-    version="1.0"
+    title="WarehouseMS", description="Warehouse Management System", version="1.0"
 )
 
 
@@ -45,14 +42,18 @@ async def handle_auth_jwt_exception(
 
 
 @app.exception_handler(DoesNotExist)
-async def handle_does_not_exist(request: Request, exception: DoesNotExist) -> JSONResponse:
+async def handle_does_not_exist(
+    request: Request, exception: DoesNotExist
+) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND, content={"detail": str(exception)}
     )
 
 
 @app.exception_handler(AlreadyExists)
-async def handle_already_exists(request: Request, exception: AlreadyExists) -> JSONResponse:
+async def handle_already_exists(
+    request: Request, exception: AlreadyExists
+) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
@@ -99,6 +100,7 @@ async def handle_account_not_activated_exception(
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
+
 
 @app.exception_handler(AccountAlreadyDeactivatedException)
 async def handle_account_already_deactivated_exception(
