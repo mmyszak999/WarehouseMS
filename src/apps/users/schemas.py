@@ -7,12 +7,18 @@ from pydantic import BaseModel, EmailStr, Field, validator
 class UserLoginInputSchema(BaseModel):
     email: EmailStr = Field()
     password: str = Field(min_length=8, max_length=40)
-    
+
 
 class UserBaseSchema(BaseModel):
     first_name: str = Field(max_length=50)
     last_name: str = Field(max_length=75)
     employment_date: datetime.date
+
+    @validator("employment_date")
+    def validate_employment_date(cls, employment_date: datetime.date) -> datetime.date:
+        if employment_date >= datetime.date.today():
+            raise ValueError("Employment date must be in the past")
+        return employment_date
 
 
 class UserInputSchema(UserBaseSchema):
@@ -22,7 +28,7 @@ class UserInputSchema(UserBaseSchema):
     can_move_goods: bool
     can_recept_goods: bool
     can_issue_goods: bool
-    
+
     @validator("birth_date")
     def validate_birth_date(cls, birth_date: datetime.date) -> datetime.date:
         if birth_date >= datetime.date.today():
@@ -41,6 +47,16 @@ class UserPasswordSchema(BaseModel):
         return rep_password
 
 
+class UserUpdateSchema(BaseModel):
+    first_name: Optional[str]
+    last_name: Optional[str]
+    employment_date: Optional[datetime.date]
+    birth_date: Optional[datetime.date]
+    can_move_goods: Optional[bool]
+    can_recept_goods: Optional[bool]
+    can_issue_goods: Optional[bool]
+
+
 class UserInfoOutputSchema(UserBaseSchema):
     is_active: bool
 
@@ -53,6 +69,7 @@ class UserOutputSchema(UserInputSchema):
     is_active: bool
     is_superuser: bool
     is_staff: bool
-    
+    has_password_set: bool
+
     class Config:
         orm_mode = True

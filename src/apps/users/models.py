@@ -15,7 +15,7 @@ class User(Base):
     first_name = Column(String(length=50), nullable=False)
     last_name = Column(String(length=75), nullable=False)
     email = Column(String, unique=True, nullable=False)
-    password = Column(String, nullable=False)
+    password = Column(String, nullable=True)
     birth_date = Column(Date, nullable=False)
     employment_date = Column(Date, nullable=True)
     is_active = Column(Boolean, nullable=False, server_default="false")

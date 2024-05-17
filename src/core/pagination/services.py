@@ -7,7 +7,6 @@ from src.core.pagination.models import BaseModel, PageParams
 from src.core.pagination.schemas import PagedResponseSchema, T
 
 
-
 async def paginate(
     query,
     response_schema: BaseModel,

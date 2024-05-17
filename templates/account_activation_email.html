@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+    <div style=" display: flex; align-items: center; justify-content: center; flex-direction: column;">
+        <h3> Warehouse MS - Account Verification </h3>
+        <br>
+        <p>Thank you for registrating!
+        Click the link below to set your password in order to activate your account!
+        </p> 
+
+        <a style=" padding: 1rem; border-radius: 0.5rem; font-size: 1rem; text-decoration: none; background: #0275d8; color: white;" href="http://localhost:8000/api/email/confirm-account-activation/{{token}}">
+            Activate account
+        <a>
+
+        <h5>If wish not to use our services, please ignore this email.</h5>
+    </div>
+</body>
+</html>
