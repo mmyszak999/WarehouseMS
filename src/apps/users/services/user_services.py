@@ -24,6 +24,7 @@ from src.core.exceptions import (
     AuthenticationException,
     DoesNotExist,
     ServiceException,
+    PasswordNotSetException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -75,6 +76,9 @@ async def authenticate(
         raise AuthenticationException("Invalid Credentials")
     if not user.is_active:
         raise AccountNotActivatedException("email", login_data["email"])
+    if not user.has_passwords_set:
+        raise PasswordNotSetException
+    
     return user
 
 

@@ -68,4 +68,9 @@ class UserCantActivateTheirAccountException(ServiceException):
 
 class PasswordAlreadySetException(ServiceException):
     def __init__(self) -> None:
-        super().__init__(f"This account already has its password set")
+        super().__init__(f"This account already has its password set! ")
+
+
+class PasswordNotSetException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(f"This account hasn't got the password set! ")

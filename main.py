@@ -17,6 +17,7 @@ from src.core.exceptions import (
     ServiceException,
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
+    PasswordNotSetException
 )
 
 app = FastAPI(
@@ -141,6 +142,15 @@ async def handle_user_cant_activate_their_account_exception(
 @app.exception_handler(PasswordAlreadySetException)
 async def handle_password_already_set_exception(
     request: Request, exception: PasswordAlreadySetException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(PasswordNotSetException)
+async def handle_password_not_set_exception(
+    request: Request, exception: PasswordNotSetException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
