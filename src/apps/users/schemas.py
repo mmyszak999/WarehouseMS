@@ -47,6 +47,12 @@ class UserPasswordSchema(BaseModel):
         return rep_password
 
 
+class UserRegisterSchema(UserInputSchema, UserPasswordSchema):
+    """
+    only for testing purposes
+    """
+    pass
+
 class UserUpdateSchema(BaseModel):
     first_name: Optional[str]
     last_name: Optional[str]

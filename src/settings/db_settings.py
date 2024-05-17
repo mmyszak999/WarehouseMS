@@ -28,5 +28,13 @@ class DatabaseSettings(BaseSettings):
         )
         return TEST_DATABASE_URL
 
+    @property
+    def test_sync_postgres_url(self) -> str:
+        TEST_DATABASE_URL = (
+            f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@"
+            f"{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.TEST_POSTGRES_DB}"
+        )
+        return TEST_DATABASE_URL
+
 
 settings = DatabaseSettings()

@@ -3,8 +3,9 @@ from datetime import date
 from decimal import Decimal
 from typing import Optional
 
-from src.apps.users.schemas import UserInputSchema
+from src.apps.users.schemas import UserInputSchema, UserPasswordSchema
 from src.core.utils.time import set_employment_date_for_factory
+from src.core.utils.faker import initialize_faker
 
 
 class SchemaFactory:
@@ -43,4 +44,19 @@ class UserInputSchemaFactory(SchemaFactory):
             can_move_goods=can_move_goods or False,
             can_recept_goods=can_recept_goods or False,
             can_issue_goods=can_issue_goods or False
+        )
+
+
+class UserPasswordSchemaFactory(SchemaFactory):
+    def __init__(self, schema_class=UserPasswordSchema):
+        super().__init__(schema_class)
+
+    def generate(
+        self,
+        password: str = "password",
+        password_repeat: str = "password"
+    ):
+        return self.schema_class(
+            password=password,
+            password_repeat=password_repeat
         )

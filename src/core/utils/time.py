@@ -6,4 +6,4 @@ def get_current_time():
 
 
 def set_employment_date_for_factory():
-    return get_current_time() - datetime.timedelta(months=random.randint(1, 12))
+    return get_current_time() - datetime.timedelta(weeks=random.randint(4, 55))
