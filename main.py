@@ -14,10 +14,10 @@ from src.core.exceptions import (
     DoesNotExist,
     IsOccupied,
     PasswordAlreadySetException,
+    PasswordNotSetException,
     ServiceException,
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
-    PasswordNotSetException
 )
 
 app = FastAPI(

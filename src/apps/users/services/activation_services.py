@@ -39,11 +39,10 @@ async def manage_activation_status(
     session: AsyncSession,
     field: str,
     value: Any,
-    request_user_id: str = None,
     activate: bool = True,
 ) -> None:
     if not (user_object := (await if_exists(User, field, value, session))):
-        raise DoesNotExist(User.__name__, "id", user_id)
+        raise DoesNotExist(User.__name__, field, value)
 
     if activate and user_object.is_active:
         raise AccountAlreadyActivatedException("email", user_object.email)
@@ -63,9 +62,7 @@ async def activate_single_user(
     if user_id == request_user_id:
         raise UserCantActivateTheirAccountException
 
-    await manage_activation_status(
-        session, "id", user_id, request_user_id=request_user_id
-    )
+    await manage_activation_status(session, "id", user_id)
 
 
 async def activate_single_user_by_link(
@@ -80,9 +77,7 @@ async def deactivate_single_user(
     if user_id == request_user_id:
         raise UserCantDeactivateTheirAccountException
 
-    await manage_activation_status(
-        session, "id", user_id, request_user_id=request_user_id, activate=False
-    )
+    await manage_activation_status(session, "id", user_id, activate=False)
 
 
 async def set_user_password(

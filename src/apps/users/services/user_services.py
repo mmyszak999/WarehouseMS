@@ -23,8 +23,8 @@ from src.core.exceptions import (
     AlreadyExists,
     AuthenticationException,
     DoesNotExist,
+    PasswordNotSetException,
     ServiceException,
-    PasswordNotSetException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -78,7 +78,7 @@ async def authenticate(
         raise AccountNotActivatedException("email", login_data["email"])
     if not user.has_passwords_set:
         raise PasswordNotSetException
-    
+
     return user
 
 

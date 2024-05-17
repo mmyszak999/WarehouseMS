@@ -4,7 +4,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.users.models import User
-from src.core.exceptions import AccountNotActivatedException, AuthenticationException
+from src.core.exceptions import (
+    AccountNotActivatedException,
+    AuthenticationException,
+    PasswordNotSetException,
+)
 from src.dependencies.get_db import get_db
 from src.settings.jwt_settings import AuthJWTSettings
 
@@ -19,6 +23,8 @@ async def authenticate_user(
         raise AuthenticationException("Cannot find user")
     if not user.is_active:
         raise AccountNotActivatedException("email", user.email)
+    if not user.has_passwords_set:
+        raise PasswordNotSetException
 
     return user
 
