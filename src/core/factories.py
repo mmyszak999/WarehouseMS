@@ -4,6 +4,7 @@ from decimal import Decimal
 from typing import Optional
 
 from src.apps.users.schemas import UserInputSchema
+from src.core.utils.time import set_employment_date_for_factory
 
 
 class SchemaFactory:
@@ -35,10 +36,11 @@ class UserInputSchemaFactory(SchemaFactory):
         return self.schema_class(
             first_name=first_name or self.faker.first_name(),
             last_name=last_name or self.faker.last_name(),
-            mployment_date=employment_date or self.faker.date_of_birth(),
+            employment_date=employment_date or set_employment_date_for_factory(),
             email=email or self.faker.ascii_email(),
             birth_date=birth_date or self.faker.date_of_birth(),
-            is_staff=is_staff,
-            can_recept_goods=can_recept_goods,
-            can_issue_goods=can_issue_goods
+            is_staff=is_staff or False,
+            can_move_goods=can_move_goods or False,
+            can_recept_goods=can_recept_goods or False,
+            can_issue_goods=can_issue_goods or False
         )
