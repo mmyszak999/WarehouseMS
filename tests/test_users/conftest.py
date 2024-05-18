@@ -43,7 +43,7 @@ async def create_user_without_activation(
     async_session.add(new_user)
     
     await async_session.commit()
-    await async_session.refresh()
+    await async_session.refresh(new_user)
 
     return UserOutputSchema.from_orm(new_user)
 
@@ -54,32 +54,45 @@ def create_superuser():
 
 
 @pytest.fixture
-def db_user(async_session: AsyncSession) -> UserOutputSchema:
-    return register_user_without_activation(sync_session, DB_USER_SCHEMA)
+async def user(async_session: AsyncSession) -> UserOutputSchema:
+    """creates basic user"""
+    return await create_user_without_activation(async_session, DB_USER_SCHEMA)
 
 
 @pytest.fixture
-def db_staff_user(async_session: AsyncSession) -> UserOutputSchema:
-    return register_user_without_activation(
-        sync_session, DB_STAFF_USER_SCHEMA, is_staff=True
+async def staff_user(async_session: AsyncSession) -> UserOutputSchema:
+    """creates staff user"""
+    return await create_user_without_activation(
+        async_session, DB_STAFF_USER_SCHEMA, is_staff=True,
+        can_move_goods=True, can_issue_goods=True, can_recept_goods=True
     )
 
 
 @pytest.fixture
-def auth_headers(async_session: AsyncSession, db_user: UserOutputSchema) -> dict[str, str]:
-    access_token = AuthJWT().create_access_token(db_user.email)
+async def db_user(async_session: AsyncSession, user) -> UserOutputSchema:
+    """awaits coroutine with basic user and hides implementation"""
+    return await user
+
+
+@pytest.fixture
+async def db_staff_user(async_session: AsyncSession, staff_user) -> UserOutputSchema:
+    """awaits coroutine with staff user and hides implementation"""
+    return await staff_user
+
+
+@pytest.fixture
+def auth_headers() -> dict[str, str]:
+    access_token = AuthJWT().create_access_token(DB_USER_SCHEMA.email)
     return {"Authorization": f"Bearer {access_token}"}
 
 
 @pytest.fixture
-def staff_auth_headers(
-    async_session: AsyncSession, db_staff_user: UserOutputSchema
-) -> dict[str, str]:
-    access_token = AuthJWT().create_access_token(db_staff_user.email)
+def staff_auth_headers() -> dict[str, str]:
+    access_token = AuthJWT().create_access_token(DB_STAFF_USER_SCHEMA.email)
     return {"Authorization": f"Bearer {access_token}"}
 
 
 @pytest.fixture
-def superuser_auth_headers(sync_session: AsyncSession) -> dict[str, str]:
+def superuser_auth_headers() -> dict[str, str]:
     access_token = AuthJWT().create_access_token("superuser@mail.com")
     return {"Authorization": f"Bearer {access_token}"}

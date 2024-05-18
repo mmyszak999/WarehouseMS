@@ -23,7 +23,7 @@ async def authenticate_user(
         raise AuthenticationException("Cannot find user")
     if not user.is_active:
         raise AccountNotActivatedException("email", user.email)
-    if not user.has_passwords_set:
+    if not user.has_password_set:
         raise PasswordNotSetException
 
     return user

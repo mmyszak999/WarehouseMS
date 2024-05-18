@@ -76,7 +76,7 @@ async def authenticate(
         raise AuthenticationException("Invalid Credentials")
     if not user.is_active:
         raise AccountNotActivatedException("email", login_data["email"])
-    if not user.has_passwords_set:
+    if not user.has_password_set:
         raise PasswordNotSetException
 
     return user

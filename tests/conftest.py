@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.event import listens_for
 
 from main import app
-from src.settings.db_settings import settings
+from src.settings.db_settings import DatabaseSettings
 from src.settings.alembic import *
 from src.dependencies.get_db import get_db
 from src.database.db_connection import Base
@@ -18,7 +18,8 @@ from src.database.db_connection import Base
 
 @pytest.fixture(scope="session", autouse=True)
 def meta_migration():
-    sync_engine = create_engine(settings.test_sync_postgres_url, echo=False)
+    settings = DatabaseSettings(ASYNC=False, TESTING=True)
+    sync_engine = create_engine(settings.postgres_url, echo=False)
 
     Base.metadata.drop_all(sync_engine)
     Base.metadata.create_all(sync_engine)
@@ -30,7 +31,8 @@ def meta_migration():
 
 @pytest_asyncio.fixture(scope="session")
 async def async_engine() -> AsyncEngine:
-    engine = create_async_engine(settings.test_postgres_url, echo=False)
+    settings = DatabaseSettings(TESTING=True)
+    engine = create_async_engine(settings.postgres_url, echo=False)
 
     yield engine
 
@@ -57,10 +59,10 @@ async def async_session(async_engine: AsyncEngine) -> AsyncSession:
 
 
 @pytest.fixture()
-def async_client(session: AsyncSession) -> AsyncClient:
+def async_client(async_session: AsyncSession) -> AsyncClient:
     def override_get_db():
-        yield session
+        yield async_session
 
     app.dependency_overrides[get_db] = override_get_db
-    yield AsyncClient(app=app, base_url="http://test:8000/api/v1")
+    yield AsyncClient(app=app, base_url="http://test:8000/api/")
     del app.dependency_overrides[get_db]
