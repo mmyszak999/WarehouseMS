@@ -1,6 +1,7 @@
 import subprocess
 
 import pytest
+import pytest_asyncio
 from fastapi import BackgroundTasks
 from fastapi_jwt_auth import AuthJWT
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSession
@@ -53,31 +54,27 @@ def create_superuser():
     subprocess.run(["./app_scripts/create_superuser.sh", "test_db"])
 
 
-@pytest.fixture
-async def user(async_session: AsyncSession) -> UserOutputSchema:
-    """creates basic user"""
+@pytest_asyncio.fixture
+async def db_user(async_session: AsyncSession) -> UserOutputSchema:
     return await create_user_without_activation(async_session, DB_USER_SCHEMA)
 
 
-@pytest.fixture
-async def staff_user(async_session: AsyncSession) -> UserOutputSchema:
-    """creates staff user"""
+@pytest_asyncio.fixture
+async def db_staff_user(async_session: AsyncSession) -> UserOutputSchema:
     return await create_user_without_activation(
         async_session, DB_STAFF_USER_SCHEMA, is_staff=True,
         can_move_goods=True, can_issue_goods=True, can_recept_goods=True
     )
 
 
-@pytest.fixture
+"""@pytest_asyncio.fixture
 async def db_user(async_session: AsyncSession, user) -> UserOutputSchema:
-    """awaits coroutine with basic user and hides implementation"""
     return await user
 
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def db_staff_user(async_session: AsyncSession, staff_user) -> UserOutputSchema:
-    """awaits coroutine with staff user and hides implementation"""
-    return await staff_user
+    return await staff_user"""
 
 
 @pytest.fixture

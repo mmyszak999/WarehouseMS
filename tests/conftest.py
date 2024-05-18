@@ -7,6 +7,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSession
 from sqlalchemy import create_engine
 from sqlalchemy.event import listens_for
+from sqlalchemy.pool import NullPool
 
 from main import app
 from src.settings.db_settings import DatabaseSettings
@@ -14,8 +15,7 @@ from src.settings.alembic import *
 from src.dependencies.get_db import get_db
 from src.database.db_connection import Base
 
-
-
+    
 @pytest.fixture(scope="session", autouse=True)
 def meta_migration():
     settings = DatabaseSettings(ASYNC=False, TESTING=True)
@@ -32,7 +32,7 @@ def meta_migration():
 @pytest_asyncio.fixture(scope="session")
 async def async_engine() -> AsyncEngine:
     settings = DatabaseSettings(TESTING=True)
-    engine = create_async_engine(settings.postgres_url, echo=False)
+    engine = create_async_engine(settings.postgres_url, echo=False, poolclass=NullPool)
 
     yield engine
 
