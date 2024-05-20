@@ -130,22 +130,9 @@ async def test_raise_exception_while_updating_nonexistent_user(
         await update_single_user(async_session, update_data, generate_uuid())
 
 
-
 @pytest.mark.asyncio
 async def test_raise_exception_while_deleting_nonexistent_user(
     async_session: AsyncSession
 ):
     with pytest.raises(DoesNotExist):
         await delete_single_user(async_session, generate_uuid())
-
-
-
-    
-
-
-
-
-
-
-
-    

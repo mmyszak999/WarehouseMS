@@ -26,6 +26,7 @@ from src.core.exceptions import (
     PasswordAlreadySetException,
     ServiceException,
     UserCantDeactivateTheirAccountException,
+    UserCantActivateTheirAccountException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
