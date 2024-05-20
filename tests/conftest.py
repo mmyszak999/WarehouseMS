@@ -64,5 +64,5 @@ def async_client(async_session: AsyncSession) -> AsyncClient:
         yield async_session
 
     app.dependency_overrides[get_db] = override_get_db
-    yield AsyncClient(app=app, base_url="http://test:8000/api/")
+    yield AsyncClient(app=app, base_url="http://localhost:8000/api/")
     del app.dependency_overrides[get_db]

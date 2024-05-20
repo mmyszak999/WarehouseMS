@@ -67,16 +67,6 @@ async def db_staff_user(async_session: AsyncSession) -> UserOutputSchema:
     )
 
 
-"""@pytest_asyncio.fixture
-async def db_user(async_session: AsyncSession, user) -> UserOutputSchema:
-    return await user
-
-
-@pytest_asyncio.fixture
-async def db_staff_user(async_session: AsyncSession, staff_user) -> UserOutputSchema:
-    return await staff_user"""
-
-
 @pytest.fixture
 def auth_headers() -> dict[str, str]:
     access_token = AuthJWT().create_access_token(DB_USER_SCHEMA.email)
