@@ -29,13 +29,28 @@ async def test_user_input_schema_raises_validation_error_when_employment_date_is
 @pytest.mark.parametrize(
     "birth_date, result, schema",
     [
-        #input schema part
-        (datetime.now() - timedelta(days=1), does_not_raise(), UserInputSchemaFactory()),
-        (datetime.now() + timedelta(days=1), pytest.raises(ValidationError), UserInputSchemaFactory()),
-        
-        #update schema part
-        (datetime.now() - timedelta(days=1), does_not_raise(), UserUpdateSchemaFactory()),
-        (datetime.now() + timedelta(days=1), pytest.raises(ValidationError), UserUpdateSchemaFactory()),
+        # input schema part
+        (
+            datetime.now() - timedelta(days=1),
+            does_not_raise(),
+            UserInputSchemaFactory(),
+        ),
+        (
+            datetime.now() + timedelta(days=1),
+            pytest.raises(ValidationError),
+            UserInputSchemaFactory(),
+        ),
+        # update schema part
+        (
+            datetime.now() - timedelta(days=1),
+            does_not_raise(),
+            UserUpdateSchemaFactory(),
+        ),
+        (
+            datetime.now() + timedelta(days=1),
+            pytest.raises(ValidationError),
+            UserUpdateSchemaFactory(),
+        ),
     ],
 )
 async def test_user_input_schema_and_update_schema_raises_validation_error_when_birth_date_is_from_future(
@@ -59,7 +74,4 @@ async def test_user_password_schema_raises_validation_error_when_passwords_are_n
     password1, password2, result
 ):
     with result:
-        UserPasswordSchema(
-            password=password1,
-            password_repeat=password2
-        )
+        UserPasswordSchema(password=password1, password_repeat=password2)

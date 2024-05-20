@@ -1,21 +1,21 @@
-import pytest
-import pytest_asyncio
 import asyncio
 from asyncio import AbstractEventLoop
 
+import pytest
+import pytest_asyncio
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine, AsyncSession
 from sqlalchemy import create_engine
 from sqlalchemy.event import listens_for
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.pool import NullPool
 
 from main import app
-from src.settings.db_settings import DatabaseSettings
-from src.settings.alembic import *
-from src.dependencies.get_db import get_db
 from src.database.db_connection import Base
+from src.dependencies.get_db import get_db
+from src.settings.alembic import *
+from src.settings.db_settings import DatabaseSettings
 
-    
+
 @pytest.fixture(scope="session", autouse=True)
 def meta_migration():
     settings = DatabaseSettings(ASYNC=False, TESTING=True)

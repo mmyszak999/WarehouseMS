@@ -1,44 +1,44 @@
 import pytest
-
-from fastapi import status, BackgroundTasks
+from fastapi import BackgroundTasks, status
 from fastapi_jwt_auth import AuthJWT
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.apps.users.schemas import UserLoginInputSchema, UserOutputSchema
-from src.core.factories import UserInputSchemaFactory, UserUpdateSchemaFactory
-from tests.test_users.conftest import (
-    DB_USER_SCHEMA, PASSWORD_SCHEMA, db_staff_user, db_user,
-    auth_headers, staff_auth_headers
-)
 from src.apps.users.models import User
+from src.apps.users.schemas import UserLoginInputSchema, UserOutputSchema
+from src.apps.users.services.activation_services import deactivate_single_user
 from src.apps.users.services.user_services import (
-    create_user_base,
     authenticate,
-    get_single_user,
     create_single_user,
+    create_user_base,
+    delete_single_user,
     get_all_users,
+    get_single_user,
     update_single_user,
-    delete_single_user
 )
-from src.apps.users.services.activation_services import (
-    deactivate_single_user
-)
-from src.core.pagination.models import PageParams
 from src.core.exceptions import (
+    AccountNotActivatedException,
     AlreadyExists,
     AuthenticationException,
-    AccountNotActivatedException,
+    DoesNotExist,
     PasswordNotSetException,
-    DoesNotExist
-    )
+)
+from src.core.factories import UserInputSchemaFactory, UserUpdateSchemaFactory
+from src.core.pagination.models import PageParams
 from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid
+from tests.test_users.conftest import (
+    DB_USER_SCHEMA,
+    PASSWORD_SCHEMA,
+    auth_headers,
+    db_staff_user,
+    db_user,
+    staff_auth_headers,
+)
 
 
 @pytest.mark.asyncio
 async def test_create_user_with_occupied_email(
-    async_session: AsyncSession,
-    db_user: UserOutputSchema
+    async_session: AsyncSession, db_user: UserOutputSchema
 ):
     user_schema = UserInputSchemaFactory().generate(email=DB_USER_SCHEMA.email)
     with pytest.raises(AlreadyExists):
@@ -47,8 +47,7 @@ async def test_create_user_with_occupied_email(
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_providing_wrong_credentials_when_signing_in(
-    async_session: AsyncSession,
-    db_user: UserOutputSchema
+    async_session: AsyncSession, db_user: UserOutputSchema
 ):
     login_schema = UserLoginInputSchema(email=db_user.email, password="wrongpass")
     with pytest.raises(AuthenticationException):
@@ -59,7 +58,7 @@ async def test_raise_exception_when_providing_wrong_credentials_when_signing_in(
 async def test_raise_exception_inactive_user_tries_to_sign_in(
     async_session: AsyncSession,
     db_user: UserOutputSchema,
-    db_staff_user: UserOutputSchema
+    db_staff_user: UserOutputSchema,
 ):
     await deactivate_single_user(async_session, db_user.id, db_staff_user.id)
     login_schema = UserLoginInputSchema(email=db_user.email, password="password")
@@ -69,18 +68,18 @@ async def test_raise_exception_inactive_user_tries_to_sign_in(
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_user_without_set_password_tries_to_sign_in(
-    async_session: AsyncSession,
-    db_user: UserOutputSchema
+    async_session: AsyncSession, db_user: UserOutputSchema
 ):
     db_user_object = await if_exists(User, "id", db_user.id, async_session)
     db_user_object.has_password_set = False
     async_session.add(db_user_object)
     await async_session.commit()
     await async_session.refresh(db_user_object)
-    
+
     login_schema = UserLoginInputSchema(email=db_user.email, password="password")
     with pytest.raises(PasswordNotSetException):
         await authenticate(login_schema, async_session)
+
 
 @pytest.mark.asyncio
 async def test_if_single_user_was_returned(
@@ -97,11 +96,13 @@ async def test_raise_exception_while_getting_nonexistent_user(
 ):
     with pytest.raises(DoesNotExist):
         await get_single_user(async_session, generate_uuid())
-    
-    
+
+
 @pytest.mark.asyncio
 async def test_if_multiple_users_were_returned(
-    async_session: AsyncSession, db_user: UserOutputSchema, db_staff_user: UserOutputSchema
+    async_session: AsyncSession,
+    db_user: UserOutputSchema,
+    db_staff_user: UserOutputSchema,
 ):
     users = await get_all_users(async_session, PageParams())
     assert users.total == 3
@@ -109,30 +110,32 @@ async def test_if_multiple_users_were_returned(
 
 @pytest.mark.asyncio
 async def test_if_inactive_users_will_be_included_in_retrieving_all_users(
-    async_session: AsyncSession, db_user: UserOutputSchema, db_staff_user: UserOutputSchema
+    async_session: AsyncSession,
+    db_user: UserOutputSchema,
+    db_staff_user: UserOutputSchema,
 ):
     await deactivate_single_user(async_session, db_user.id, db_staff_user.id)
-    
+
     active_users = await get_all_users(async_session, PageParams())
     assert active_users.total == 2
-    
+
     all_users = await get_all_users(async_session, PageParams(), only_active=False)
     assert all_users.total == 3
-    
-    
+
+
 @pytest.mark.asyncio
 async def test_raise_exception_while_updating_nonexistent_user(
     async_session: AsyncSession, db_user: UserOutputSchema
 ):
     update_data = UserUpdateSchemaFactory().generate(first_name="test")
-    
+
     with pytest.raises(DoesNotExist):
         await update_single_user(async_session, update_data, generate_uuid())
 
 
 @pytest.mark.asyncio
 async def test_raise_exception_while_deleting_nonexistent_user(
-    async_session: AsyncSession
+    async_session: AsyncSession,
 ):
     with pytest.raises(DoesNotExist):
         await delete_single_user(async_session, generate_uuid())

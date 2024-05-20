@@ -13,7 +13,7 @@ class DatabaseSettings(BaseSettings):
 
     class Config:
         env_file = ".env"
-        
+
     @property
     def postgres_url(self) -> str:
         db_name = self.TEST_POSTGRES_DB if self.TESTING else self.POSTGRES_DB
@@ -23,5 +23,5 @@ class DatabaseSettings(BaseSettings):
             f"{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{db_name}"
         )
 
-settings = DatabaseSettings()
 
+settings = DatabaseSettings()
