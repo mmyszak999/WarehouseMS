@@ -55,6 +55,12 @@ class UserUpdateSchema(BaseModel):
     can_move_goods: Optional[bool]
     can_recept_goods: Optional[bool]
     can_issue_goods: Optional[bool]
+    
+    @validator("birth_date")
+    def validate_birth_date(cls, birth_date: datetime.date) -> datetime.date:
+        if birth_date >= datetime.date.today():
+            raise ValueError("Birth date must be in the past")
+        return birth_date
 
 
 class UserInfoOutputSchema(UserBaseSchema):
