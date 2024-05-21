@@ -42,7 +42,7 @@ class Category(Base):
     products = relationship(
         "Product",
         secondary=category_product_association_table,
-        back_populates="categories",
+        back_populates="categories"
     )
 
 
@@ -61,5 +61,6 @@ class Product(Base):
         "Category",
         secondary=category_product_association_table,
         back_populates="products",
+        lazy="joined"
     )
     

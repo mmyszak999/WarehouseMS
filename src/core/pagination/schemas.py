@@ -7,6 +7,7 @@ T = TypeVar("T")
 
 class PagedResponseSchema(GenericModel, Generic[T]):
     total: int
+    total_on_page: int
     page: int
     size: int
     results: List[T]

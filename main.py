@@ -5,6 +5,7 @@ from fastapi_jwt_auth.exceptions import AuthJWTException
 from src.apps.emails.routers import email_router
 from src.apps.users.routers import user_router
 from src.apps.products.routers.category_routers import category_router
+from src.apps.products.routers.product_routers import product_router
 from src.core.exceptions import (
     AccountAlreadyActivatedException,
     AccountAlreadyDeactivatedException,
@@ -19,6 +20,8 @@ from src.core.exceptions import (
     ServiceException,
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
+    LegacyProductException,
+    ProductIsAlreadyLegacyException
 )
 
 app = FastAPI(
@@ -31,6 +34,7 @@ root_router = APIRouter(prefix="/api")
 root_router.include_router(user_router)
 root_router.include_router(email_router)
 root_router.include_router(category_router)
+root_router.include_router(product_router)
 
 app.include_router(root_router)
 
@@ -153,6 +157,24 @@ async def handle_password_already_set_exception(
 @app.exception_handler(PasswordNotSetException)
 async def handle_password_not_set_exception(
     request: Request, exception: PasswordNotSetException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(LegacyProductException)
+async def handle_legacy_product_exception(
+    request: Request, exception: LegacyProductException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(ProductIsAlreadyLegacyException)
+async def handle_product_is_already_legacy_exception(
+    request: Request, exception: ProductIsAlreadyLegacyException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
