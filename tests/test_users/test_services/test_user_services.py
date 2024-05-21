@@ -37,7 +37,7 @@ from tests.test_users.conftest import (
 
 
 @pytest.mark.asyncio
-async def test_create_user_with_occupied_email(
+async def test_raise_exception_when_creating_user_with_occupied_email(
     async_session: AsyncSession, db_user: UserOutputSchema
 ):
     user_schema = UserInputSchemaFactory().generate(email=DB_USER_SCHEMA.email)
@@ -55,7 +55,7 @@ async def test_raise_exception_when_providing_wrong_credentials_when_signing_in(
 
 
 @pytest.mark.asyncio
-async def test_raise_exception_inactive_user_tries_to_sign_in(
+async def test_raise_exception_when_inactive_user_tries_to_sign_in(
     async_session: AsyncSession,
     db_user: UserOutputSchema,
     db_staff_user: UserOutputSchema,
