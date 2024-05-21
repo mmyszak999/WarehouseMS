@@ -25,6 +25,7 @@ from src.core.exceptions import (
     DoesNotExist,
     PasswordAlreadySetException,
     ServiceException,
+    UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
 )
 from src.core.pagination.models import PageParams
