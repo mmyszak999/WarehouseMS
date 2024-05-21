@@ -2,7 +2,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.models import Category
-from src.apps.products.schemas import (
+from src.apps.products.schemas.category_schemas import (
     CategoryInputSchema,
     CategoryOutputSchema,
     CategoryUpdateSchema,

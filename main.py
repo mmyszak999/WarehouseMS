@@ -4,6 +4,7 @@ from fastapi_jwt_auth.exceptions import AuthJWTException
 
 from src.apps.emails.routers import email_router
 from src.apps.users.routers import user_router
+from src.apps.products.routers.category_routers import category_router
 from src.core.exceptions import (
     AccountAlreadyActivatedException,
     AccountAlreadyDeactivatedException,
@@ -29,6 +30,7 @@ root_router = APIRouter(prefix="/api")
 
 root_router.include_router(user_router)
 root_router.include_router(email_router)
+root_router.include_router(category_router)
 
 app.include_router(root_router)
 
