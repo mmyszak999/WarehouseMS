@@ -3,9 +3,9 @@ from fastapi.responses import JSONResponse
 from fastapi_jwt_auth.exceptions import AuthJWTException
 
 from src.apps.emails.routers import email_router
-from src.apps.users.routers import user_router
 from src.apps.products.routers.category_routers import category_router
 from src.apps.products.routers.product_routers import product_router
+from src.apps.users.routers import user_router
 from src.core.exceptions import (
     AccountAlreadyActivatedException,
     AccountAlreadyDeactivatedException,
@@ -15,13 +15,13 @@ from src.core.exceptions import (
     AuthorizationException,
     DoesNotExist,
     IsOccupied,
+    LegacyProductException,
     PasswordAlreadySetException,
     PasswordNotSetException,
+    ProductIsAlreadyLegacyException,
     ServiceException,
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
-    LegacyProductException,
-    ProductIsAlreadyLegacyException
 )
 
 app = FastAPI(

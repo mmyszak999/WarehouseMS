@@ -12,10 +12,9 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import DateTime
 
-from src.core.utils.utils import generate_uuid
 from src.core.utils.time import get_current_time
+from src.core.utils.utils import generate_uuid
 from src.database.db_connection import Base
-
 
 category_product_association_table = Table(
     "category_product_association_table",
@@ -42,7 +41,7 @@ class Category(Base):
     products = relationship(
         "Product",
         secondary=category_product_association_table,
-        back_populates="categories"
+        back_populates="categories",
     )
 
 
@@ -61,6 +60,5 @@ class Product(Base):
         "Category",
         secondary=category_product_association_table,
         back_populates="products",
-        lazy="joined"
+        lazy="joined",
     )
-    

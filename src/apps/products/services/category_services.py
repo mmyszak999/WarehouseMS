@@ -33,7 +33,9 @@ async def create_category(
     return CategoryOutputSchema.from_orm(new_category)
 
 
-async def get_single_category(session: AsyncSession, category_id: int) -> CategoryOutputSchema:
+async def get_single_category(
+    session: AsyncSession, category_id: int
+) -> CategoryOutputSchema:
     if not (category_object := await if_exists(Category, "id", category_id, session)):
         raise DoesNotExist(Category.__name__, "id", category_id)
 

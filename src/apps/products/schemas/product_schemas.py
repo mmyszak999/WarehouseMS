@@ -4,8 +4,8 @@ from typing import Optional
 from pydantic import BaseModel, Field, validator
 
 from src.apps.products.schemas.category_schemas import (
+    CategoryIdListSchema,
     CategoryOutputSchema,
-    CategoryIdListSchema
 )
 
 
@@ -18,7 +18,6 @@ class ProductBaseSchema(BaseModel):
 class ProductInputSchema(ProductBaseSchema):
     wholesale_price: Decimal
     category_ids: CategoryIdListSchema
-    amount_in_goods: int = 0
 
 
 class ProductUpdateSchema(BaseModel):
@@ -40,7 +39,7 @@ class ProductOutputSchema(ProductBasicOutputSchema):
     wholesale_price: Decimal
     amount_in_goods: int
     legacy_product: bool
-    
+
     class Config:
         orm_mode = True
 

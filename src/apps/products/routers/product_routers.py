@@ -6,10 +6,10 @@ from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.schemas.product_schemas import (
+    ProductBasicOutputSchema,
     ProductInputSchema,
     ProductOutputSchema,
     ProductUpdateSchema,
-    ProductBasicOutputSchema,
     RemovedProductOutputSchema,
 )
 from src.apps.products.services.product_services import (
@@ -18,8 +18,8 @@ from src.apps.products.services.product_services import (
     get_all_products,
     get_available_single_product,
     get_single_product,
+    make_single_product_legacy,
     update_single_product,
-    make_single_product_legacy
 )
 from src.apps.users.models import User
 from src.core.pagination.models import PageParams
@@ -53,11 +53,9 @@ async def post_product(
 async def get_available_products(
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
-    page_params: PageParams = Depends()
+    page_params: PageParams = Depends(),
 ) -> PagedResponseSchema[ProductBasicOutputSchema]:
-    return await get_all_available_products(
-        session, page_params
-    )
+    return await get_all_available_products(session, page_params)
 
 
 @product_router.get(
@@ -90,9 +88,7 @@ async def get_product_as_staff(
 
 @product_router.get(
     "/{product_id}",
-    response_model=Union[
-        ProductBasicOutputSchema, RemovedProductOutputSchema
-    ],
+    response_model=Union[ProductBasicOutputSchema, RemovedProductOutputSchema],
     status_code=status.HTTP_200_OK,
 )
 async def get_product(

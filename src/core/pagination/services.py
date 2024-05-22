@@ -1,6 +1,6 @@
 import asyncio
 
-from sqlalchemy import Table, select, func
+from sqlalchemy import Table, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.pagination.models import BaseModel, PageParams
@@ -17,17 +17,14 @@ async def paginate(
     total_amount = await session.scalar(select(func.count()).select_from(query))
 
     instances = await session.execute(
-        query.offset((page_params.page - 1) * page_params.size).limit(
-            page_params.size
-        )
+        query.offset((page_params.page - 1) * page_params.size).limit(page_params.size)
     )
     instances = instances.scalars().unique().all()
     total_on_page = len(instances)
-    
+
     next_page_check = (
         total_amount - ((page_params.page - 1) * page_params.size)
     ) > page_params.size
-    
 
     return PagedResponseSchema(
         total=total_amount,

@@ -1,8 +1,8 @@
 from typing import Union
 
+from pydantic import BaseModel
 from sqlalchemy import delete, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel
 from sqlalchemy.orm import lazyload
 
 from src.apps.products.models import (
@@ -11,18 +11,18 @@ from src.apps.products.models import (
     category_product_association_table,
 )
 from src.apps.products.schemas.product_schemas import (
+    ProductBasicOutputSchema,
     ProductInputSchema,
     ProductOutputSchema,
     ProductUpdateSchema,
-    ProductBasicOutputSchema,
     RemovedProductOutputSchema,
 )
 from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
     IsOccupied,
-    ProductIsAlreadyLegacyException,
     LegacyProductException,
+    ProductIsAlreadyLegacyException,
     ServiceException,
 )
 from src.core.pagination.models import PageParams
@@ -79,7 +79,7 @@ async def get_single_product(
 ) -> ProductOutputSchema:
     if not (product_object := await if_exists(Product, "id", product_id, session)):
         raise DoesNotExist(Product.__name__, "id", product_id)
-    
+
     return ProductOutputSchema.from_orm(product_object)
 
 
@@ -166,7 +166,9 @@ async def update_single_product(
                 {"product_id": product_id, "category_id": category_id}
                 for category_id in to_insert
             ]
-            await session.execute(insert(category_product_association_table).values(rows))
+            await session.execute(
+                insert(category_product_association_table).values(rows)
+            )
             product_was_updated += 1
 
         product_data.pop("category_ids")
@@ -194,7 +196,6 @@ async def make_single_product_legacy(
 
     if product_object.legacy_product:
         raise Product
-
 
     product_object.legacy_product = True
     session.add(product_object)
