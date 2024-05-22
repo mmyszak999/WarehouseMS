@@ -32,13 +32,13 @@ from src.core.pagination.schemas import PagedResponseSchema
     ],
 )
 @pytest.mark.asyncio
-async def test_only_staff_user_can_create_product(
+async def test_only_staff_user_can_create_category(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
 ):
-    category_data = ProductInputSchemaFactory().generate()
+    category_data = CategoryInputSchemaFactory().generate()
     response = await async_client.post(
         "categories/",
         headers=user_headers,
