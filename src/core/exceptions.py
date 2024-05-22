@@ -74,3 +74,15 @@ class PasswordAlreadySetException(ServiceException):
 class PasswordNotSetException(ServiceException):
     def __init__(self) -> None:
         super().__init__(f"This account hasn't got the password set! ")
+
+
+class ProductIsAlreadyLegacyException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(f"This product is already legacy")
+
+
+class LegacyProductException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"This product is treated as a legacy product and no action can be proceeded"
+        )
