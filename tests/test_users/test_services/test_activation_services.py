@@ -16,15 +16,6 @@ from src.apps.users.services.activation_services import (
     manage_activation_status,
     set_user_password,
 )
-from src.apps.users.services.user_services import (
-    authenticate,
-    create_single_user,
-    create_user_base,
-    delete_single_user,
-    get_all_users,
-    get_single_user,
-    update_single_user,
-)
 from src.core.exceptions import (
     AccountAlreadyActivatedException,
     AccountAlreadyDeactivatedException,
@@ -37,7 +28,6 @@ from src.core.exceptions import (
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
 )
-from src.core.factories import UserInputSchemaFactory, UserUpdateSchemaFactory
 from src.core.pagination.models import PageParams
 from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid

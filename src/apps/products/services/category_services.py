@@ -24,7 +24,7 @@ async def create_category(
             select(Category).filter(Category.name == category_data["name"]).limit(1)
         )
         if category_name_check:
-            raise AlreadyExists(Category.__name__, "name", category.name)
+            raise AlreadyExists(Category.__name__, "name", category_data["name"])
 
     new_category = Category(**category_data)
     session.add(new_category)

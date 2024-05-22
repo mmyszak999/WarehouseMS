@@ -61,7 +61,7 @@ async def get_category(
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
 ) -> CategoryOutputSchema:
-    check_if_staff(request_user)
+    await check_if_staff(request_user)
     return await get_single_category(session, category_id)
 
 

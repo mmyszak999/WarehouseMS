@@ -22,7 +22,7 @@ from src.core.exceptions import (
     DoesNotExist,
     PasswordNotSetException,
 )
-from src.core.factories import UserInputSchemaFactory, UserUpdateSchemaFactory
+from src.core.factory.user_factory  import UserInputSchemaFactory, UserUpdateSchemaFactory
 from src.core.pagination.models import PageParams
 from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid

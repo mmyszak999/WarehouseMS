@@ -5,7 +5,7 @@ import pytest
 from pydantic.error_wrappers import ValidationError
 
 from src.apps.users.schemas import UserPasswordSchema
-from src.core.factories import UserInputSchemaFactory, UserUpdateSchemaFactory
+from src.core.factory.user_factory  import UserInputSchemaFactory, UserUpdateSchemaFactory
 
 
 @pytest.mark.asyncio
