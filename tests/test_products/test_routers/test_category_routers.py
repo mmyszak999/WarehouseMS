@@ -13,6 +13,7 @@ from tests.test_users.conftest import (
     staff_auth_headers,
 )
 from tests.test_products.conftest import db_categories
+from src.core.pagination.schemas import PagedResponseSchema
 
 
 @pytest.mark.parametrize(
@@ -31,13 +32,13 @@ from tests.test_products.conftest import db_categories
     ],
 )
 @pytest.mark.asyncio
-async def test_only_staff_user_can_create_category(
+async def test_only_staff_user_can_create_product(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
 ):
-    category_data = CategoryInputSchemaFactory().generate()
+    category_data = ProductInputSchemaFactory().generate()
     response = await async_client.post(
         "categories/",
         headers=user_headers,
@@ -64,7 +65,7 @@ async def test_only_staff_user_can_create_category(
 @pytest.mark.asyncio
 async def test_staff_and_authenticated_user_can_get_all_categories(
     async_client: AsyncClient,
-    db_categories: CategoryOutputSchema,
+    db_categories: PagedResponseSchema[CategoryOutputSchema],
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
@@ -101,7 +102,7 @@ async def test_staff_and_authenticated_user_can_get_all_categories(
 @pytest.mark.asyncio
 async def test_only_staff_user_can_get_single_category(
     async_client: AsyncClient,
-    db_categories: CategoryOutputSchema,
+    db_categories: PagedResponseSchema[CategoryOutputSchema],
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
@@ -137,7 +138,7 @@ async def test_only_staff_user_can_get_single_category(
 @pytest.mark.asyncio
 async def test_only_staff_user_can_update_single_category(
     async_client: AsyncClient,
-    db_categories: CategoryOutputSchema,
+    db_categories: PagedResponseSchema[CategoryOutputSchema],
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
@@ -175,7 +176,7 @@ async def test_only_staff_user_can_update_single_category(
 @pytest.mark.asyncio
 async def test_only_staff_user_can_delete_single_category(
     async_client: AsyncClient,
-    db_categories: CategoryOutputSchema,
+    db_categories: PagedResponseSchema[CategoryOutputSchema],
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,

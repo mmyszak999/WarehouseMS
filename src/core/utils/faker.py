@@ -17,3 +17,6 @@ def initialize_faker():
     faker.add_provider(lorem)
 
     return faker
+
+def set_product_weight() -> int:
+    return random.randint(1, 50)
