@@ -3,8 +3,8 @@ from decimal import Decimal
 from typing import Optional
 
 from src.apps.users.schemas import UserInputSchema, UserPasswordSchema, UserUpdateSchema
-from src.core.utils.time import set_employment_date_for_factory
 from src.core.factory.core import SchemaFactory
+from src.core.utils.time import set_employment_date_for_factory
 
 
 class UserInputSchemaFactory(SchemaFactory):

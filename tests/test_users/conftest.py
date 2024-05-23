@@ -9,7 +9,10 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engin
 from src.apps.users.schemas import UserInputSchema, UserOutputSchema
 from src.apps.users.services.activation_services import set_user_password
 from src.apps.users.services.user_services import create_user_base
-from src.core.factory.user_factory  import UserInputSchemaFactory, UserPasswordSchemaFactory
+from src.core.factory.user_factory import (
+    UserInputSchemaFactory,
+    UserPasswordSchemaFactory,
+)
 from src.core.pagination.models import PageParams
 
 DB_USER_SCHEMA = UserInputSchemaFactory().generate()

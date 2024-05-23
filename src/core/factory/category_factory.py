@@ -2,7 +2,10 @@ from datetime import date
 from decimal import Decimal
 from typing import Optional
 
-from src.apps.products.schemas.category_schemas import CategoryInputSchema, CategoryUpdateSchema
+from src.apps.products.schemas.category_schemas import (
+    CategoryInputSchema,
+    CategoryUpdateSchema,
+)
 from src.core.factory.core import SchemaFactory
 
 

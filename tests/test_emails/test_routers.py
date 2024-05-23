@@ -9,7 +9,10 @@ from src.apps.users.schemas import (
     UserOutputSchema,
     UserPasswordSchema,
 )
-from src.core.factories import UserInputSchemaFactory, UserUpdateSchemaFactory
+from src.core.factory.user_factory import (
+    UserInputSchemaFactory,
+    UserUpdateSchemaFactory,
+)
 from src.core.utils.email import generate_confirm_token
 from tests.test_users.conftest import (
     DB_USER_SCHEMA,
