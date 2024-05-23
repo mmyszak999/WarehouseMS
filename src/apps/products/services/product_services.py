@@ -52,7 +52,7 @@ async def create_product(
             raise ServiceException("Wrong categories!")
 
         product_data["categories"] = categories
-        product_data.pop("category_ids")
+    product_data.pop("category_ids")
 
     new_product = Product(**product_data)
 
@@ -138,7 +138,7 @@ async def update_single_product(
         raise DoesNotExist(Product.__name__, "id", product_id)
 
     if product_object.legacy_product:
-        raise LegacyProductException
+        raise ProductIsAlreadyLegacyException
 
     product_data = product_input.dict(exclude_none=True, exclude_unset=True)
 
@@ -195,7 +195,7 @@ async def make_single_product_legacy(
         raise DoesNotExist(Product.__name__, "id", product_id)
 
     if product_object.legacy_product:
-        raise Product
+        raise ProductIsAlreadyLegacyException
 
     product_object.legacy_product = True
     session.add(product_object)

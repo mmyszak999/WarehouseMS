@@ -14,7 +14,9 @@ async def paginate(
     page_params: PageParams,
     session: AsyncSession,
 ) -> PagedResponseSchema[T]:
-    total_amount = await session.scalar(select(func.count()).select_from(query))
+    total_amount = await session.scalar(
+        select(func.count()).select_from(query.subquery())
+    )
 
     instances = await session.execute(
         query.offset((page_params.page - 1) * page_params.size).limit(page_params.size)

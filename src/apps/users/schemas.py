@@ -58,7 +58,7 @@ class UserUpdateSchema(BaseModel):
 
     @validator("birth_date")
     def validate_birth_date(cls, birth_date: datetime.date) -> datetime.date:
-        if birth_date >= datetime.date.today():
+        if birth_date and (birth_date >= datetime.date.today()):
             raise ValueError("Birth date must be in the past")
         return birth_date
 

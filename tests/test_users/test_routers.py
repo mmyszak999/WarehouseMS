@@ -4,7 +4,10 @@ from fastapi_jwt_auth import AuthJWT
 from httpx import AsyncClient, Response
 
 from src.apps.users.schemas import UserLoginInputSchema, UserOutputSchema
-from src.core.factories import UserInputSchemaFactory, UserUpdateSchemaFactory
+from src.core.factory.user_factory import (
+    UserInputSchemaFactory,
+    UserUpdateSchemaFactory,
+)
 from tests.test_users.conftest import (
     DB_USER_SCHEMA,
     PASSWORD_SCHEMA,
