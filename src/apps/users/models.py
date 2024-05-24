@@ -26,3 +26,4 @@ class User(Base):
     can_recept_stocks = Column(Boolean, nullable=False, server_default="false")
     can_issue_stocks = Column(Boolean, nullable=False, server_default="false")
     receptions = relationship("Reception", back_populates="user")
+    issues = relationship("Issue", back_populates="user")

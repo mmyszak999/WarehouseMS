@@ -17,12 +17,12 @@ from src.core.utils.utils import generate_uuid
 from src.database.db_connection import Base
 
 
-class Reception(Base):
-    __tablename__ = "reception"
+class Issue(Base):
+    __tablename__ = "issue"
     id = Column(
         String, primary_key=True, unique=True, nullable=False, default=generate_uuid
     )
-    reception_date = Column(
+    issue_date = Column(
         DateTime, nullable=False, default=get_current_time
     )
     user_id = Column(
@@ -30,5 +30,5 @@ class Reception(Base):
         ForeignKey("user.id", ondelete="SET NULL", onupdate="cascade"),
         nullable=True,
     )
-    user = relationship("User", back_populates="receptions")
-    stocks = relationship("Stock", back_populates="reception")
+    user = relationship("User", back_populates="issues")
+    stocks = relationship("Stock", back_populates="issue")

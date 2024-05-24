@@ -3,20 +3,20 @@ from typing import Optional
 from pydantic import BaseModel, Field
 
 
-class ReceptionBaseSchema(BaseModel):
-    name: str = Field(max_length=75)
-
-
-class CategoryInputSchema(CategoryBaseSchema):
+class StockInputSchema(BaseModel):
     pass
 
 
-class CategoryUpdateSchema(BaseModel):
-    name: Optional[str] = Field(max_length=75)
+class StockBasicOutputSchema(BaseModel):
+    pass
 
 
-class CategoryOutputSchema(CategoryBaseSchema):
-    id: str
+class StockOutputSchema(BaseModel):
+    pass
 
     class Config:
         orm_mode = True
+
+
+class StockIdListSchema(BaseModel):
+    id: list[str]
