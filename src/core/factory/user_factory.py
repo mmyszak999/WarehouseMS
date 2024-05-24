@@ -19,9 +19,9 @@ class UserInputSchemaFactory(SchemaFactory):
         email: str = None,
         birth_date: date = None,
         is_staff: bool = None,
-        can_move_goods: bool = None,
-        can_recept_goods: bool = None,
-        can_issue_goods: bool = None,
+        can_move_stocks: bool = None,
+        can_recept_stocks: bool = None,
+        can_issue_stocks: bool = None,
     ):
         return self.schema_class(
             first_name=first_name or self.faker.first_name(),
@@ -30,9 +30,9 @@ class UserInputSchemaFactory(SchemaFactory):
             email=email or self.faker.ascii_email(),
             birth_date=birth_date or self.faker.date_of_birth(),
             is_staff=is_staff or False,
-            can_move_goods=can_move_goods or False,
-            can_recept_goods=can_recept_goods or False,
-            can_issue_goods=can_issue_goods or False,
+            can_move_stocks=can_move_stocks or False,
+            can_recept_stocks=can_recept_stocks or False,
+            can_issue_stocks=can_issue_stocks or False,
         )
 
 
@@ -54,16 +54,16 @@ class UserUpdateSchemaFactory(SchemaFactory):
         last_name: Optional[str] = None,
         employment_date: Optional[date] = None,
         birth_date: Optional[date] = None,
-        can_move_goods: Optional[bool] = None,
-        can_recept_goods: Optional[bool] = None,
-        can_issue_goods: Optional[bool] = None,
+        can_move_stocks: Optional[bool] = None,
+        can_recept_stocks: Optional[bool] = None,
+        can_issue_stocks: Optional[bool] = None,
     ):
         return self.schema_class(
             first_name=first_name,
             last_name=last_name,
             employment_date=employment_date,
             birth_date=birth_date,
-            can_move_goods=can_move_goods,
-            can_recept_goods=can_recept_goods,
-            can_issue_goods=can_issue_goods,
+            can_move_stocks=can_move_stocks,
+            can_recept_stocks=can_recept_stocks,
+            can_issue_stocks=can_issue_stocks,
         )

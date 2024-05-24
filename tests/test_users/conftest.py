@@ -27,16 +27,16 @@ async def create_user_without_activation(
     user_schema: UserInputSchema,
     is_active: bool = True,
     is_staff: bool = False,
-    can_move_goods: bool = False,
-    can_recept_goods: bool = False,
-    can_issue_goods: bool = False,
+    can_move_stocks: bool = False,
+    can_recept_stocks: bool = False,
+    can_issue_stocks: bool = False,
 ):
     new_user = await create_user_base(async_session, user_schema)
     new_user.is_active = is_active
     new_user.is_staff = is_staff
-    new_user.can_move_goods = can_move_goods
-    new_user.can_recept_goods = can_recept_goods
-    new_user.can_issue_goods = can_issue_goods
+    new_user.can_move_stocks = can_move_stocks
+    new_user.can_recept_stocks = can_recept_stocks
+    new_user.can_issue_stocks = can_issue_stocks
     async_session.add(new_user)
 
     await set_user_password(async_session, new_user.email, PASSWORD_SCHEMA)
@@ -64,9 +64,9 @@ async def db_staff_user(async_session: AsyncSession) -> UserOutputSchema:
         async_session,
         DB_STAFF_USER_SCHEMA,
         is_staff=True,
-        can_move_goods=True,
-        can_issue_goods=True,
-        can_recept_goods=True,
+        can_move_stocks=True,
+        can_issue_stocks=True,
+        can_recept_stocks=True,
     )
 
 
