@@ -4,15 +4,14 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
-from src.apps.products.schemas.product_schemas import ProductIdListSchema
-from src.apps.stocks.schemas import StockBasicOutputSchema
+from src.apps.products.schemas.product_schemas import ProductIdListSchema, ProductBasicOutputSchema
 from src.apps.users.schemas import UserInfoOutputSchema
 
 
 
 class ReceptionProductInputSchema(BaseModel):
     product_id: str
-    product_amount: int
+    product_count: int
     
     
 class ReceptionInputSchema(BaseModel):
@@ -28,8 +27,17 @@ class ReceptionBasicOutputSchema(BaseModel):
         orm_mode = True
 
 
+class ReceptionStockOutputSchema(BaseModel):
+    weight: Decimal
+    product_count: int
+    product: ProductBasicOutputSchema
+    
+    class Config:
+        orm_mode = True
+    
+    
 class ReceptionOutputSchema(ReceptionBasicOutputSchema):
-    stocks: list[StockBasicOutputSchema]
+    stocks: list[ReceptionStockOutputSchema]
 
     class Config:
         orm_mode = True

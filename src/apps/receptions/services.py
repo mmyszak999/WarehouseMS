@@ -8,6 +8,7 @@ from src.apps.receptions.schemas import (
 )
 from src.apps.products.models import Product
 from src.apps.stocks.models import Stock
+from src.apps.stocks.services import create_stocks
 from src.core.exceptions import AlreadyExists, DoesNotExist, IsOccupied
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -28,8 +29,17 @@ async def create_reception(
         if not len(set(product_ids)) == len(products):
             raise ServiceException("Wrong products!")
     
-    #here create reception object, session.add()
-    #there add stock create service for every product data with loop usage
+    product_counts = [product.pop("product_count") for product in products_data]
+    new_reception = Reception(user_id=user_id)
+    session.add(new_reception)
+    await session.flush()
+    await create_stocks(session, products, product_counts, new_reception.id)
+    
+    await session.commit()
+    await session.refresh(new_reception)
+    print([s.__dict__ for s in new_reception.stocks])
+    
+    return ReceptionOutputSchema.from_orm(new_reception)
 
 
 """async def get_single_category(

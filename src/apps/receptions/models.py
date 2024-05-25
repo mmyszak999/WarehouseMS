@@ -30,5 +30,5 @@ class Reception(Base):
         ForeignKey("user.id", ondelete="SET NULL", onupdate="cascade"),
         nullable=True,
     )
-    user = relationship("User", back_populates="receptions")
-    stocks = relationship("Stock", back_populates="reception")
+    user = relationship("User", back_populates="receptions", lazy="joined")
+    stocks = relationship("Stock", back_populates="reception", lazy="joined")

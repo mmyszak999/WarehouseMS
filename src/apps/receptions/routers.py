@@ -17,7 +17,7 @@ reception_router = APIRouter(prefix="/receptions", tags=["reception"])
 
 @reception_router.post(
     "/",
-    response_model=ReceptionInputSchema,
+    response_model=ReceptionOutputSchema,
     status_code=status.HTTP_201_CREATED,
 )
 async def post_reception(
