@@ -18,14 +18,17 @@ class StockInputSchema(StockBaseSchema):
     
 
 class StockBasicOutputSchema(StockBaseSchema):
+    id: str
     product: ProductBasicOutputSchema
     reception: ReceptionBasicOutputSchema
     
-
+    class Config:
+        orm_mode = True
+    
 
 class StockOutputSchema(StockBasicOutputSchema):
     is_issued: bool
-    updated_at: bool
+    updated_at: Optional[bool]
 
     class Config:
         orm_mode = True

@@ -34,7 +34,7 @@ class Stock(Base):
         ForeignKey("reception.id", ondelete="SET NULL", onupdate="cascade"),
         nullable=True,
     )
-    reception = relationship("Reception", back_populates="stocks")
+    reception = relationship("Reception", back_populates="stocks", lazy="joined")
     issue_id = Column(
         String,
         ForeignKey("issue.id", ondelete="SET NULL", onupdate="cascade"),
