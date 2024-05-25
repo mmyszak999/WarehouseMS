@@ -2,7 +2,7 @@ from typing import Optional
 from datetime import datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from src.apps.products.schemas.product_schemas import ProductIdListSchema, ProductBasicOutputSchema
 from src.apps.users.schemas import UserInfoOutputSchema
@@ -13,15 +13,27 @@ class ReceptionProductInputSchema(BaseModel):
     product_id: str
     product_count: int
     
+    @validator("product_count")
+    def validate_product_count(cls, product_count: int) -> int:
+        if product_count <= 0:
+            raise ValueError("Product count must be positive!")
+        return product_count
+    
     
 class ReceptionInputSchema(BaseModel):
     products_data: list[ReceptionProductInputSchema]
+    description: Optional[str] = Field(max_length=400)
+
+
+class ReceptionUpdateSchema(BaseModel):
+    description: Optional[str] = Field(max_length=400)
 
 
 class ReceptionBasicOutputSchema(BaseModel):
     id: str
     user: UserInfoOutputSchema
     reception_date: datetime
+    description: Optional[str]
     
     class Config:
         orm_mode = True

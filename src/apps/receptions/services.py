@@ -4,7 +4,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.apps.receptions.models import Reception
 from src.apps.receptions.schemas import (
     ReceptionInputSchema,
-    ReceptionOutputSchema
+    ReceptionOutputSchema,
+    ReceptionBasicOutputSchema,
+    ReceptionUpdateSchema
 )
 from src.apps.products.models import Product
 from src.apps.stocks.models import Stock
@@ -37,67 +39,47 @@ async def create_reception(
     
     await session.commit()
     await session.refresh(new_reception)
-    print([s.__dict__ for s in new_reception.stocks])
     
     return ReceptionOutputSchema.from_orm(new_reception)
 
 
-"""async def get_single_category(
-    session: AsyncSession, category_id: int
-) -> CategoryOutputSchema:
-    if not (category_object := await if_exists(Category, "id", category_id, session)):
-        raise DoesNotExist(Category.__name__, "id", category_id)
+async def get_single_reception(
+    session: AsyncSession, reception_id: int
+) -> ReceptionOutputSchema:
+    if not (reception_object := await if_exists(Reception, "id", reception_id, session)):
+        raise DoesNotExist(Reception.__name__, "id", reception_id)
 
-    return CategoryOutputSchema.from_orm(category_object)
+    return ReceptionOutputSchema.from_orm(reception_object)
 
 
-async def get_all_categories(
+async def get_all_receptions(
     session: AsyncSession, page_params: PageParams
-) -> PagedResponseSchema[CategoryOutputSchema]:
-    query = select(Category)
+) -> PagedResponseSchema[ReceptionBasicOutputSchema]:
+    query = select(Reception)
 
     return await paginate(
         query=query,
-        response_schema=CategoryOutputSchema,
-        table=Category,
+        response_schema=ReceptionBasicOutputSchema,
+        table=Reception,
         page_params=page_params,
         session=session,
     )
 
+async def update_single_reception(
+    session: AsyncSession, reception_input: ReceptionUpdateSchema, reception_id: int
+) -> ReceptionOutputSchema:
+    if not (reception_object := await if_exists(Reception, "id", reception_id, session)):
+        raise DoesNotExist(Reception.__name__, "id", reception_id)
 
-async def update_single_category(
-    session: AsyncSession, category_input: CategoryUpdateSchema, category_id: int
-) -> CategoryOutputSchema:
-    if not (category_object := await if_exists(Category, "id", category_id, session)):
-        raise DoesNotExist(Category.__name__, "id", category_id)
+    reception_data = reception_input.dict(exclude_unset=True)
 
-    category_data = category_input.dict(exclude_unset=True)
-
-    if category_data:
-        category_name_check = await session.scalar(
-            select(Category).filter(Category.name == category_input.name).limit(1)
-        )
-        if category_name_check:
-            raise IsOccupied(Category.__name__, "name", category_input.name)
-
+    if reception_data:
         statement = (
-            update(Category).filter(Category.id == category_id).values(**category_data)
+            update(Reception).filter(Reception.id == reception_id).values(**reception_data)
         )
 
         await session.execute(statement)
         await session.commit()
-        await session.refresh(category_object)
+        await session.refresh(reception_object)
 
-    return await get_single_category(session, category_id=category_id)
-
-
-async def delete_single_category(session: AsyncSession, category_id: str):
-    if not (await if_exists(Category, "id", category_id, session)):
-        raise DoesNotExist(Category.__name__, "id", category_id)
-
-    statement = delete(Category).filter(Category.id == category_id)
-    result = await session.execute(statement)
-    await session.commit()
-
-    return result
-"""
+    return await get_single_reception(session, reception_id=reception_id)

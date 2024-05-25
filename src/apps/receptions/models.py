@@ -25,6 +25,7 @@ class Reception(Base):
     reception_date = Column(
         DateTime, nullable=False, default=get_current_time
     )
+    description = Column(String(length=400), nullable=True)
     user_id = Column(
         String,
         ForeignKey("user.id", ondelete="SET NULL", onupdate="cascade"),

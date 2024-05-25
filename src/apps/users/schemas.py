@@ -25,9 +25,9 @@ class UserInputSchema(UserBaseSchema):
     email: EmailStr = Field()
     birth_date: datetime.date
     is_staff: bool
-    can_move_goods: bool
-    can_recept_goods: bool
-    can_issue_goods: bool
+    can_move_stocks: bool
+    can_recept_stocks: bool
+    can_issue_stocks: bool
 
     @validator("birth_date")
     def validate_birth_date(cls, birth_date: datetime.date) -> datetime.date:
@@ -52,9 +52,9 @@ class UserUpdateSchema(BaseModel):
     last_name: Optional[str]
     employment_date: Optional[datetime.date]
     birth_date: Optional[datetime.date]
-    can_move_goods: Optional[bool]
-    can_recept_goods: Optional[bool]
-    can_issue_goods: Optional[bool]
+    can_move_stocks: Optional[bool]
+    can_recept_stocks: Optional[bool]
+    can_issue_stocks: Optional[bool]
 
     @validator("birth_date")
     def validate_birth_date(cls, birth_date: datetime.date) -> datetime.date:
