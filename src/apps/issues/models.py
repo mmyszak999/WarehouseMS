@@ -31,5 +31,5 @@ class Issue(Base):
         ForeignKey("user.id", ondelete="SET NULL", onupdate="cascade"),
         nullable=True,
     )
-    user = relationship("User", back_populates="issues")
-    stocks = relationship("Stock", back_populates="issue")
+    user = relationship("User", back_populates="issues", lazy="joined")
+    stocks = relationship("Stock", back_populates="issue", lazy="joined")

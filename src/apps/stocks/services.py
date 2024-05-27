@@ -12,7 +12,7 @@ from src.apps.stocks.schemas import (
 )
 from src.apps.products.models import Product
 from src.apps.stocks.models import Stock
-from src.core.exceptions import AlreadyExists, DoesNotExist, IsOccupied
+from src.core.exceptions import AlreadyExists, DoesNotExist, IsOccupied, ServiceException
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
@@ -104,7 +104,7 @@ async def issue_stocks(
         stock.issue_id = issue_id
         stock.is_issued = True
         stock.updated_at = get_current_time()
-        session.add(new_stock)
+        session.add(stock)
     await session.flush()
 
 

@@ -25,15 +25,15 @@ async def create_issue(
     stocks_data = issue_input.dict()["stock_ids"]
     if stock_ids := [stock.pop("id") for stock in stocks_data]:
         stocks = await session.scalars(
-            select(Stock).where(Stock.id.in_(stock_ids))
+            select(Stock).where(Stock.id.in_(stock_ids), Stock.is_issued==False)
         )
-        stocks = stock.unique().all()
-        if not len(set(product_ids)) == len(stocks):
-            raise ServiceException("Wrong stocks!")
+        stocks = stocks.unique().all()
+        if not len(set(stock_ids)) == len(stocks):
+            raise ServiceException("Wrong stocks! Check if all requested stock are not issued!")
     
     new_issue = Issue(
         user_id=user_id,
-        description=stocks_data.pop("description")
+        description=issue_input.description
         )
     
     session.add(new_issue)
