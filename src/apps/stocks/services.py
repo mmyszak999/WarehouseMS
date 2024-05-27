@@ -17,6 +17,7 @@ from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
 from src.core.utils.orm import if_exists
+from src.core.utils.time import get_current_time
 
 
 async def create_stocks(
@@ -93,6 +94,18 @@ async def get_all_available_stocks(
     session: AsyncSession, page_params: PageParams
 ) -> PagedResponseSchema[StockBasicOutputSchema]:
     return await get_multiple_stocks(session, page_params)
+
+
+async def issue_stocks(
+    session: AsyncSession, stocks: list[Stock], 
+    issue_id: str
+) -> None:
+    for stock in stocks:
+        stock.issue_id = issue_id
+        stock.is_issued = True
+        stock.updated_at = get_current_time()
+        session.add(new_stock)
+    await session.flush()
 
 
 

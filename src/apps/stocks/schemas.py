@@ -34,5 +34,5 @@ class StockOutputSchema(StockBasicOutputSchema):
         orm_mode = True
 
 
-class StockIdListSchema(BaseModel):
-    id: list[str]
+class StockIssueInputSchema(BaseModel):
+    id: str

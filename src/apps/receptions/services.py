@@ -32,7 +32,9 @@ async def create_reception(
             raise ServiceException("Wrong products!")
     
     product_counts = [product.pop("product_count") for product in products_data]
-    new_reception = Reception(user_id=user_id)
+    new_reception = Reception(
+        user_id=user_id,
+        description=products_data.pop("desctiption"))
     session.add(new_reception)
     await session.flush()
     await create_stocks(session, products, product_counts, new_reception.id)
