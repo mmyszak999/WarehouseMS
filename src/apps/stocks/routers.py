@@ -33,7 +33,6 @@ async def get_available_stocks(
     request_user: User = Depends(authenticate_user),
     page_params: PageParams = Depends(),
 ) -> PagedResponseSchema[StockBasicOutputSchema]:
-    await check_if_staff_or_has_permission(request_user, "can_move_stocks")
     return await get_all_available_stocks(session, page_params)
 
 
@@ -75,5 +74,4 @@ async def get_stock(
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
 ) -> StockOutputSchema:
-    await check_if_staff_or_has_permission(request_user, "can_move_stocks")
     return await get_single_stock(session, stock_id)
