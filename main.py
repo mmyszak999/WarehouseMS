@@ -3,8 +3,11 @@ from fastapi.responses import JSONResponse
 from fastapi_jwt_auth.exceptions import AuthJWTException
 
 from src.apps.emails.routers import email_router
+from src.apps.issues.routers import issue_router
 from src.apps.products.routers.category_routers import category_router
 from src.apps.products.routers.product_routers import product_router
+from src.apps.receptions.routers import reception_router
+from src.apps.stocks.routers import stock_router
 from src.apps.users.routers import user_router
 from src.core.exceptions import (
     AccountAlreadyActivatedException,
@@ -13,6 +16,7 @@ from src.core.exceptions import (
     AlreadyExists,
     AuthenticationException,
     AuthorizationException,
+    CannotRetrieveIssuedStockException,
     DoesNotExist,
     IsOccupied,
     LegacyProductException,
@@ -35,6 +39,9 @@ root_router.include_router(user_router)
 root_router.include_router(email_router)
 root_router.include_router(category_router)
 root_router.include_router(product_router)
+root_router.include_router(reception_router)
+root_router.include_router(stock_router)
+root_router.include_router(issue_router)
 
 app.include_router(root_router)
 
@@ -175,6 +182,15 @@ async def handle_legacy_product_exception(
 @app.exception_handler(ProductIsAlreadyLegacyException)
 async def handle_product_is_already_legacy_exception(
     request: Request, exception: ProductIsAlreadyLegacyException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(CannotRetrieveIssuedStockException)
+async def handle_cannot_retrieve_issued_stock_exception(
+    request: Request, exception: CannotRetrieveIssuedStockException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}

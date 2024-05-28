@@ -49,3 +49,7 @@ class RemovedProductOutputSchema(ProductBaseSchema):
 
     class Config:
         orm_mode = True
+
+
+class ProductIdListSchema(BaseModel):
+    id: list[str]

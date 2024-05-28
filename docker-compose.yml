@@ -2,7 +2,7 @@ version: '3.9'
 
 services: 
   db:
-    image: postgres:14.4
+    image: postgres:14.3
     container_name: fastapi_db
     env_file:
       - .env
