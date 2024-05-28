@@ -2,21 +2,20 @@ from fastapi import Depends, Request, Response, status
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.apps.issues.models import Issue
 from src.apps.issues.schemas import (
+    IssueBasicOutputSchema,
     IssueInputSchema,
     IssueOutputSchema,
-    IssueBasicOutputSchema,
-    IssueUpdateSchema
-    )
-
+    IssueUpdateSchema,
+)
 from src.apps.issues.services import (
-    create_issue, 
-    get_all_issues, 
+    create_issue,
+    get_all_issues,
     get_single_issue,
-    update_single_issue
+    update_single_issue,
 )
 from src.apps.users.models import User
-from src.apps.issues.models import Issue
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.permissions import check_if_staff_or_has_permission

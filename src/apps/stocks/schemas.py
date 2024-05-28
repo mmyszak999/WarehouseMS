@@ -1,10 +1,11 @@
-from typing import Optional
+from datetime import datetime
 from decimal import Decimal
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
-from src.apps.receptions.schemas import ReceptionBasicOutputSchema
 from src.apps.products.schemas.product_schemas import ProductBasicOutputSchema
+from src.apps.receptions.schemas import ReceptionBasicOutputSchema
 
 
 class StockBaseSchema(BaseModel):
@@ -15,20 +16,20 @@ class StockBaseSchema(BaseModel):
 class StockInputSchema(StockBaseSchema):
     product_id: str
     reception_id: str
-    
+
 
 class StockBasicOutputSchema(StockBaseSchema):
     id: str
     product: ProductBasicOutputSchema
     reception: ReceptionBasicOutputSchema
-    
+
     class Config:
         orm_mode = True
-    
+
 
 class StockOutputSchema(StockBasicOutputSchema):
     is_issued: bool
-    updated_at: Optional[bool]
+    updated_at: Optional[datetime]
 
     class Config:
         orm_mode = True

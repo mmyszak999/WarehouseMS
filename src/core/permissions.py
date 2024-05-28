@@ -21,7 +21,7 @@ async def check_if_staff(request_user: User) -> bool:
 
 
 async def check_if_staff_or_has_permission(request_user: User, attribute: str) -> bool:
-    if not (request_user.is_staff or getattr(request_user, attribute) == True) :
+    if not (request_user.is_staff or getattr(request_user, attribute) == True):
         raise AuthorizationException(
             "You don't have staff permissions to perform this action!"
         )

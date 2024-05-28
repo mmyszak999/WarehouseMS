@@ -44,5 +44,3 @@ class Stock(Base):
     product_count = Column(Integer, nullable=False)
     is_issued = Column(Boolean, nullable=False, server_default="false")
     updated_at = Column(DateTime, nullable=True)
-    
-    

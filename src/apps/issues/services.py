@@ -3,15 +3,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.issues.models import Issue
 from src.apps.issues.schemas import (
+    IssueBasicOutputSchema,
     IssueInputSchema,
     IssueOutputSchema,
-    IssueBasicOutputSchema,
-    IssueUpdateSchema
+    IssueUpdateSchema,
 )
 from src.apps.products.models import Product
 from src.apps.stocks.models import Stock
-from src.core.exceptions import AlreadyExists, DoesNotExist, IsOccupied
 from src.apps.stocks.services import issue_stocks
+from src.core.exceptions import AlreadyExists, DoesNotExist, IsOccupied
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
@@ -19,36 +19,32 @@ from src.core.utils.orm import if_exists
 
 
 async def create_issue(
-    session: AsyncSession, issue_input: IssueInputSchema,
-    user_id: str
+    session: AsyncSession, issue_input: IssueInputSchema, user_id: str
 ) -> IssueOutputSchema:
     stocks_data = issue_input.dict()["stock_ids"]
     if stock_ids := [stock.pop("id") for stock in stocks_data]:
         stocks = await session.scalars(
-            select(Stock).where(Stock.id.in_(stock_ids), Stock.is_issued==False)
+            select(Stock).where(Stock.id.in_(stock_ids), Stock.is_issued == False)
         )
         stocks = stocks.unique().all()
         if not len(set(stock_ids)) == len(stocks):
-            raise ServiceException("Wrong stocks! Check if all requested stock are not issued!")
-    
-    new_issue = Issue(
-        user_id=user_id,
-        description=issue_input.description
-        )
-    
+            raise ServiceException(
+                "Wrong stocks! Check if all requested stock are not issued!"
+            )
+
+    new_issue = Issue(user_id=user_id, description=issue_input.description)
+
     session.add(new_issue)
     await session.flush()
     await issue_stocks(session, stocks, new_issue.id)
-    
+
     await session.commit()
     await session.refresh(new_issue)
-    
+
     return IssueOutputSchema.from_orm(new_issue)
 
 
-async def get_single_issue(
-    session: AsyncSession, issue_id: int
-) -> IssueOutputSchema:
+async def get_single_issue(session: AsyncSession, issue_id: int) -> IssueOutputSchema:
     if not (issue_object := await if_exists(Issue, "id", issue_id, session)):
         raise DoesNotExist(Issue.__name__, "id", issue_id)
 
@@ -68,6 +64,7 @@ async def get_all_issues(
         session=session,
     )
 
+
 async def update_single_issue(
     session: AsyncSession, issue_input: IssueUpdateSchema, issue_id: int
 ) -> IssueOutputSchema:
@@ -77,9 +74,7 @@ async def update_single_issue(
     issue_data = issue_input.dict(exclude_unset=True)
 
     if issue_data:
-        statement = (
-            update(Issue).filter(Issue.id == issue_id).values(**issue_data)
-        )
+        statement = update(Issue).filter(Issue.id == issue_id).values(**issue_data)
 
         await session.execute(statement)
         await session.commit()

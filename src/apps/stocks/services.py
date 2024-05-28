@@ -1,18 +1,23 @@
 from typing import Union
 
+from pydantic import BaseModel
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel
 
-from src.apps.stocks.models import Stock
-from src.apps.stocks.schemas import (
-    StockInputSchema,
-    StockOutputSchema,
-    StockBasicOutputSchema
-)
 from src.apps.products.models import Product
 from src.apps.stocks.models import Stock
-from src.core.exceptions import AlreadyExists, DoesNotExist, IsOccupied, ServiceException
+from src.apps.stocks.schemas import (
+    StockBasicOutputSchema,
+    StockInputSchema,
+    StockOutputSchema,
+)
+from src.core.exceptions import (
+    AlreadyExists,
+    CannotRetrieveIssuedStockException,
+    DoesNotExist,
+    IsOccupied,
+    ServiceException,
+)
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
@@ -21,32 +26,35 @@ from src.core.utils.time import get_current_time
 
 
 async def create_stocks(
-    session: AsyncSession, products: list[Product],
-    product_counts: dict[str, int], reception_id: str
+    session: AsyncSession,
+    products: list[Product],
+    product_counts: dict[str, int],
+    reception_id: str,
 ) -> None:
-    for product, product_count, in zip(products, product_counts):
+    for (
+        product,
+        product_count,
+    ) in zip(products, product_counts):
         weight = product_count * product.weight
         stock_input = StockInputSchema(
             weight=weight,
             product_count=product_count,
             product_id=product.id,
-            reception_id=reception_id
+            reception_id=reception_id,
         )
-        new_stock = Stock(
-            **stock_input.dict()
-        )
+        new_stock = Stock(**stock_input.dict())
         session.add(new_stock)
     await session.flush()
 
 
 async def get_single_stock(
-    session: AsyncSession, stock_id: int, can_get_issued: bool=False
+    session: AsyncSession, stock_id: int, can_get_issued: bool = False
 ) -> StockOutputSchema:
     if not (stock_object := await if_exists(Stock, "id", stock_id, session)):
         raise DoesNotExist(Stock.__name__, "id", stock_id)
 
     if (not can_get_issued) and stock_object.is_issued:
-        raise Exception("stock not available")
+        raise CannotRetrieveIssuedStockException
     return StockOutputSchema.from_orm(stock_object)
 
 
@@ -97,8 +105,7 @@ async def get_all_available_stocks(
 
 
 async def issue_stocks(
-    session: AsyncSession, stocks: list[Stock], 
-    issue_id: str
+    session: AsyncSession, stocks: list[Stock], issue_id: str
 ) -> None:
     for stock in stocks:
         stock.issue_id = issue_id
@@ -106,7 +113,3 @@ async def issue_stocks(
         stock.updated_at = get_current_time()
         session.add(stock)
     await session.flush()
-
-
-
-        

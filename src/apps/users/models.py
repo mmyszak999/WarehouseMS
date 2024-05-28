@@ -2,8 +2,8 @@ from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
-from src.core.utils.utils import generate_uuid
 from src.apps.issues.models import Issue
+from src.core.utils.utils import generate_uuid
 from src.database.db_connection import Base
 
 
