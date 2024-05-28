@@ -28,7 +28,7 @@ from src.core.utils.time import get_current_time
 async def create_stocks(
     session: AsyncSession,
     products: list[Product],
-    product_counts: dict[str, int],
+    product_counts: list[int],
     reception_id: str,
 ) -> None:
     for (

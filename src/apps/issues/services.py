@@ -18,9 +18,9 @@ from src.core.pagination.services import paginate
 from src.core.utils.orm import if_exists
 
 
-async def create_issue(
+async def base_create_issue(
     session: AsyncSession, issue_input: IssueInputSchema, user_id: str
-) -> IssueOutputSchema:
+):
     stocks_data = issue_input.dict()["stock_ids"]
     if stock_ids := [stock.pop("id") for stock in stocks_data]:
         stocks = await session.scalars(
@@ -36,6 +36,14 @@ async def create_issue(
 
     session.add(new_issue)
     await session.flush()
+    
+    return stocks, new_issue
+
+
+async def create_issue(
+    session: AsyncSession, issue_input: IssueInputSchema, user_id: str
+) -> IssueOutputSchema:
+    stocks, new_issue = await base_create_issue(session, issue_input, user_id)
     await issue_stocks(session, stocks, new_issue.id)
 
     await session.commit()
