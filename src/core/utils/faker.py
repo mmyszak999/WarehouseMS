@@ -21,3 +21,7 @@ def initialize_faker():
 
 def set_product_weight() -> int:
     return random.randint(1, 50)
+
+
+def set_product_count() -> int:
+    return random.randint(5, 30)
