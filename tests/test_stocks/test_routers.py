@@ -7,7 +7,6 @@ from src.apps.stocks.schemas import StockOutputSchema
 from src.apps.receptions.schemas import ReceptionOutputSchema
 from src.apps.issues.schemas import IssueOutputSchema
 from src.apps.users.schemas import UserOutputSchema
-from src.apps.users.schemas import UserOutputSchema
 from src.core.pagination.schemas import PagedResponseSchema
 from tests.test_stocks.conftest import db_stocks
 from tests.test_receptions.conftest import db_receptions

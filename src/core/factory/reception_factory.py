@@ -29,10 +29,10 @@ class ReceptionUpdateSchemaFactory(SchemaFactory):
 
     def generate(
         self,
-        desctiption: Optional[str] = None
+        description: Optional[str] = None
     ):
         return self.schema_class(
-            desctiption=desctiption
+            description=description
         )
         
 class ReceptionProductInputSchemaFactory(SchemaFactory):
