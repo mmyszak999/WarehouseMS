@@ -15,11 +15,11 @@ class IssueInputSchemaFactory(SchemaFactory):
     def generate(
         self,
         stock_ids: list[StockIssueInputSchema],
-        desctiption: Optional[str] = None
+        description: Optional[str] = None
     ):
         return self.schema_class(
-            products_data=stock_ids,
-            desctiption=desctiption or self.faker.sentence()
+            stock_ids=stock_ids,
+            description=description or self.faker.sentence()
         )
 
 

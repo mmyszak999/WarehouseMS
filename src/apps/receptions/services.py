@@ -23,10 +23,11 @@ async def base_create_reception(
     session: AsyncSession, reception_input: ReceptionInputSchema, user_id: str,
     testing: bool = False
 ):
-    products_data = reception_input.dict()["products_data"]
+    reception_input = reception_input.dict(exclude_none=True, exclude_unset=True)
+    products_data = reception_input["products_data"]
     if testing:
         new_reception = Reception(
-        user_id=user_id, description=products_data.pop("desctiption")
+        user_id=user_id, description=reception_input.get("description")
         )
         session.add(new_reception)
         await session.commit()
@@ -42,7 +43,7 @@ async def base_create_reception(
 
     product_counts = [product.pop("product_count") for product in products_data]
     new_reception = Reception(
-        user_id=user_id, description=products_data.pop("desctiption")
+        user_id=user_id, description=reception_input.get("description")
     )
     session.add(new_reception)
     await session.flush()

@@ -14,12 +14,12 @@ class ReceptionInputSchemaFactory(SchemaFactory):
 
     def generate(
         self,
-        products_data: list[ReceptionProductInputSchema],
-        desctiption: Optional[str] = None
+        products_data: list[ReceptionProductInputSchema] = None,
+        description: Optional[str] = None
     ):
         return self.schema_class(
             products_data=products_data,
-            desctiption=desctiption or self.faker.sentence()
+            description=description or self.faker.sentence()
         )
 
 
@@ -33,4 +33,18 @@ class ReceptionUpdateSchemaFactory(SchemaFactory):
     ):
         return self.schema_class(
             desctiption=desctiption
+        )
+        
+class ReceptionProductInputSchemaFactory(SchemaFactory):
+    def __init__(self, schema_class=ReceptionProductInputSchema):
+        super().__init__(schema_class)
+
+    def generate(
+        self,
+        product_id: str,
+        product_count: int = None
+    ):
+        return self.schema_class(
+            product_id=product_id,
+            product_count=product_count or set_product_count()
         )

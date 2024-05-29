@@ -3,7 +3,6 @@ from decimal import Decimal
 from typing import Optional
 
 from src.apps.stocks.schemas import StockInputSchema
-from 
 from src.core.factory.core import SchemaFactory
 from src.core.utils.faker import set_product_weight, set_product_count
 
