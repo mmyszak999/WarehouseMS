@@ -60,6 +60,8 @@ async def test_only_user_with_proper_permission_can_create_reception(
     )
     
     assert response.status_code == status_code
+    if status_code == status.HTTP_200_OK:
+        assert response.json()["user"]["id"] == user.id
 
 
 @pytest.mark.parametrize(

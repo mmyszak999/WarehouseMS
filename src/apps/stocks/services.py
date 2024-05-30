@@ -30,7 +30,7 @@ async def create_stocks(
     products: list[Product],
     product_counts: list[int],
     reception_id: str,
-) -> None:
+) -> Stock:
     for (
         product,
         product_count,
@@ -45,6 +45,7 @@ async def create_stocks(
         new_stock = Stock(**stock_input.dict())
         session.add(new_stock)
     await session.flush()
+    return new_stock
 
 
 async def get_single_stock(
