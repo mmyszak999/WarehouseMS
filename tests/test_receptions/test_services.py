@@ -91,5 +91,4 @@ async def test_raise_exception_while_updating_nonexistent_reception(
     update_data = ReceptionUpdateSchemaFactory().generate()
     with pytest.raises(DoesNotExist):
         await update_single_reception(async_session, update_data, generate_uuid())
-
     
