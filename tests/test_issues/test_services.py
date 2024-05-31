@@ -1,16 +1,18 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.apps.products.schemas.product_schemas import ProductOutputSchema
-from src.apps.receptions.schemas import ReceptionOutputSchema
+from src.apps.issues.schemas import IssueOutputSchema
 from src.apps.issues.services import (
     base_create_issue,
     create_issue,
     get_all_issues,
     get_single_issue,
-    update_single_issue
+    update_single_issue,
 )
-from src.apps.stocks.schemas import StockOutputSchema, StockIssueInputSchema
+from src.apps.products.schemas.product_schemas import ProductOutputSchema
+from src.apps.receptions.schemas import ReceptionOutputSchema
+from src.apps.stocks.schemas import StockIssueInputSchema, StockOutputSchema
+from src.apps.stocks.services import issue_stocks
 from src.apps.users.schemas import UserOutputSchema
 from src.core.exceptions import (
     AlreadyExists,
@@ -19,12 +21,10 @@ from src.core.exceptions import (
     MissingIssueDataException,
     ServiceException,
 )
-from src.apps.issues.schemas import IssueOutputSchema
 from src.core.factory.issue_factory import (
     IssueInputSchemaFactory,
-    IssueUpdateSchemaFactory
+    IssueUpdateSchemaFactory,
 )
-from src.apps.stocks.services import issue_stocks
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.utils import generate_uuid
@@ -50,7 +50,7 @@ async def test_if_issue_was_created_correctly(
     issue_input = IssueInputSchemaFactory().generate(
         stock_ids=[
             StockIssueInputSchema(id=db_stocks.results[0].id),
-            StockIssueInputSchema(id=db_stocks.results[1].id)
+            StockIssueInputSchema(id=db_stocks.results[1].id),
         ],
         description="descr",
     )

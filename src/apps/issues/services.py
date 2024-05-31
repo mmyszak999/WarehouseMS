@@ -45,9 +45,9 @@ async def base_create_issue(
             raise ServiceException(
                 "Wrong stocks! Check if all requested stock are not issued!"
             )
-    
+
     new_issue = Issue(user_id=user_id, description=issue_input.get("description"))
-    
+
     if testing:
         session.add(new_issue)
         await session.commit()

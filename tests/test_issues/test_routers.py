@@ -3,15 +3,15 @@ from fastapi import status
 from fastapi_jwt_auth import AuthJWT
 from httpx import AsyncClient, Response
 
+from src.apps.issues.schemas import IssueOutputSchema
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.receptions.schemas import ReceptionOutputSchema
-from src.apps.issues.schemas import IssueOutputSchema
-from src.apps.stocks.schemas import StockOutputSchema, StockIssueInputSchema
 from src.apps.stocks.models import Stock
+from src.apps.stocks.schemas import StockIssueInputSchema, StockOutputSchema
 from src.apps.users.schemas import UserOutputSchema
 from src.core.factory.issue_factory import (
     IssueInputSchemaFactory,
-    IssueUpdateSchemaFactory
+    IssueUpdateSchemaFactory,
 )
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
@@ -50,9 +50,8 @@ async def test_only_user_with_proper_permission_can_create_issue(
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema]
+    db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
-    #stocks_to_issue = await if_exists(Stock, "id", db_stocks.results[0].id, async_session)
     issue_input = IssueInputSchemaFactory().generate(
         stock_ids=[StockIssueInputSchema(id=db_stocks.results[0].id)]
     )
@@ -88,7 +87,7 @@ async def test_only_user_with_proper_permission_can_get_all_issues(
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema]
+    db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
 
     response = await async_client.get("issues/", headers=user_headers)
@@ -121,8 +120,7 @@ async def test_only_user_with_proper_permission_can_get_single_issue(
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema]
-
+    db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
     response = await async_client.get(
         f"issues/{db_issues.results[0].id}", headers=user_headers
@@ -156,8 +154,7 @@ async def test_only_user_with_proper_permission_can_update_single_issue(
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema]
-
+    db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
     update_data = IssueUpdateSchemaFactory().generate(description="wow")
     response = await async_client.patch(
@@ -165,7 +162,7 @@ async def test_only_user_with_proper_permission_can_update_single_issue(
         headers=user_headers,
         content=update_data.json(),
     )
-    
+
     assert response.status_code == status_code
     if status_code == status.HTTP_200_OK:
         assert update_data.description == response.json()["description"]
