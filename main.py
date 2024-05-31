@@ -20,15 +20,15 @@ from src.core.exceptions import (
     DoesNotExist,
     IsOccupied,
     LegacyProductException,
+    MissingIssueDataException,
+    MissingProductDataException,
+    MissingReceptionDataException,
     PasswordAlreadySetException,
     PasswordNotSetException,
     ProductIsAlreadyLegacyException,
     ServiceException,
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
-    MissingProductDataException,
-    MissingIssueDataException,
-    MissingReceptionDataException
 )
 
 app = FastAPI(

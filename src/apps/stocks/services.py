@@ -16,8 +16,8 @@ from src.core.exceptions import (
     CannotRetrieveIssuedStockException,
     DoesNotExist,
     IsOccupied,
+    MissingProductDataException,
     ServiceException,
-    MissingProductDataException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -32,7 +32,7 @@ async def create_stocks(
     product_counts: list[int] = [],
     reception_id: str = None,
     testing: bool = False,
-    input_schemas: list[StockInputSchema] = None
+    input_schemas: list[StockInputSchema] = None,
 ) -> list[Stock]:
     stock_list = []
     if testing and input_schemas:
@@ -42,10 +42,10 @@ async def create_stocks(
             stock_list.append(new_stock)
         await session.flush()
         return stock_list
-    
+
     if not (products or product_counts):
         raise MissingProductDataException
-            
+
     for (
         product,
         product_count,
@@ -62,7 +62,6 @@ async def create_stocks(
         stock_list.append(new_stock)
     await session.flush()
     return stock_list
-    
 
 
 async def get_single_stock(

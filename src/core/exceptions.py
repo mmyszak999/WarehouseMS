@@ -95,7 +95,9 @@ class CannotRetrieveIssuedStockException(ServiceException):
 
 class MissingProductDataException(ServiceException):
     def __init__(self) -> None:
-        super().__init__(f"Product id or product count data is not consistent or complete! ")
+        super().__init__(
+            f"Product id or product count data is not consistent or complete! "
+        )
 
 
 class MissingIssueDataException(ServiceException):
