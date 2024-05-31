@@ -41,6 +41,12 @@ class Stock(Base):
         nullable=True,
     )
     issue = relationship("Issue", back_populates="stocks", lazy="joined")
+    waiting_room_id = Column(
+        String,
+        ForeignKey("waiting_room.id", ondelete="SET NULL", onupdate="cascade"),
+        nullable=True,
+    )
+    waiting_room = relationship("WaitingRoom", back_populates="stocks", lazy="joined")
     product_count = Column(Integer, nullable=False)
     is_issued = Column(Boolean, nullable=False, server_default="false")
     updated_at = Column(DateTime, nullable=True)
