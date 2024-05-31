@@ -24,5 +24,5 @@ class IssueUpdateSchemaFactory(SchemaFactory):
     def __init__(self, schema_class=IssueUpdateSchema):
         super().__init__(schema_class)
 
-    def generate(self, desctiption: Optional[str] = None):
-        return self.schema_class(desctiption=desctiption)
+    def generate(self, description: Optional[str] = None):
+        return self.schema_class(description=description)
