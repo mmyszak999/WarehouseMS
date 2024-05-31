@@ -129,5 +129,6 @@ async def issue_stocks(
         stock.is_issued = True
         stock.updated_at = get_current_time()
         session.add(stock)
+        await session.refresh(stock)
     await session.flush()
     return stocks

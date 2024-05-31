@@ -62,4 +62,4 @@ class Product(Base):
         back_populates="products",
         lazy="joined",
     )
-    stocks = relationship("Stock", back_populates="product")
+    stocks = relationship("Stock", back_populates="product", lazy="joined")

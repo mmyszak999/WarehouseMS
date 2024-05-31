@@ -29,11 +29,6 @@ async def base_create_issue(
     issue_input: IssueInputSchema = None,
     testing: bool = False,
 ):
-    if testing:
-        new_issue = Issue(user_id=user_id)
-        session.add(new_issue)
-        await session.commit()
-        return new_issue
 
     if (issue_input is None) or not (
         issue_input := issue_input.dict(exclude_none=True, exclude_unset=True)
@@ -50,8 +45,13 @@ async def base_create_issue(
             raise ServiceException(
                 "Wrong stocks! Check if all requested stock are not issued!"
             )
-
+    
     new_issue = Issue(user_id=user_id, description=issue_input.get("description"))
+    
+    if testing:
+        session.add(new_issue)
+        await session.commit()
+        return new_issue
 
     session.add(new_issue)
     await session.flush()

@@ -165,7 +165,7 @@ async def test_only_user_with_proper_permission_can_update_single_issue(
         headers=user_headers,
         content=update_data.json(),
     )
-
+    
     assert response.status_code == status_code
     if status_code == status.HTTP_200_OK:
         assert update_data.description == response.json()["description"]
