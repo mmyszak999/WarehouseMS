@@ -26,7 +26,6 @@ from src.core.factory.reception_factory import (
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.utils import generate_uuid
-from tests.test_issues.conftest import db_issues
 from tests.test_products.conftest import db_products
 from tests.test_receptions.conftest import db_receptions
 from tests.test_stocks.conftest import db_stocks
