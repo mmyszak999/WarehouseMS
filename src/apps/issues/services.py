@@ -27,7 +27,7 @@ async def base_create_issue(
         await session.commit()
         return new_issue
     
-    if not (issue_input := issue_input.dict(exclude_none=True, exclude_unset=True)):
+    if (issue_input is None) or not (issue_input := issue_input.dict(exclude_none=True, exclude_unset=True)):
         raise MissingIssueDataException
         
     stocks_data = issue_input.get('stock_ids')
