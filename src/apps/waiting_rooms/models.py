@@ -26,4 +26,5 @@ class WaitingRoom(Base):
     max_weight = Column(DECIMAL, nullable=False)
     stocks = relationship("Stocks", back_populates="waiting_room", lazy="joined")
     occupied_slots = Column(Integer, nullable=False, default=0)
+    current_stock_weight = Column(DECIMAL, nullable=False, default=0)
     

@@ -19,6 +19,9 @@ class WaitingRoomBaseSchema(BaseModel):
 class WaitingRoomInputSchema(WaitingRoomBaseSchema):
     pass
 
+    class Config:
+        orm_mode = True
+
 
 class WaitingRoomUpdateSchema(BaseModel):
     max_stocks: Optional[int]
@@ -29,7 +32,13 @@ class WaitingRoomBasicOutputSchema(WaitingRoomBaseSchema):
     id: str
     stocks: list[StockBasicOutputSchema]
     
+    class Config:
+        orm_mode = True
     
-class WaitingRoomcOutputSchema(WaitingRoomBasicOutputSchema):
+    
+class WaitingRoomOutputSchema(WaitingRoomBasicOutputSchema):
     occupied_slots: int
+    
+    class Config:
+        orm_mode = True
 
