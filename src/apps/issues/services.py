@@ -11,7 +11,12 @@ from src.apps.issues.schemas import (
 from src.apps.products.models import Product
 from src.apps.stocks.models import Stock
 from src.apps.stocks.services import issue_stocks
-from src.core.exceptions import AlreadyExists, DoesNotExist, IsOccupied
+from src.core.exceptions import (
+    AlreadyExists,
+    DoesNotExist,
+    IsOccupied,
+    MissingIssueDataException,
+)
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
@@ -19,10 +24,23 @@ from src.core.utils.orm import if_exists
 
 
 async def base_create_issue(
-    session: AsyncSession, issue_input: IssueInputSchema, user_id: str
+    session: AsyncSession,
+    user_id: str,
+    issue_input: IssueInputSchema = None,
+    testing: bool = False,
 ):
-    issue_input = issue_input.dict(exclude_none=True, exclude_unset=True)
-    stocks_data = issue_input.get('stock_ids')
+    if testing:
+        new_issue = Issue(user_id=user_id)
+        session.add(new_issue)
+        await session.commit()
+        return new_issue
+
+    if (issue_input is None) or not (
+        issue_input := issue_input.dict(exclude_none=True, exclude_unset=True)
+    ):
+        raise MissingIssueDataException
+
+    stocks_data = issue_input.get("stock_ids")
     if stock_ids := [stock.pop("id") for stock in stocks_data]:
         stocks = await session.scalars(
             select(Stock).where(Stock.id.in_(stock_ids), Stock.is_issued == False)
@@ -37,14 +55,14 @@ async def base_create_issue(
 
     session.add(new_issue)
     await session.flush()
-    
+
     return stocks, new_issue
 
 
 async def create_issue(
     session: AsyncSession, issue_input: IssueInputSchema, user_id: str
 ) -> IssueOutputSchema:
-    stocks, new_issue = await base_create_issue(session, issue_input, user_id)
+    stocks, new_issue = await base_create_issue(session, user_id, issue_input)
     await issue_stocks(session, stocks, new_issue.id)
 
     await session.commit()

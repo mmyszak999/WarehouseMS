@@ -20,6 +20,9 @@ from src.core.exceptions import (
     DoesNotExist,
     IsOccupied,
     LegacyProductException,
+    MissingIssueDataException,
+    MissingProductDataException,
+    MissingReceptionDataException,
     PasswordAlreadySetException,
     PasswordNotSetException,
     ProductIsAlreadyLegacyException,
@@ -191,6 +194,33 @@ async def handle_product_is_already_legacy_exception(
 @app.exception_handler(CannotRetrieveIssuedStockException)
 async def handle_cannot_retrieve_issued_stock_exception(
     request: Request, exception: CannotRetrieveIssuedStockException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(MissingProductDataException)
+async def missing_product_data_exception(
+    request: Request, exception: MissingProductDataException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(MissingIssueDataException)
+async def missing_issue_data_exception(
+    request: Request, exception: MissingIssueDataException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(MissingReceptionDataException)
+async def missing_reception_data_exception(
+    request: Request, exception: MissingReceptionDataException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}

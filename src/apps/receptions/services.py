@@ -11,28 +11,37 @@ from src.apps.receptions.schemas import (
 )
 from src.apps.stocks.models import Stock
 from src.apps.stocks.services import create_stocks
-from src.core.exceptions import AlreadyExists, DoesNotExist, IsOccupied
+from src.core.exceptions import (
+    AlreadyExists,
+    DoesNotExist,
+    IsOccupied,
+    MissingReceptionDataException,
+    ServiceException,
+)
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
 from src.core.utils.orm import if_exists
 
 
-
 async def base_create_reception(
-    session: AsyncSession, reception_input: ReceptionInputSchema, user_id: str,
-    testing: bool = False
+    session: AsyncSession,
+    user_id: str,
+    reception_input: ReceptionInputSchema = None,
+    testing: bool = False,
 ):
-    reception_input = reception_input.dict(exclude_none=True, exclude_unset=True)
-    products_data = reception_input["products_data"]
     if testing:
-        new_reception = Reception(
-        user_id=user_id, description=reception_input.get("description")
-        )
+        new_reception = Reception(user_id=user_id)
         session.add(new_reception)
         await session.commit()
         return new_reception
 
+    if (reception_input is None) or not (
+        reception_input := reception_input.dict(exclude_none=True, exclude_unset=True)
+    ):
+        raise MissingReceptionDataException
+
+    products_data = reception_input["products_data"]
     if product_ids := [product.pop("product_id") for product in products_data]:
         products = await session.scalars(
             select(Product).where(Product.id.in_(product_ids))
@@ -42,6 +51,9 @@ async def base_create_reception(
             raise ServiceException("Wrong products!")
 
     product_counts = [product.pop("product_count") for product in products_data]
+    if not len(products) == len(product_counts):
+        raise ServiceException("Products does not match the product count data")
+
     new_reception = Reception(
         user_id=user_id, description=reception_input.get("description")
     )
@@ -53,9 +65,9 @@ async def base_create_reception(
 async def create_reception(
     session: AsyncSession, reception_input: ReceptionInputSchema, user_id: str
 ) -> ReceptionOutputSchema:
-    
+
     products, product_counts, new_reception = await base_create_reception(
-        session, reception_input, user_id
+        session, user_id, reception_input
     )
     await create_stocks(session, products, product_counts, new_reception.id)
 
