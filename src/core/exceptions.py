@@ -84,10 +84,25 @@ class ProductIsAlreadyLegacyException(ServiceException):
 class LegacyProductException(ServiceException):
     def __init__(self) -> None:
         super().__init__(
-            f"This product is treated as a legacy product and no action can be proceeded"
+            f"This product is treated as a legacy product and no action can be proceeded "
         )
 
 
 class CannotRetrieveIssuedStockException(ServiceException):
     def __init__(self) -> None:
-        super().__init__(f"This stock can't be retrieved as it is unavailable!")
+        super().__init__(f"This stock can't be retrieved as it is unavailable! ")
+
+
+class MissingProductDataException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(f"Product id or product count data is not consistent or complete! ")
+
+
+class MissingIssueDataException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(f"Issue create data was not provided! ")
+
+
+class MissingReceptionDataException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(f"Reception create data was not provided! ")

@@ -11,7 +11,7 @@ from src.apps.receptions.schemas import (
 )
 from src.apps.stocks.models import Stock
 from src.apps.stocks.services import create_stocks
-from src.core.exceptions import AlreadyExists, DoesNotExist, IsOccupied
+from src.core.exceptions import AlreadyExists, DoesNotExist, IsOccupied, MissingReceptionDataException
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
@@ -23,16 +23,18 @@ async def base_create_reception(
     session: AsyncSession, reception_input: ReceptionInputSchema, user_id: str,
     testing: bool = False
 ):
-    reception_input = reception_input.dict(exclude_none=True, exclude_unset=True)
-    products_data = reception_input["products_data"]
     if testing:
         new_reception = Reception(
-        user_id=user_id, description=reception_input.get("description")
+        user_id=user_id
         )
         session.add(new_reception)
         await session.commit()
         return new_reception
 
+    if not (reception_input := reception_input.dict(exclude_none=True, exclude_unset=True)):
+        raise MissingReceptionDataException
+    
+    products_data = reception_input["products_data"]
     if product_ids := [product.pop("product_id") for product in products_data]:
         products = await session.scalars(
             select(Product).where(Product.id.in_(product_ids))

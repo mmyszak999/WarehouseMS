@@ -17,6 +17,7 @@ from src.core.exceptions import (
     DoesNotExist,
     IsOccupied,
     ServiceException,
+    MissingProductDataException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -27,10 +28,24 @@ from src.core.utils.time import get_current_time
 
 async def create_stocks(
     session: AsyncSession,
-    products: list[Product],
-    product_counts: list[int],
-    reception_id: str,
-) -> Stock:
+    products: list[Product] = [],
+    product_counts: list[int] = [],
+    reception_id: str = None,
+    testing: bool = False,
+    input_schemas: list[StockInputSchema] = None
+) -> list[Stock]:
+    stock_list = []
+    if testing and input_schemas:
+        for schema in input_schemas:
+            new_stock = Stock(**schema.dict())
+            session.add(new_stock)
+            stock_list.append(new_stock)
+        await session.flush()
+        return stock_list
+    
+    if not (products or product_counts):
+        raise MissingProductDataException
+            
     for (
         product,
         product_count,
@@ -44,8 +59,10 @@ async def create_stocks(
         )
         new_stock = Stock(**stock_input.dict())
         session.add(new_stock)
+        stock_list.append(new_stock)
     await session.flush()
-    return new_stock
+    return stock_list
+    
 
 
 async def get_single_stock(
@@ -107,10 +124,11 @@ async def get_all_available_stocks(
 
 async def issue_stocks(
     session: AsyncSession, stocks: list[Stock], issue_id: str
-) -> None:
+) -> list[Stock]:
     for stock in stocks:
         stock.issue_id = issue_id
         stock.is_issued = True
         stock.updated_at = get_current_time()
         session.add(stock)
     await session.flush()
+    return stocks

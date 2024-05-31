@@ -15,7 +15,7 @@ class StockBaseSchema(BaseModel):
 
 class StockInputSchema(StockBaseSchema):
     product_id: str
-    reception_id: str
+    reception_id: Optional[str]
 
 
 class StockBasicOutputSchema(StockBaseSchema):
