@@ -9,6 +9,7 @@ from src.apps.products.routers.product_routers import product_router
 from src.apps.receptions.routers import reception_router
 from src.apps.stocks.routers import stock_router
 from src.apps.users.routers import user_router
+from src.apps.waiting_rooms.routers import waiting_room_router
 from src.core.exceptions import (
     AccountAlreadyActivatedException,
     AccountAlreadyDeactivatedException,
@@ -29,6 +30,9 @@ from src.core.exceptions import (
     ServiceException,
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
+    TooLittleWaitingRoomSpaceException,
+    TooLittleWaitingRoomWeightException,
+    WaitingRoomIsNotEmptyException
 )
 
 app = FastAPI(
@@ -45,6 +49,7 @@ root_router.include_router(product_router)
 root_router.include_router(reception_router)
 root_router.include_router(stock_router)
 root_router.include_router(issue_router)
+root_router.include_router(waiting_room_router)
 
 app.include_router(root_router)
 
@@ -225,3 +230,31 @@ async def missing_reception_data_exception(
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
+
+
+@app.exception_handler(TooLittleWaitingRoomSpaceException)
+async def too_little_waiting_room_space_exception(
+    request: Request, exception: TooLittleWaitingRoomSpaceException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(TooLittleWaitingRoomWeightException)
+async def too_little_waiting_room_weight_exception(
+    request: Request, exception: TooLittleWaitingRoomWeightException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(WaitingRoomIsNotEmptyException)
+async def waiting_room_is_not_empty_exception(
+    request: Request, exception: WaitingRoomIsNotEmptyException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+

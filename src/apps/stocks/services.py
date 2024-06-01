@@ -88,16 +88,6 @@ async def get_multiple_stocks(
     if not get_issued:
         query = query.filter(Stock.is_issued == False)
 
-    """query = query.join(
-        category_product_association_table,
-        Product.id == category_product_association_table.c.product_id,
-        isouter=True,
-    ).join(
-        Category,
-        category_product_association_table.c.category_id == Category.id,
-        isouter=True,
-    )"""
-
     return await paginate(
         query=query,
         response_schema=schema,

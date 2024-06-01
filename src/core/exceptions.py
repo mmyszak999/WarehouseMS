@@ -1,4 +1,5 @@
 from typing import Any
+from decimal import Decimal
 
 
 class ServiceException(Exception):
@@ -108,3 +109,34 @@ class MissingIssueDataException(ServiceException):
 class MissingReceptionDataException(ServiceException):
     def __init__(self) -> None:
         super().__init__(f"Reception create data was not provided! ")
+
+
+class TooLittleWaitingRoomWeightException(ServiceException):
+    def __init__(self, value1: Decimal, value2: Decimal) -> None:
+        super().__init__(
+            f"The Requested waiting room weight ({value1}) is lower than the weight of "
+            f"all the stocks in the waiting room({value2}) !"
+        )
+
+
+class TooLittleWaitingRoomSpaceException(ServiceException):
+    def __init__(self, value1: Decimal, value2: Decimal) -> None:
+        super().__init__(
+            f"The Requested waiting room stock slots amount ({value1}) is lower than the amount of "
+            f"the stocks in the waiting room({value2}) !"
+        )
+
+
+class TooLittleWaitingRoomSpaceException(ServiceException):
+    def __init__(self, value1: Decimal, value2: Decimal) -> None:
+        super().__init__(
+            f"The Requested waiting room stock slots amount ({value1}) is lower than the amount of "
+            f"the stocks in the waiting room({value2}) !"
+        )
+
+
+class WaitingRoomIsNotEmptyException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"The waiting room with stocks inside cannot be deleted! "
+        )

@@ -16,7 +16,9 @@ from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
     IsOccupied,
-    MissingWaitingRoomDataException,
+    TooLittleWaitingRoomSpaceException,
+    TooLittleWaitingRoomWeightException,
+    WaitingRoomIsNotEmptyException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -53,16 +55,13 @@ async def get_single_waiting_room(
 
 
 async def get_all_waiting_rooms(
-    session: AsyncSession, page_params: PageParams, output_schema: BaseModel = WaitingRoomBasicOutputSchema
-) -> Union[
-    PagedResponseSchema[WaitingRoomBasicOutputSchema],
-    PagedResponseSchema[WaitingRoomOutputSchema]
-    ]:
+    session: AsyncSession, page_params: PageParams
+) -> PagedResponseSchema[WaitingRoomBasicOutputSchema]:
     query = select(WaitingRoom)
 
     return await paginate(
         query=query,
-        response_schema=output_schema,
+        response_schema=WaitingRoomBasicOutputSchema,
         table=WaitingRoom,
         page_params=page_params,
         session=session,
@@ -79,11 +78,15 @@ async def update_single_waiting_room(
 
     if new_max_weight := waiting_room_data.get('max_weight'):
         if new_max_weight < waiting_room_object.current_stock_weight:
-            raise Exception('too less weight')
+            raise TooLittleWaitingRoomWeightException(
+                new_max_weight, waiting_room_object.current_stock_weight
+            )
     
     if new_max_stocks := waiting_room_data.get('max_stocks'):
         if new_max_stocks < waiting_room_object.occupied_slots:
-            raise Exception('too less space for current stocks')
+            raise TooLittleWaitingRoomSpaceException(
+                new_max_stocks, waiting_room_object.occupied_slots
+            )
         
     
     if waiting_room_data:
@@ -94,3 +97,16 @@ async def update_single_waiting_room(
         await session.refresh(waiting_room_object)
 
     return await get_single_waiting_room(session, waiting_room_id=waiting_room_id)
+
+
+async def delete_single_waiting_room(session: AsyncSession, waiting_room_id: str):
+    if not (waiting_room_object := await if_exists(WaitingRoom, "id", waiting_room_id, session)):
+        raise DoesNotExist(WaitingRoom.__name__, "id", waiting_room_id)
+    
+    if waiting_room_object.occupied_slots:
+        raise WaitingRoomIsNotEmptyException
+    statement = delete(WaitingRoom).filter(WaitingRoom.id == waiting_room_id)
+    result = await session.execute(statement)
+    await session.commit()
+
+    return result
