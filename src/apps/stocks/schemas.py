@@ -60,3 +60,7 @@ class StockOutputSchema(StockBasicOutputSchema):
 
 class StockIssueInputSchema(BaseModel):
     id: str
+
+
+class StockWaitingRoomInputSchema(StockIssueInputSchema):
+    pass

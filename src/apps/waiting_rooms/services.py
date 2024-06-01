@@ -1,4 +1,5 @@
 from typing import Union
+from decimal import Decimal
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,13 +13,18 @@ from src.apps.waiting_rooms.schemas import (
     WaitingRoomUpdateSchema
 )
 from src.apps.stocks.models import Stock
+from src.apps.stocks.schemas import StockWaitingRoomInputSchema
 from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
     IsOccupied,
     TooLittleWaitingRoomSpaceException,
     TooLittleWaitingRoomWeightException,
-    WaitingRoomIsNotEmptyException
+    WaitingRoomIsNotEmptyException,
+    CannotMoveIssuedStockException,
+    StockAlreadyInWaitingRoomException,
+    NoAvailableSlotsInWaitingRoomException,
+    NoAvailableWeightInWaitingRoomException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -68,6 +74,19 @@ async def get_all_waiting_rooms(
     )
 
 
+async def manage_waiting_room_state(
+    waiting_room_object: WaitingRoom,
+    max_weight: Decimal,
+    max_stocks: int
+) -> WaitingRoom:
+    avalable_weight = max_weight - waiting_room_object.current_stock_weight
+    available_slots = max_stocks - waiting_room_object.occupied_slots
+    
+    waiting_room_object.available_stock_weight = avalable_weight
+    waiting_room_object.available_slots = available_slots
+    return waiting_room_object
+
+
 async def update_single_waiting_room(
     session: AsyncSession, waiting_room_input: WaitingRoomUpdateSchema, waiting_room_id: int
 ) -> WaitingRoomOutputSchema:
@@ -75,6 +94,7 @@ async def update_single_waiting_room(
         raise DoesNotExist(WaitingRoom.__name__, "id", waiting_room_id)
 
     waiting_room_data = waiting_room_input.dict(exclude_unset=True, exclude_none=True)
+    print(waiting_room_data)
 
     if new_max_weight := waiting_room_data.get('max_weight'):
         if new_max_weight < waiting_room_object.current_stock_weight:
@@ -87,7 +107,11 @@ async def update_single_waiting_room(
             raise TooLittleWaitingRoomSpaceException(
                 new_max_stocks, waiting_room_object.occupied_slots
             )
-        
+    
+    waiting_room_object = await manage_waiting_room_state(
+        waiting_room_object, new_max_weight, new_max_stocks
+    )
+    session.add(waiting_room_object)
     
     if waiting_room_data:
         statement = update(WaitingRoom).filter(WaitingRoom.id == waiting_room_id).values(**waiting_room_data)
@@ -110,3 +134,39 @@ async def delete_single_waiting_room(session: AsyncSession, waiting_room_id: str
     await session.commit()
 
     return result
+
+
+async def add_single_stock_to_waiting_room(
+    session: AsyncSession, waiting_room_id: str, stock_schema: StockWaitingRoomInputSchema
+) -> dict[str, str]:
+    if not (waiting_room_object := await if_exists(WaitingRoom, "id", waiting_room_id, session)):
+        raise DoesNotExist(WaitingRoom.__name__, "id", waiting_room_id)
+    
+    stock_id = stock_schema.id
+    if not (stock_object := await if_exists(Stock, "id", stock_id, session)):
+        raise DoesNotExist(Stock.__name__, "id", stock_id)
+    
+    if stock_object.is_issued:
+        raise CannotMoveIssuedStockException
+    
+    if stock_object.waiting_room_id is not None:
+        raise StockAlreadyInWaitingRoomException
+    
+    if waiting_room_object.occupied_slots == waiting_room_object.max_stocks:
+        raise NoAvailableSlotsInWaitingRoomException
+    
+    if (waiting_room_object.current_stock_weight + stock_object.weight) > waiting_room_object.max_weight:
+        raise NoAvailableWeightInWaitingRoomException
+    
+    
+    waiting_room_object.available_slots -= 1
+    waiting_room_object.occupied_slots += 1
+    waiting_room_object.current_stock_weight += stock_object.weight
+    waiting_room_object.available_stock_weight -= stock_object.weight
+    session.add(waiting_room_object)
+    
+    stock_object.waiting_room_id = waiting_room_object.id
+    session.add(stock_object)
+    await session.commit()
+
+    return {"message": "Stock was successfully add to the waiting room! "}

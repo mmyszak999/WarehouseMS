@@ -32,7 +32,11 @@ from src.core.exceptions import (
     UserCantDeactivateTheirAccountException,
     TooLittleWaitingRoomSpaceException,
     TooLittleWaitingRoomWeightException,
-    WaitingRoomIsNotEmptyException
+    WaitingRoomIsNotEmptyException,
+    CannotMoveIssuedStockException,
+    StockAlreadyInWaitingRoomException,
+    NoAvailableSlotsInWaitingRoomException,
+    NoAvailableWeightInWaitingRoomException
 )
 
 app = FastAPI(
@@ -253,6 +257,42 @@ async def too_little_waiting_room_weight_exception(
 @app.exception_handler(WaitingRoomIsNotEmptyException)
 async def waiting_room_is_not_empty_exception(
     request: Request, exception: WaitingRoomIsNotEmptyException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(CannotMoveIssuedStockException)
+async def cannot_move_issued_stock_exception(
+    request: Request, exception: CannotMoveIssuedStockException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(StockAlreadyInWaitingRoomException)
+async def stock_already_in_waiting_room_exception(
+    request: Request, exception: StockAlreadyInWaitingRoomException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(NoAvailableSlotsInWaitingRoomException)
+async def no_available_slots_in_waiting_room_exception(
+    request: Request, exception: NoAvailableSlotsInWaitingRoomException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(NoAvailableWeightInWaitingRoomException)
+async def no_available_weight_in_waiting_room_exception(
+    request: Request, exception: NoAvailableWeightInWaitingRoomException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}

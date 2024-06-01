@@ -1,5 +1,6 @@
 from fastapi import Depends, Request, Response, status
 from fastapi.routing import APIRouter
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.waiting_rooms.schemas import (
@@ -14,11 +15,13 @@ from src.apps.waiting_rooms.services import (
     get_all_waiting_rooms,
     get_single_waiting_room,
     update_single_waiting_room,
+    add_single_stock_to_waiting_room
 )
+from src.apps.stocks.schemas import StockWaitingRoomInputSchema
 from src.apps.users.models import User
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
-from src.core.permissions import check_if_staff
+from src.core.permissions import check_if_staff, check_if_staff_or_has_permission
 from src.dependencies.get_db import get_db
 from src.dependencies.user import authenticate_user
 
@@ -69,7 +72,6 @@ async def get_waiting_room(
     )
 
 
-
 @waiting_room_router.patch(
     "/{waiting_room_id}",
     response_model=WaitingRoomOutputSchema,
@@ -97,3 +99,20 @@ async def delete_waiting_room(
     await check_if_staff(request_user)
     await delete_single_waiting_room(session, waiting_room_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@waiting_room_router.patch(
+    "/{waiting_room_id}/add-stock",
+    status_code=status.HTTP_201_CREATED,
+)
+async def add_stock_to_waiting_room(
+    waiting_room_id: str,
+    stock_schema: StockWaitingRoomInputSchema,
+    session: AsyncSession = Depends(get_db),
+    request_user: User = Depends(authenticate_user),
+) -> JSONResponse:
+    await check_if_staff_or_has_permission(request_user, "can_move_stocks")
+    result = await add_single_stock_to_waiting_room(
+        session, waiting_room_id, stock_schema
+    )
+    return JSONResponse(result)

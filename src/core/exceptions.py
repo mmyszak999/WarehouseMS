@@ -140,3 +140,28 @@ class WaitingRoomIsNotEmptyException(ServiceException):
         super().__init__(
             f"The waiting room with stocks inside cannot be deleted! "
         )
+
+
+class CannotMoveIssuedStockException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"The requested stock was issued and can't be moved! "
+        )
+    
+class StockAlreadyInWaitingRoomException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"The requested stock was already placed in a waiting room! "
+        )
+
+class NoAvailableSlotsInWaitingRoomException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"This waiting room has no more available slots to store the stocks! "
+        )
+
+class NoAvailableWeightInWaitingRoomException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"This waiting room has no more available weight to store the stocks! "
+        )
