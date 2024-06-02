@@ -12,6 +12,7 @@ from src.apps.stocks.schemas import (
     StockOutputSchema,
 )
 from src.apps.waiting_rooms.models import WaitingRoom
+from src.apps.waiting_rooms.services import manage_waiting_room_state
 from src.core.exceptions import (
     AlreadyExists,
     CannotRetrieveIssuedStockException,
@@ -19,6 +20,7 @@ from src.core.exceptions import (
     IsOccupied,
     MissingProductDataException,
     ServiceException,
+    NoAvailableWaitingRoomsException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -59,9 +61,8 @@ async def create_stocks(
     )
         available_waiting_room = available_waiting_room.scalar()
         if not available_waiting_room:
-            raise Exception(
-                "There is not enough space in the waiting rooms for one of your stock (product+product_count)! "
-            )
+            raise NoAvailableWaitingRoomsException(product.name, product_count, stock_weight)
+        
         stock_input = StockInputSchema(
             weight=stock_weight,
             product_count=product_count,
@@ -72,6 +73,9 @@ async def create_stocks(
         new_stock = Stock(**stock_input.dict())
         session.add(new_stock)
         stock_list.append(new_stock)
+        await manage_waiting_room_state(
+            available_waiting_room, stocks_involved=True, stock_object=new_stock
+        )
     await session.flush()
     return stock_list
 

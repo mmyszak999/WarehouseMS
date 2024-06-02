@@ -126,15 +126,6 @@ class TooLittleWaitingRoomSpaceException(ServiceException):
             f"the stocks in the waiting room({value2}) !"
         )
 
-
-class TooLittleWaitingRoomSpaceException(ServiceException):
-    def __init__(self, value1: Decimal, value2: Decimal) -> None:
-        super().__init__(
-            f"The Requested waiting room stock slots amount ({value1}) is lower than the amount of "
-            f"the stocks in the waiting room({value2}) !"
-        )
-
-
 class WaitingRoomIsNotEmptyException(ServiceException):
     def __init__(self) -> None:
         super().__init__(
@@ -164,4 +155,19 @@ class NoAvailableWeightInWaitingRoomException(ServiceException):
     def __init__(self) -> None:
         super().__init__(
             f"This waiting room has no more available weight to store the stocks! "
+        )
+
+
+class TooLittleWaitingRoomSpaceException(ServiceException):
+    def __init__(self, value1: Decimal, value2: Decimal) -> None:
+        super().__init__(
+            f"The Requested waiting room stock slots amount ({value1}) is lower than the amount of "
+            f"the stocks in the waiting room({value2}) !"
+        )
+
+class NoAvailableWaitingRoomsException(ServiceException):
+    def __init__(self, product_name: Decimal, product_count: int, stock_weight: Decimal) -> None:
+        super().__init__(
+            f"The stock can't be recepted because there is no available waiting rooms for the stock! "
+            f"Stock data: product_name: {product_name}, count: {product_count}, weight: {stock_weight} "
         )

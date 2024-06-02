@@ -80,10 +80,10 @@ async def manage_waiting_room_state(
     max_weight: Decimal = None,
     max_stocks: int = None,
     stocks_involved: bool = False,
-    decrease_values: bool = False,
+    adding_stock_to_waiting_room: bool = True,
     stock_object: Stock = None
 ) -> WaitingRoom:
-    multiplier = -1 if decrease_values else 1
+    multiplier = 1 if adding_stock_to_waiting_room else -1
     if stocks_involved:
         if stock_object is None:
             raise ServiceException("Stock object was not provided! ")
@@ -141,8 +141,8 @@ async def delete_single_waiting_room(session: AsyncSession, waiting_room_id: str
     if not (waiting_room_object := await if_exists(WaitingRoom, "id", waiting_room_id, session)):
         raise DoesNotExist(WaitingRoom.__name__, "id", waiting_room_id)
     
-    if waiting_room_object.occupied_slots:
-        raise WaitingRoomIsNotEmptyException
+    """if waiting_room_object.stocks:
+        raise WaitingRoomIsNotEmptyException"""
     statement = delete(WaitingRoom).filter(WaitingRoom.id == waiting_room_id)
     result = await session.execute(statement)
     await session.commit()
@@ -163,7 +163,7 @@ async def add_single_stock_to_waiting_room(
     if stock_object.is_issued:
         raise CannotMoveIssuedStockException
     
-    if stock_object.waiting_room_id is not None:
+    if stock_object.waiting_room_id == waiting_room_id:
         raise StockAlreadyInWaitingRoomException
     
     if waiting_room_object.occupied_slots == waiting_room_object.max_stocks:
@@ -173,6 +173,11 @@ async def add_single_stock_to_waiting_room(
         raise NoAvailableWeightInWaitingRoomException
     
     
+    old_waiting_room_object = stock_object.waiting_room
+    old_waiting_room_object = await manage_waiting_room_state(
+       old_waiting_room_object, stocks_involved=True, adding_stock_to_waiting_room=False, stock_object=stock_object
+    )
+    session.add(old_waiting_room_object)
     waiting_room_object = await manage_waiting_room_state(
         waiting_room_object, stocks_involved=True, stock_object=stock_object
     )

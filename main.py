@@ -36,7 +36,8 @@ from src.core.exceptions import (
     CannotMoveIssuedStockException,
     StockAlreadyInWaitingRoomException,
     NoAvailableSlotsInWaitingRoomException,
-    NoAvailableWeightInWaitingRoomException
+    NoAvailableWeightInWaitingRoomException,
+    NoAvailableWaitingRoomsException
 )
 
 app = FastAPI(
@@ -293,6 +294,15 @@ async def no_available_slots_in_waiting_room_exception(
 @app.exception_handler(NoAvailableWeightInWaitingRoomException)
 async def no_available_weight_in_waiting_room_exception(
     request: Request, exception: NoAvailableWeightInWaitingRoomException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(NoAvailableWaitingRoomsException)
+async def no_available_waiting_rooms_exception(
+    request: Request, exception: NoAvailableWaitingRoomsException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
