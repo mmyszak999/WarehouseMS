@@ -16,6 +16,7 @@ from src.core.exceptions import (
     DoesNotExist,
     IsOccupied,
     MissingIssueDataException,
+    ServiceException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
