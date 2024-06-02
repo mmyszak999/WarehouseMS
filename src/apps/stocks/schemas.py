@@ -28,6 +28,7 @@ class StockBaseSchema(BaseModel):
 class StockInputSchema(StockBaseSchema):
     product_id: str
     reception_id: Optional[str]
+    waiting_room_id: Optional[str]
 
 
 class StockWaitingRoomBasicOutputSchema(BaseModel):

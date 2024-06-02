@@ -24,7 +24,8 @@ from src.core.exceptions import (
     CannotMoveIssuedStockException,
     StockAlreadyInWaitingRoomException,
     NoAvailableSlotsInWaitingRoomException,
-    NoAvailableWeightInWaitingRoomException
+    NoAvailableWeightInWaitingRoomException,
+    ServiceException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -76,14 +77,28 @@ async def get_all_waiting_rooms(
 
 async def manage_waiting_room_state(
     waiting_room_object: WaitingRoom,
-    max_weight: Decimal,
-    max_stocks: int
+    max_weight: Decimal = None,
+    max_stocks: int = None,
+    stocks_involved: bool = False,
+    decrease_values: bool = False,
+    stock_object: Stock = None
 ) -> WaitingRoom:
-    avalable_weight = max_weight - waiting_room_object.current_stock_weight
-    available_slots = max_stocks - waiting_room_object.occupied_slots
-    
-    waiting_room_object.available_stock_weight = avalable_weight
-    waiting_room_object.available_slots = available_slots
+    multiplier = -1 if decrease_values else 1
+    if stocks_involved:
+        if stock_object is None:
+            raise ServiceException("Stock object was not provided! ")
+        waiting_room_object.available_slots -= multiplier
+        waiting_room_object.occupied_slots += multiplier
+        waiting_room_object.current_stock_weight += (multiplier * stock_object.weight)
+        waiting_room_object.available_stock_weight -= (multiplier * stock_object.weight)
+    else:
+        if max_weight is not None:
+            new_available_weight = max_weight - waiting_room_object.current_stock_weight
+            waiting_room_object.available_stock_weight = new_available_weight
+        if max_stocks is not None:
+            new_available_slots = max_stocks - waiting_room_object.occupied_slots
+            waiting_room_object.available_slots = new_available_slots
+        
     return waiting_room_object
 
 
@@ -94,7 +109,6 @@ async def update_single_waiting_room(
         raise DoesNotExist(WaitingRoom.__name__, "id", waiting_room_id)
 
     waiting_room_data = waiting_room_input.dict(exclude_unset=True, exclude_none=True)
-    print(waiting_room_data)
 
     if new_max_weight := waiting_room_data.get('max_weight'):
         if new_max_weight < waiting_room_object.current_stock_weight:
@@ -159,10 +173,9 @@ async def add_single_stock_to_waiting_room(
         raise NoAvailableWeightInWaitingRoomException
     
     
-    waiting_room_object.available_slots -= 1
-    waiting_room_object.occupied_slots += 1
-    waiting_room_object.current_stock_weight += stock_object.weight
-    waiting_room_object.available_stock_weight -= stock_object.weight
+    waiting_room_object = await manage_waiting_room_state(
+        waiting_room_object, stocks_involved=True, stock_object=stock_object
+    )
     session.add(waiting_room_object)
     
     stock_object.waiting_room_id = waiting_room_object.id

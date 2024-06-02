@@ -11,6 +11,7 @@ from src.apps.stocks.schemas import (
     StockInputSchema,
     StockOutputSchema,
 )
+from src.apps.waiting_rooms.models import WaitingRoom
 from src.core.exceptions import (
     AlreadyExists,
     CannotRetrieveIssuedStockException,
@@ -50,12 +51,23 @@ async def create_stocks(
         product,
         product_count,
     ) in zip(products, product_counts):
-        weight = product_count * product.weight
+        stock_weight = product_count * product.weight
+        available_waiting_room = await session.execute(
+        select(WaitingRoom).filter(
+            WaitingRoom.available_slots >= 1,
+            WaitingRoom.available_stock_weight >= stock_weight).limit(1)
+    )
+        available_waiting_room = available_waiting_room.scalar()
+        if not available_waiting_room:
+            raise Exception(
+                "There is not enough space in the waiting rooms for one of your stock (product+product_count)! "
+            )
         stock_input = StockInputSchema(
-            weight=weight,
+            weight=stock_weight,
             product_count=product_count,
             product_id=product.id,
             reception_id=reception_id,
+            waiting_room_id=available_waiting_room.id
         )
         new_stock = Stock(**stock_input.dict())
         session.add(new_stock)
