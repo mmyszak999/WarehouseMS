@@ -1,5 +1,5 @@
-from typing import Any
 from decimal import Decimal
+from typing import Any
 
 
 class ServiceException(Exception):
@@ -126,30 +126,28 @@ class TooLittleWaitingRoomSpaceException(ServiceException):
             f"the stocks in the waiting room({value2}) !"
         )
 
+
 class WaitingRoomIsNotEmptyException(ServiceException):
     def __init__(self) -> None:
-        super().__init__(
-            f"The waiting room with stocks inside cannot be deleted! "
-        )
+        super().__init__(f"The waiting room with stocks inside cannot be deleted! ")
 
 
 class CannotMoveIssuedStockException(ServiceException):
     def __init__(self) -> None:
-        super().__init__(
-            f"The requested stock was issued and can't be moved! "
-        )
-    
+        super().__init__(f"The requested stock was issued and can't be moved! ")
+
+
 class StockAlreadyInWaitingRoomException(ServiceException):
     def __init__(self) -> None:
-        super().__init__(
-            f"The requested stock was already placed in a waiting room! "
-        )
+        super().__init__(f"The requested stock was already placed in a waiting room! ")
+
 
 class NoAvailableSlotsInWaitingRoomException(ServiceException):
     def __init__(self) -> None:
         super().__init__(
             f"This waiting room has no more available slots to store the stocks! "
         )
+
 
 class NoAvailableWeightInWaitingRoomException(ServiceException):
     def __init__(self) -> None:
@@ -165,8 +163,11 @@ class TooLittleWaitingRoomSpaceException(ServiceException):
             f"the stocks in the waiting room({value2}) !"
         )
 
+
 class NoAvailableWaitingRoomsException(ServiceException):
-    def __init__(self, product_name: Decimal, product_count: int, stock_weight: Decimal) -> None:
+    def __init__(
+        self, product_name: Decimal, product_count: int, stock_weight: Decimal
+    ) -> None:
         super().__init__(
             f"The stock can't be recepted because there is no available waiting rooms for the stock! "
             f"Stock data: product_name: {product_name}, count: {product_count}, weight: {stock_weight} "

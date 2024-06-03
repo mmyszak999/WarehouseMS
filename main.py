@@ -17,6 +17,7 @@ from src.core.exceptions import (
     AlreadyExists,
     AuthenticationException,
     AuthorizationException,
+    CannotMoveIssuedStockException,
     CannotRetrieveIssuedStockException,
     DoesNotExist,
     IsOccupied,
@@ -24,20 +25,19 @@ from src.core.exceptions import (
     MissingIssueDataException,
     MissingProductDataException,
     MissingReceptionDataException,
+    NoAvailableSlotsInWaitingRoomException,
+    NoAvailableWaitingRoomsException,
+    NoAvailableWeightInWaitingRoomException,
     PasswordAlreadySetException,
     PasswordNotSetException,
     ProductIsAlreadyLegacyException,
     ServiceException,
-    UserCantActivateTheirAccountException,
-    UserCantDeactivateTheirAccountException,
+    StockAlreadyInWaitingRoomException,
     TooLittleWaitingRoomSpaceException,
     TooLittleWaitingRoomWeightException,
+    UserCantActivateTheirAccountException,
+    UserCantDeactivateTheirAccountException,
     WaitingRoomIsNotEmptyException,
-    CannotMoveIssuedStockException,
-    StockAlreadyInWaitingRoomException,
-    NoAvailableSlotsInWaitingRoomException,
-    NoAvailableWeightInWaitingRoomException,
-    NoAvailableWaitingRoomsException
 )
 
 app = FastAPI(
@@ -307,4 +307,3 @@ async def no_available_waiting_rooms_exception(
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
-

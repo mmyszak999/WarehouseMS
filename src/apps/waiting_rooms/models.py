@@ -18,10 +18,11 @@ from src.database.db_connection import Base
 
 
 def default_available_slots(context):
-    return context.get_current_parameters()['max_stocks']
+    return context.get_current_parameters()["max_stocks"]
+
 
 def default_available_stock_weight(context):
-    return context.get_current_parameters()['max_weight']
+    return context.get_current_parameters()["max_weight"]
 
 
 class WaitingRoom(Base):
@@ -34,5 +35,7 @@ class WaitingRoom(Base):
     occupied_slots = Column(Integer, nullable=False, default=0)
     available_slots = Column(Integer, nullable=False, default=default_available_slots)
     current_stock_weight = Column(DECIMAL, nullable=False, default=0)
-    available_stock_weight = Column(DECIMAL, nullable=False, default=default_available_stock_weight)
+    available_stock_weight = Column(
+        DECIMAL, nullable=False, default=default_available_stock_weight
+    )
     stocks = relationship("Stock", back_populates="waiting_room", lazy="joined")

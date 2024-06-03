@@ -1,24 +1,24 @@
 from fastapi import Depends, Request, Response, status
-from fastapi.routing import APIRouter
 from fastapi.responses import JSONResponse
+from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.apps.stocks.schemas import StockWaitingRoomInputSchema
+from src.apps.users.models import User
 from src.apps.waiting_rooms.schemas import (
+    WaitingRoomBasicOutputSchema,
     WaitingRoomInputSchema,
     WaitingRoomOutputSchema,
     WaitingRoomUpdateSchema,
-    WaitingRoomBasicOutputSchema
 )
 from src.apps.waiting_rooms.services import (
+    add_single_stock_to_waiting_room,
     create_waiting_room,
     delete_single_waiting_room,
     get_all_waiting_rooms,
     get_single_waiting_room,
     update_single_waiting_room,
-    add_single_stock_to_waiting_room
 )
-from src.apps.stocks.schemas import StockWaitingRoomInputSchema
-from src.apps.users.models import User
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.permissions import check_if_staff, check_if_staff_or_has_permission
@@ -65,7 +65,7 @@ async def get_waiting_room(
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
 ) -> WaitingRoomOutputSchema:
-    if (await check_if_staff(request_user)):
+    if await check_if_staff(request_user):
         return await get_single_waiting_room(session, waiting_room_id)
     return await get_single_waiting_room(
         session, waiting_room_id, output_schema=WaitingRoomBasicOutputSchema
@@ -84,7 +84,9 @@ async def update_waiting_room(
     request_user: User = Depends(authenticate_user),
 ) -> WaitingRoomOutputSchema:
     await check_if_staff(request_user)
-    return await update_single_waiting_room(session, waiting_room_input, waiting_room_id)
+    return await update_single_waiting_room(
+        session, waiting_room_input, waiting_room_id
+    )
 
 
 @waiting_room_router.delete(

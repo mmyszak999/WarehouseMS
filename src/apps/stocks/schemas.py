@@ -11,13 +11,13 @@ from src.apps.receptions.schemas import ReceptionBasicOutputSchema
 class StockBaseSchema(BaseModel):
     weight: Decimal
     product_count: int
-    
+
     @validator("weight")
     def validate_weight(cls, weight: int) -> int:
         if weight and (weight < 0):
             raise ValueError("Stocks weight must be positive! ")
         return weight
-    
+
     @validator("product_count")
     def validate_product_count(cls, product_count: int) -> int:
         if product_count and (product_count < 0):
@@ -34,12 +34,12 @@ class StockInputSchema(StockBaseSchema):
 class StockWaitingRoomBasicOutputSchema(BaseModel):
     max_stocks: int
     max_weight: Decimal
-    id: str  
-    
+    id: str
+
     class Config:
         orm_mode = True
-        
-        
+
+
 class StockBasicOutputSchema(StockBaseSchema):
     id: str
     product: ProductBasicOutputSchema
@@ -48,7 +48,6 @@ class StockBasicOutputSchema(StockBaseSchema):
 
     class Config:
         orm_mode = True
-        
 
 
 class StockOutputSchema(StockBasicOutputSchema):
