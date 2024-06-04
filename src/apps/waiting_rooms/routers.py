@@ -1,3 +1,5 @@
+from typing import Union
+
 from fastapi import Depends, Request, Response, status
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
@@ -64,7 +66,7 @@ async def get_waiting_room(
     waiting_room_id: str,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
-) -> WaitingRoomOutputSchema:
+) -> Union[WaitingRoomOutputSchema, WaitingRoomBasicOutputSchema]:
     if await check_if_staff(request_user):
         return await get_single_waiting_room(session, waiting_room_id)
     return await get_single_waiting_room(

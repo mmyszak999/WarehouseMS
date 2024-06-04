@@ -53,7 +53,7 @@ async def get_single_waiting_room(
     session: AsyncSession,
     waiting_room_id: int,
     output_schema: BaseModel = WaitingRoomOutputSchema,
-) -> WaitingRoomOutputSchema:
+) -> Union[WaitingRoomOutputSchema, WaitingRoomBasicOutputSchema]:
     if not (
         waiting_room_object := await if_exists(
             WaitingRoom, "id", waiting_room_id, session

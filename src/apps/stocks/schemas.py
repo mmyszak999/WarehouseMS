@@ -15,13 +15,13 @@ class StockBaseSchema(BaseModel):
     @validator("weight")
     def validate_weight(cls, weight: int) -> int:
         if weight and (weight < 0):
-            raise ValueError("Stocks weight must be positive! ")
+            raise ValueError("Stock weight must be positive! ")
         return weight
 
     @validator("product_count")
     def validate_product_count(cls, product_count: int) -> int:
         if product_count and (product_count < 0):
-            raise ValueError("Product_count must be positive! ")
+            raise ValueError("Product count must be positive! ")
         return product_count
 
 
