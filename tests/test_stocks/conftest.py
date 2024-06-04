@@ -12,8 +12,9 @@ from src.apps.receptions.schemas import (
     ReceptionProductInputSchema,
 )
 from src.apps.receptions.services import create_reception, get_all_receptions
-from src.apps.stocks.schemas import StockOutputSchema
+from src.apps.stocks.schemas import StockOutputSchema, StockIssueInputSchema
 from src.apps.stocks.services import get_all_stocks
+from src.apps.issues.services import create_issue
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
 from src.core.factory.reception_factory import (
@@ -21,6 +22,7 @@ from src.core.factory.reception_factory import (
     ReceptionProductInputSchemaFactory,
 )
 from src.core.factory.stock_factory import StockInputSchemaFactory
+from src.core.factory.issue_factory import IssueInputSchemaFactory
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
@@ -50,5 +52,12 @@ async def db_stocks(
             ]
         )
         await create_reception(async_session, reception_input, db_staff_user.id)
-
+    stocks = await get_all_stocks(async_session, PageParams())
+    
+    issue_input = IssueInputSchemaFactory().generate(
+        stock_ids=[StockIssueInputSchema(id=stocks.results[2].id)]
+    )
+    await create_issue(async_session, issue_input, db_staff_user.id)
+    await async_session.flush()
+    
     return await get_all_stocks(async_session, PageParams())

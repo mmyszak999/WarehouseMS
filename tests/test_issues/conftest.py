@@ -20,7 +20,6 @@ from src.core.utils.orm import if_exists
 from tests.test_products.conftest import db_categories, db_products
 from tests.test_stocks.conftest import db_stocks
 from tests.test_waiting_rooms.conftest import db_waiting_rooms
-
 from tests.test_users.conftest import (
     auth_headers,
     create_superuser,
@@ -37,8 +36,4 @@ async def db_issues(
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_staff_user: UserOutputSchema,
 ) -> PagedResponseSchema[IssueOutputSchema]:
-    issue_input = IssueInputSchemaFactory().generate(
-        stock_ids=[StockIssueInputSchema(id=db_stocks.results[2].id)]
-    )
-    await create_issue(async_session, issue_input, db_staff_user.id)
     return await get_all_issues(async_session, PageParams())

@@ -8,7 +8,6 @@ from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.receptions.schemas import ReceptionOutputSchema
 from src.apps.stocks.schemas import StockOutputSchema
 from src.apps.users.schemas import UserOutputSchema
-
 from src.core.pagination.schemas import PagedResponseSchema
 from tests.test_issues.conftest import db_issues
 from tests.test_receptions.conftest import db_receptions
@@ -74,13 +73,13 @@ async def test_only_staff_user_can_get_all_stocks(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
-    db_products: PagedResponseSchema[ProductOutputSchema],
     status_code: int,
+    db_products: PagedResponseSchema[ProductOutputSchema],
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
-
+    print(db_stocks.results)
     response = await async_client.get("stocks/all", headers=user_headers)
 
     assert response.status_code == status_code
