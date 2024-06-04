@@ -17,8 +17,8 @@ class WaitingRoomInputSchemaFactory(SchemaFactory):
         max_weight: Decimal = None
     ):
         return self.schema_class(
-            max_stocks=max_stocks or set_waiting_room_stocks,
-            max_weight=max_weight or set_waiting_room_weight
+            max_stocks=max_stocks or set_waiting_room_stocks(),
+            max_weight=max_weight or set_waiting_room_weight()
         )
 
 

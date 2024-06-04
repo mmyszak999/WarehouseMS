@@ -6,6 +6,7 @@ from src.apps.issues.services import base_create_issue
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.receptions.schemas import ReceptionOutputSchema
 from src.apps.stocks.schemas import StockOutputSchema
+from tests.test_waiting_rooms.conftest import db_waiting_rooms
 from src.apps.stocks.services import (
     create_stocks,
     get_all_available_stocks,

@@ -15,6 +15,7 @@ from src.apps.receptions.services import create_reception, get_all_receptions
 from src.apps.stocks.schemas import StockOutputSchema
 from src.apps.stocks.services import get_all_stocks
 from src.apps.users.schemas import UserOutputSchema
+from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
 from src.core.factory.reception_factory import (
     ReceptionInputSchemaFactory,
     ReceptionProductInputSchemaFactory,
@@ -24,6 +25,7 @@ from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from tests.test_products.conftest import db_categories, db_products
+from tests.test_waiting_rooms.conftest import db_waiting_rooms
 from tests.test_users.conftest import (
     auth_headers,
     create_superuser,
@@ -37,7 +39,8 @@ from tests.test_users.conftest import (
 @pytest_asyncio.fixture
 async def db_stocks(
     async_session: AsyncSession,
-    db_products: list[ProductOutputSchema],
+    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
+    db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ) -> PagedResponseSchema[StockOutputSchema]:
     for product in db_products.results:
