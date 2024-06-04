@@ -1,3 +1,4 @@
+from decimal import Decimal
 from typing import Any
 
 
@@ -108,3 +109,66 @@ class MissingIssueDataException(ServiceException):
 class MissingReceptionDataException(ServiceException):
     def __init__(self) -> None:
         super().__init__(f"Reception create data was not provided! ")
+
+
+class TooLittleWaitingRoomWeightException(ServiceException):
+    def __init__(self, value1: Decimal, value2: Decimal) -> None:
+        super().__init__(
+            f"The Requested waiting room weight ({value1}) is lower than the weight of "
+            f"all the stocks in the waiting room({value2}) !"
+        )
+
+
+class TooLittleWaitingRoomSpaceException(ServiceException):
+    def __init__(self, value1: Decimal, value2: Decimal) -> None:
+        super().__init__(
+            f"The Requested waiting room stock slots amount ({value1}) is lower than the amount of "
+            f"the stocks in the waiting room({value2}) !"
+        )
+
+
+class WaitingRoomIsNotEmptyException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(f"The waiting room with stocks inside cannot be deleted! ")
+
+
+class CannotMoveIssuedStockException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(f"The requested stock was issued and can't be moved! ")
+
+
+class StockAlreadyInWaitingRoomException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(f"The requested stock was already placed in a waiting room! ")
+
+
+class NoAvailableSlotsInWaitingRoomException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"This waiting room has no more available slots to store the stocks! "
+        )
+
+
+class NoAvailableWeightInWaitingRoomException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"This waiting room has no more available weight to store the stocks! "
+        )
+
+
+class TooLittleWaitingRoomSpaceException(ServiceException):
+    def __init__(self, value1: Decimal, value2: Decimal) -> None:
+        super().__init__(
+            f"The Requested waiting room stock slots amount ({value1}) is lower than the amount of "
+            f"the stocks in the waiting room({value2}) !"
+        )
+
+
+class NoAvailableWaitingRoomsException(ServiceException):
+    def __init__(
+        self, product_name: Decimal, product_count: int, stock_weight: Decimal
+    ) -> None:
+        super().__init__(
+            f"The stock can't be recepted because there is no available waiting rooms for the stock! "
+            f"Stock data: product_name: {product_name}, count: {product_count}, weight: {stock_weight} "
+        )

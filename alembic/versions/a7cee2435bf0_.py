@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 2f0fc91806bd
+Revision ID: a7cee2435bf0
 Revises: 
-Create Date: 2024-05-31 11:11:41.811701
+Create Date: 2024-06-04 05:44:30.171154
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '2f0fc91806bd'
+revision = 'a7cee2435bf0'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -56,6 +56,17 @@ def upgrade() -> None:
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('id')
     )
+    op.create_table('waiting_room',
+    sa.Column('id', sa.String(), nullable=False),
+    sa.Column('max_stocks', sa.Integer(), nullable=False),
+    sa.Column('max_weight', sa.DECIMAL(), nullable=False),
+    sa.Column('occupied_slots', sa.Integer(), nullable=False),
+    sa.Column('available_slots', sa.Integer(), nullable=False),
+    sa.Column('current_stock_weight', sa.DECIMAL(), nullable=False),
+    sa.Column('available_stock_weight', sa.DECIMAL(), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('id')
+    )
     op.create_table('category_product_association_table',
     sa.Column('category_id', sa.String(), nullable=True),
     sa.Column('product_id', sa.String(), nullable=False),
@@ -86,12 +97,14 @@ def upgrade() -> None:
     sa.Column('product_id', sa.String(), nullable=True),
     sa.Column('reception_id', sa.String(), nullable=True),
     sa.Column('issue_id', sa.String(), nullable=True),
+    sa.Column('waiting_room_id', sa.String(), nullable=True),
     sa.Column('product_count', sa.Integer(), nullable=False),
     sa.Column('is_issued', sa.Boolean(), server_default='false', nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['issue_id'], ['issue.id'], onupdate='cascade', ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['product_id'], ['product.id'], onupdate='cascade', ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['reception_id'], ['reception.id'], onupdate='cascade', ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['waiting_room_id'], ['waiting_room.id'], onupdate='cascade', ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id')
     )
@@ -104,6 +117,7 @@ def downgrade() -> None:
     op.drop_table('reception')
     op.drop_table('issue')
     op.drop_table('category_product_association_table')
+    op.drop_table('waiting_room')
     op.drop_table('user')
     op.drop_table('product')
     op.drop_table('category')

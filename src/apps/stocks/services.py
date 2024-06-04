@@ -11,12 +11,15 @@ from src.apps.stocks.schemas import (
     StockInputSchema,
     StockOutputSchema,
 )
+from src.apps.waiting_rooms.models import WaitingRoom
+from src.apps.waiting_rooms.services import manage_waiting_room_state
 from src.core.exceptions import (
     AlreadyExists,
     CannotRetrieveIssuedStockException,
     DoesNotExist,
     IsOccupied,
     MissingProductDataException,
+    NoAvailableWaitingRoomsException,
     ServiceException,
 )
 from src.core.pagination.models import PageParams
@@ -50,16 +53,35 @@ async def create_stocks(
         product,
         product_count,
     ) in zip(products, product_counts):
-        weight = product_count * product.weight
+        stock_weight = product_count * product.weight
+        available_waiting_room = await session.execute(
+            select(WaitingRoom)
+            .filter(
+                WaitingRoom.available_slots >= 1,
+                WaitingRoom.available_stock_weight >= stock_weight,
+            )
+            .limit(1)
+        )
+        available_waiting_room = available_waiting_room.scalar()
+        if not available_waiting_room:
+            raise NoAvailableWaitingRoomsException(
+                product.name, product_count, stock_weight
+            )
+
         stock_input = StockInputSchema(
-            weight=weight,
+            weight=stock_weight,
             product_count=product_count,
             product_id=product.id,
             reception_id=reception_id,
+            waiting_room_id=available_waiting_room.id,
         )
         new_stock = Stock(**stock_input.dict())
         session.add(new_stock)
         stock_list.append(new_stock)
+        await manage_waiting_room_state(
+            available_waiting_room, stocks_involved=True, stock_object=new_stock
+        )
+        session.add(available_waiting_room)
     await session.flush()
     return stock_list
 
@@ -87,16 +109,6 @@ async def get_multiple_stocks(
     query = select(Stock)
     if not get_issued:
         query = query.filter(Stock.is_issued == False)
-
-    """query = query.join(
-        category_product_association_table,
-        Product.id == category_product_association_table.c.product_id,
-        isouter=True,
-    ).join(
-        Category,
-        category_product_association_table.c.category_id == Category.id,
-        isouter=True,
-    )"""
 
     return await paginate(
         query=query,
@@ -128,7 +140,18 @@ async def issue_stocks(
         stock.issue_id = issue_id
         stock.is_issued = True
         stock.updated_at = get_current_time()
-        session.add(stock)
-        await session.refresh(stock)
+        if stock.waiting_room:
+            stock_waiting_room = await if_exists(
+                WaitingRoom, "id", stock.waiting_room_id, session
+            )
+            await manage_waiting_room_state(
+                stock_waiting_room,
+                stocks_involved=True,
+                adding_stock_to_waiting_room=False,
+                stock_object=stock,
+            )
+            session.add(stock_waiting_room)
+            stock.waiting_room_id = None
+            session.add(stock)
     await session.flush()
     return stocks
