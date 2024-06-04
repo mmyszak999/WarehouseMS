@@ -192,7 +192,7 @@ async def add_single_stock_to_waiting_room(
     if not waiting_room_object.available_slots:
         raise NoAvailableSlotsInWaitingRoomException
 
-    if available_stock_weight < stock_object.weight:
+    if waiting_room_object.available_stock_weight < stock_object.weight:
         raise NoAvailableWeightInWaitingRoomException
 
     old_waiting_room_object = stock_object.waiting_room
