@@ -82,8 +82,8 @@ async def create_stocks(
             available_waiting_room, stocks_involved=True, stock_object=new_stock
         )
         session.add(available_waiting_room)
-        await session.flush()
-        await session.refresh(new_stock)
+        await session.refresh(available_waiting_room)
+    await session.flush()
     return stock_list
 
 
@@ -154,6 +154,7 @@ async def issue_stocks(
             stock.waiting_room_id = None
             session.add(stock)
             session.add(stock_waiting_room)
-            await session.flush()
             await session.refresh(stock)
+            await session.refresh(stock_waiting_room)
+        await session.flush()
     return stocks

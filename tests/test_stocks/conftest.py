@@ -17,6 +17,8 @@ from src.apps.stocks.services import get_all_stocks
 from src.apps.issues.services import create_issue
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
+from src.apps.waiting_rooms.services import create_waiting_room, get_all_waiting_rooms
+from src.core.factory.waiting_room_factory import WaitingRoomInputSchemaFactory
 from src.core.factory.reception_factory import (
     ReceptionInputSchemaFactory,
     ReceptionProductInputSchemaFactory,
@@ -27,7 +29,6 @@ from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from tests.test_products.conftest import db_categories, db_products
-from tests.test_waiting_rooms.conftest import db_waiting_rooms
 from tests.test_users.conftest import (
     auth_headers,
     create_superuser,
@@ -37,14 +38,19 @@ from tests.test_users.conftest import (
     superuser_auth_headers,
 )
 
+DB_WAITING_ROOMS_SCHEMAS = [WaitingRoomInputSchemaFactory().generate() for _ in range(3)]
+
 
 @pytest_asyncio.fixture
 async def db_stocks(
     async_session: AsyncSession,
-    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ) -> PagedResponseSchema[StockOutputSchema]:
+    [
+        await create_waiting_room(async_session, waiting_room) for waiting_room in DB_WAITING_ROOMS_SCHEMAS
+    ]
+    await async_session.flush()
     for product in db_products.results:
         reception_input = ReceptionInputSchemaFactory().generate(
             products_data=[

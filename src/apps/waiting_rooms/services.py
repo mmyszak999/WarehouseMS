@@ -212,6 +212,7 @@ async def add_single_stock_to_waiting_room(
 
     stock_object.waiting_room_id = waiting_room_object.id
     session.add(stock_object)
+    await session.refresh(waiting_room_object)
     await session.commit()
 
     return {"message": "Stock was successfully add to the waiting room! "}

@@ -79,7 +79,6 @@ async def test_only_staff_user_can_get_all_stocks(
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
-    print(db_stocks.results)
     response = await async_client.get("stocks/all", headers=user_headers)
 
     assert response.status_code == status_code
