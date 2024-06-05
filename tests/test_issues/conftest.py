@@ -33,7 +33,6 @@ from tests.test_users.conftest import (
 @pytest_asyncio.fixture
 async def db_issues(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_staff_user: UserOutputSchema,
+    db_stocks: PagedResponseSchema[StockOutputSchema]
 ) -> PagedResponseSchema[IssueOutputSchema]:
     return await get_all_issues(async_session, PageParams())

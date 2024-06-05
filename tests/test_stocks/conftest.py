@@ -47,7 +47,7 @@ async def db_stocks(
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ) -> PagedResponseSchema[StockOutputSchema]:
-    [
+    waiting_rooms = [
         await create_waiting_room(async_session, waiting_room) for waiting_room in DB_WAITING_ROOMS_SCHEMAS
     ]
     await async_session.flush()
@@ -58,8 +58,8 @@ async def db_stocks(
             ]
         )
         await create_reception(async_session, reception_input, db_staff_user.id)
+        
     stocks = await get_all_stocks(async_session, PageParams())
-    
     issue_input = IssueInputSchemaFactory().generate(
         stock_ids=[StockIssueInputSchema(id=stocks.results[2].id)]
     )

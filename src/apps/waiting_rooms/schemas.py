@@ -54,15 +54,17 @@ class WaitingRoomUpdateSchema(BaseModel):
 class WaitingRoomBasicOutputSchema(WaitingRoomBaseSchema):
     id: str
     stocks: list[StockBasicOutputSchema]
+    occupied_slots: int
+    current_stock_weight: Decimal
+    available_slots: int
+    available_stock_weight: Decimal
 
     class Config:
         orm_mode = True
 
 
 class WaitingRoomOutputSchema(WaitingRoomBasicOutputSchema):
-    occupied_slots: int
     available_slots: int
-    current_stock_weight: Decimal
     available_stock_weight: Decimal
 
     class Config:

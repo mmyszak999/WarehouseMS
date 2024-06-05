@@ -78,11 +78,10 @@ async def create_stocks(
         new_stock = Stock(**stock_input.dict())
         session.add(new_stock)
         stock_list.append(new_stock)
-        await manage_waiting_room_state(
+        available_waiting_room = await manage_waiting_room_state(
             available_waiting_room, stocks_involved=True, stock_object=new_stock
         )
         session.add(available_waiting_room)
-        await session.refresh(available_waiting_room)
     await session.flush()
     return stock_list
 
@@ -138,23 +137,21 @@ async def issue_stocks(
     session: AsyncSession, stocks: list[Stock], issue_id: str
 ) -> list[Stock]:
     for stock in stocks:
-        stock.issue_id = issue_id
-        stock.is_issued = True
-        stock.updated_at = get_current_time()
         if stock.waiting_room:
             stock_waiting_room = await if_exists(
                 WaitingRoom, "id", stock.waiting_room_id, session
             )
-            await manage_waiting_room_state(
-                stock_waiting_room,
+            stock_waiting_room = await manage_waiting_room_state(
+                waiting_room_object=stock_waiting_room,
                 stocks_involved=True,
                 adding_stock_to_waiting_room=False,
                 stock_object=stock,
             )
-            stock.waiting_room_id = None
-            session.add(stock)
             session.add(stock_waiting_room)
-            await session.refresh(stock)
-            await session.refresh(stock_waiting_room)
-        await session.flush()
+            stock.issue_id = issue_id
+            stock.is_issued = True
+            stock.updated_at = get_current_time()
+            stock.waiting_room_id = None
+            stock.waiting_room = None
+            session.add(stock)
     return stocks
