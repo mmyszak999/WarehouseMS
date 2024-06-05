@@ -34,7 +34,7 @@ from src.core.utils.orm import if_exists
 
 
 async def create_waiting_room(
-    session: AsyncSession, waiting_room_input: WaitingRoomInputSchema
+    session: AsyncSession, waiting_room_input: WaitingRoomInputSchema, testing: bool=True
 ) -> WaitingRoomOutputSchema:
     waiting_room_input = waiting_room_input.dict()
     new_waiting_room = WaitingRoom(
@@ -43,6 +43,9 @@ async def create_waiting_room(
     )
 
     session.add(new_waiting_room)
+    if testing:
+        await session.commit()
+        return new_waiting_room
     await session.commit()
     await session.refresh(new_waiting_room)
 
