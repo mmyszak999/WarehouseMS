@@ -13,11 +13,17 @@ class ProductBaseSchema(BaseModel):
     name: str = Field(max_length=75)
     description: str
     weight: Decimal
+    
+    class Config:
+        orm_mode = True
 
 
 class ProductInputSchema(ProductBaseSchema):
     wholesale_price: Decimal
     category_ids: CategoryIdListSchema
+    
+    class Config:
+        orm_mode = True
 
 
 class ProductUpdateSchema(BaseModel):
@@ -25,6 +31,9 @@ class ProductUpdateSchema(BaseModel):
     wholesale_price: Optional[Decimal]
     description: Optional[str]
     category_ids: Optional[CategoryIdListSchema]
+    
+    class Config:
+        orm_mode = True
 
 
 class ProductBasicOutputSchema(ProductBaseSchema):
@@ -53,3 +62,6 @@ class RemovedProductOutputSchema(ProductBaseSchema):
 
 class ProductIdListSchema(BaseModel):
     id: list[str]
+    
+    class Config:
+        orm_mode = True

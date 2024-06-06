@@ -192,8 +192,10 @@ async def test_only_user_with_proper_permission_can_delete_waiting_room(
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
+    available_waiting_rooms = [
+        waiting_room for waiting_room in db_waiting_rooms.results if not waiting_room.stocks] 
     response = await async_client.delete(
-        f"waiting_rooms/{db_waiting_rooms.results[2].id}", headers=user_headers
+        f"waiting_rooms/{available_waiting_rooms[0].id}", headers=user_headers
     )
     assert response.status_code == status_code
 
@@ -224,9 +226,16 @@ async def test_only_user_with_proper_permission_can_add_stock_to_waiting_room(
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
-    stock_data = StockWaitingRoomInputSchema(id=db_stocks.results[0].id)
+    available_stocks = [stock for stock in db_stocks.results if not stock.is_issued] 
+    available_waiting_rooms = [
+        waiting_room for waiting_room in db_waiting_rooms.results
+        if waiting_room.id != available_stocks[0].waiting_room.id
+    ] 
+     
+    stock_data = StockWaitingRoomInputSchema(id=available_stocks[0].id)
     response = await async_client.patch(
-        f"waiting_rooms/{db_waiting_rooms.results[2].id}/add-stock", headers=user_headers,
+        f"waiting_rooms/{available_waiting_rooms[0].id}/add-stock", headers=user_headers,
         content=stock_data.json()
     )
+    print(response.json())
     assert response.status_code == status_code

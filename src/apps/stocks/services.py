@@ -43,7 +43,7 @@ async def create_stocks(
             new_stock = Stock(**schema.dict())
             session.add(new_stock)
             stock_list.append(new_stock)
-        await session.flush()
+        await session.commit()
         return stock_list
 
     if not (products or product_counts):

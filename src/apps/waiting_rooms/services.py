@@ -34,7 +34,7 @@ from src.core.utils.orm import if_exists
 
 
 async def create_waiting_room(
-    session: AsyncSession, waiting_room_input: WaitingRoomInputSchema, testing: bool=True
+    session: AsyncSession, waiting_room_input: WaitingRoomInputSchema, testing: bool=False
 ) -> WaitingRoomOutputSchema:
     waiting_room_input = waiting_room_input.dict()
     new_waiting_room = WaitingRoom(
@@ -198,16 +198,16 @@ async def add_single_stock_to_waiting_room(
     if waiting_room_object.available_stock_weight < stock_object.weight:
         raise NoAvailableWeightInWaitingRoomException
 
-    old_waiting_room_object = stock_object.waiting_room
-    # remember that later, stock may not be in waiting room, but on the warehouse shelf
-    # so consider the case when stock is not in waiting room then
-    old_waiting_room_object = await manage_waiting_room_state(
-        old_waiting_room_object,
-        stocks_involved=True,
-        adding_stock_to_waiting_room=False,
-        stock_object=stock_object,
-    )
-    session.add(old_waiting_room_object)
+    if old_waiting_room_object := stock_object.waiting_room:
+        # remember that later, stock may not be in waiting room, but on the warehouse shelf
+        # so consider the case when stock is not in waiting room then
+        old_waiting_room_object = await manage_waiting_room_state(
+            old_waiting_room_object,
+            stocks_involved=True,
+            adding_stock_to_waiting_room=False,
+            stock_object=stock_object,
+        )
+        session.add(old_waiting_room_object)
     waiting_room_object = await manage_waiting_room_state(
         waiting_room_object, stocks_involved=True, stock_object=stock_object
     )

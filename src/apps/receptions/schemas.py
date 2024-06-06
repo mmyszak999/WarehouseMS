@@ -21,14 +21,23 @@ class ReceptionProductInputSchema(BaseModel):
             raise ValueError("Product count must be positive!")
         return product_count
 
+    class Config:
+        orm_mode = True
+
 
 class ReceptionInputSchema(BaseModel):
     products_data: list[ReceptionProductInputSchema]
     description: Optional[str] = Field(max_length=400)
+    
+    class Config:
+        orm_mode = True
 
 
 class ReceptionUpdateSchema(BaseModel):
     description: Optional[str] = Field(max_length=400)
+    
+    class Config:
+        orm_mode = True
 
 
 class ReceptionBasicOutputSchema(BaseModel):
@@ -42,6 +51,7 @@ class ReceptionBasicOutputSchema(BaseModel):
 
 
 class ReceptionStockOutputSchema(BaseModel):
+    id: str
     weight: Decimal
     product_count: int
     product: ProductBasicOutputSchema

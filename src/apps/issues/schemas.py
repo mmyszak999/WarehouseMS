@@ -12,10 +12,16 @@ from src.apps.users.schemas import UserInfoOutputSchema
 class IssueInputSchema(BaseModel):
     stock_ids: list[StockIssueInputSchema]
     description: Optional[str] = Field(max_length=400)
+    
+    class Config:
+        orm_mode = True
 
 
 class IssueUpdateSchema(BaseModel):
     description: Optional[str] = Field(max_length=400)
+    
+    class Config:
+        orm_mode = True
 
 
 class IssueBasicOutputSchema(BaseModel):

@@ -48,9 +48,9 @@ async def db_stocks(
     db_staff_user: UserOutputSchema,
 ) -> PagedResponseSchema[StockOutputSchema]:
     waiting_rooms = [
-        await create_waiting_room(async_session, waiting_room) for waiting_room in DB_WAITING_ROOMS_SCHEMAS
+        await create_waiting_room(async_session, waiting_room, testing=True) for waiting_room in DB_WAITING_ROOMS_SCHEMAS
     ]
-    await async_session.flush()
+    
     for product in db_products.results:
         reception_input = ReceptionInputSchemaFactory().generate(
             products_data=[

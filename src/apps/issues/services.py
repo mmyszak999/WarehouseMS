@@ -29,7 +29,7 @@ async def base_create_issue(
     user_id: str,
     issue_input: IssueInputSchema = None,
     testing: bool = False,
-):
+) -> Issue:
 
     if ((issue_input is None) or not (
         issue_input := issue_input.dict(exclude_none=True, exclude_unset=True)

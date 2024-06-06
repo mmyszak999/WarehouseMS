@@ -2,10 +2,11 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.issues.schemas import IssueOutputSchema
-from src.apps.issues.services import base_create_issue
+from src.apps.issues.services import base_create_issue, create_issue
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.receptions.schemas import ReceptionOutputSchema
-from src.apps.stocks.schemas import StockOutputSchema
+from src.apps.stocks.schemas import StockOutputSchema, StockIssueInputSchema
+from src.apps.stocks.models import Stock
 from tests.test_waiting_rooms.conftest import db_waiting_rooms
 from src.apps.stocks.services import (
     create_stocks,
@@ -31,6 +32,7 @@ from tests.test_issues.conftest import db_issues
 from tests.test_products.conftest import db_products
 from tests.test_receptions.conftest import db_receptions
 from tests.test_stocks.conftest import db_stocks
+from src.core.utils.orm import if_exists
 from tests.test_users.conftest import (
     auth_headers,
     db_staff_user,
@@ -92,8 +94,9 @@ async def test_raise_exception_while_getting_issued_stock(
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
+    issued_stocks = [stock for stock in db_stocks.results if stock.is_issued]   
     with pytest.raises(CannotRetrieveIssuedStockException):
-        await get_single_stock(async_session, db_stocks.results[2].id)
+        await get_single_stock(async_session, issued_stocks[0].id)
 
 
 @pytest.mark.asyncio
@@ -121,24 +124,15 @@ async def test_if_all_stocks_were_returned(
 @pytest.mark.asyncio
 async def test_if_stocks_are_issued_correctly(
     async_session: AsyncSession,
-    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
-    stock_inputs = [
-        StockInputSchemaFactory().generate(
-            product_weight=product.weight, product_count=5, product_id=product.id
-        )
-        for product in db_products.results
-    ]
-
-    issue = await base_create_issue(async_session, db_staff_user.id, testing=True)
-
-    stocks = await create_stocks(
-        async_session, testing=True, input_schemas=stock_inputs
+    available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]   
+    stock_object = await if_exists(Stock, "id", available_stocks[0].id, async_session)
+    issue_schema = IssueInputSchemaFactory().generate(
+        stock_ids=[StockIssueInputSchema(id=stock_object.id)]
     )
-    issued_stocks = await issue_stocks(async_session, stocks, issue.id)
-
-    assert len(issued_stocks) == len(
-        {stock for stock in issued_stocks if stock.is_issued}
-    )
-    assert {stock.issue_id for stock in issued_stocks} == {issue.id}
+    issue = await create_issue(async_session, issue_schema, db_staff_user.id)
+    await async_session.refresh(stock_object)
+    assert {stock.id for stock in issue.stocks} == {stock_object.id}
