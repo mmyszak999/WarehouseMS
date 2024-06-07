@@ -319,7 +319,7 @@ async def test_raise_exception_when_waiting_room_got_no_available_weight_for_new
 
 
 @pytest.mark.asyncio
-async def test_raise_exception_when_no_stock_provided_when_managing_waiting_room_state(
+async def test_raise_exception_when_no_stock_provided_while_managing_waiting_room_state(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
@@ -388,7 +388,7 @@ async def test_check_if_available_stock_amount_is_set_correctly(
 
 
 @pytest.mark.asyncio
-async def test_check_if_old_waiting_room_state_is_managed_correctly(
+async def test_check_if_old_and_new_waiting_room_state_is_managed_correctly(
     async_session: AsyncSession,
     db_products: PagedResponseSchema[ProductOutputSchema]
 ):
@@ -429,7 +429,7 @@ async def test_check_if_old_waiting_room_state_is_managed_correctly(
     )
     
     await async_session.refresh(old_waiting_room)
-    print(old_waiting_room.__dict__, stocks[0].__dict__)
+    
     assert new_waiting_room.occupied_slots == 1
     assert new_waiting_room.current_stock_weight == stocks[0].weight
     
