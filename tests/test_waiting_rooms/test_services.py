@@ -324,27 +324,6 @@ async def test_raise_exception_when_waiting_room_got_no_available_weight_for_new
 
 
 @pytest.mark.asyncio
-async def test_raise_exception_when_waiting_room_got_no_available_weight_for_new_stocks(
-    async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema],
-    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
-):
-    available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
-    waiting_room_input = WaitingRoomInputSchemaFactory().generate(
-        max_weight=available_stocks[0].weight - 1
-    )
-    waiting_room = await create_waiting_room(async_session, waiting_room_input)
-
-    stock_schema = StockWaitingRoomInputSchema(id=available_stocks[0].id)
-    with pytest.raises(NoAvailableWeightInWaitingRoomException):
-        await add_single_stock_to_waiting_room(
-            async_session, waiting_room.id, stock_schema
-        )
-
-
-@pytest.mark.asyncio
 async def test_raise_exception_when_no_stock_provided_while_managing_waiting_room_state(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],

@@ -161,6 +161,7 @@ async def test_only_user_with_proper_permission_can_update_waiting_room(
     assert response.status_code == status_code
     if response.status_code == status.HTTP_200_OK:
         assert response.json()["id"] == db_waiting_rooms.results[1].id
+        assert response.json()["max_stocks"] == update_data.max_stocks
 
 
 @pytest.mark.parametrize(
