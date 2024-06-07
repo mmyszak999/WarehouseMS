@@ -73,13 +73,12 @@ async def test_only_staff_user_can_get_all_stocks(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
-    db_products: PagedResponseSchema[ProductOutputSchema],
     status_code: int,
+    db_products: PagedResponseSchema[ProductOutputSchema],
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
-
     response = await async_client.get("stocks/all", headers=user_headers)
 
     assert response.status_code == status_code
@@ -149,10 +148,11 @@ async def test_only_authenticated_user_can_get_basic_data_about_single_stock(
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
-
+    available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     response = await async_client.get(
-        f"stocks/{db_stocks.results[0].id}", headers=user_headers
+        f"stocks/{available_stocks[0].id}", headers=user_headers
     )
+    print(response.json())
 
     assert response.status_code == status_code
-    assert db_stocks.results[0].id == response.json()["id"]
+    assert available_stocks[0].id == response.json()["id"]

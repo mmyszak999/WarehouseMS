@@ -27,16 +27,11 @@ from tests.test_users.conftest import (
     staff_auth_headers,
     superuser_auth_headers,
 )
+from tests.test_waiting_rooms.conftest import db_waiting_rooms
 
 
 @pytest_asyncio.fixture
 async def db_issues(
-    async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_staff_user: UserOutputSchema,
+    async_session: AsyncSession, db_stocks: PagedResponseSchema[StockOutputSchema]
 ) -> PagedResponseSchema[IssueOutputSchema]:
-    issue_input = IssueInputSchemaFactory().generate(
-        stock_ids=[StockIssueInputSchema(id=db_stocks.results[2].id)]
-    )
-    await create_issue(async_session, issue_input, db_staff_user.id)
     return await get_all_issues(async_session, PageParams())

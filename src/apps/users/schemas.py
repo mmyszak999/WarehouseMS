@@ -20,6 +20,9 @@ class UserBaseSchema(BaseModel):
             raise ValueError("Employment date must be in the past")
         return employment_date
 
+    class Config:
+        orm_mode = True
+
 
 class UserInputSchema(UserBaseSchema):
     email: EmailStr = Field()
@@ -35,6 +38,9 @@ class UserInputSchema(UserBaseSchema):
             raise ValueError("Birth date must be in the past")
         return birth_date
 
+    class Config:
+        orm_mode = True
+
 
 class UserPasswordSchema(BaseModel):
     password: str = Field(min_length=8, max_length=40)
@@ -45,6 +51,9 @@ class UserPasswordSchema(BaseModel):
         if rep_password != values["password"]:
             raise ValueError("Passwords are not identical")
         return rep_password
+
+    class Config:
+        orm_mode = True
 
 
 class UserUpdateSchema(BaseModel):
@@ -61,6 +70,9 @@ class UserUpdateSchema(BaseModel):
         if birth_date and (birth_date >= datetime.date.today()):
             raise ValueError("Birth date must be in the past")
         return birth_date
+
+    class Config:
+        orm_mode = True
 
 
 class UserInfoOutputSchema(UserBaseSchema):

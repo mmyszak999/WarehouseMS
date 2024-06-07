@@ -1,4 +1,5 @@
 import random
+from decimal import Decimal
 
 from faker import Faker
 from faker.providers import address, date_time, internet, lorem, misc, person
@@ -25,3 +26,11 @@ def set_product_weight() -> int:
 
 def set_product_count() -> int:
     return random.randint(5, 30)
+
+
+def set_waiting_room_weight() -> int:
+    return random.randint(3000, 10000)
+
+
+def set_waiting_room_stocks() -> int:
+    return random.randint(5, 10)

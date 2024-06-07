@@ -59,7 +59,7 @@ async def get_waiting_rooms(
 
 @waiting_room_router.get(
     "/{waiting_room_id}",
-    response_model=WaitingRoomOutputSchema,
+    response_model=Union[WaitingRoomOutputSchema, WaitingRoomBasicOutputSchema],
     status_code=status.HTTP_200_OK,
 )
 async def get_waiting_room(
@@ -67,7 +67,7 @@ async def get_waiting_room(
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
 ) -> Union[WaitingRoomOutputSchema, WaitingRoomBasicOutputSchema]:
-    if await check_if_staff(request_user):
+    if request_user.is_staff:
         return await get_single_waiting_room(session, waiting_room_id)
     return await get_single_waiting_room(
         session, waiting_room_id, output_schema=WaitingRoomBasicOutputSchema
