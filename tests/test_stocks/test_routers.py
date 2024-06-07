@@ -148,7 +148,7 @@ async def test_only_authenticated_user_can_get_basic_data_about_single_stock(
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
-    available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]   
+    available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     response = await async_client.get(
         f"stocks/{available_stocks[0].id}", headers=user_headers
     )

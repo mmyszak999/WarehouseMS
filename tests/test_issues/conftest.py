@@ -19,7 +19,6 @@ from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from tests.test_products.conftest import db_categories, db_products
 from tests.test_stocks.conftest import db_stocks
-from tests.test_waiting_rooms.conftest import db_waiting_rooms
 from tests.test_users.conftest import (
     auth_headers,
     create_superuser,
@@ -28,11 +27,11 @@ from tests.test_users.conftest import (
     staff_auth_headers,
     superuser_auth_headers,
 )
+from tests.test_waiting_rooms.conftest import db_waiting_rooms
 
 
 @pytest_asyncio.fixture
 async def db_issues(
-    async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema]
+    async_session: AsyncSession, db_stocks: PagedResponseSchema[StockOutputSchema]
 ) -> PagedResponseSchema[IssueOutputSchema]:
     return await get_all_issues(async_session, PageParams())

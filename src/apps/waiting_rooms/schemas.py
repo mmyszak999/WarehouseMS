@@ -6,7 +6,10 @@ from pydantic import BaseModel, Field, validator
 
 from src.apps.products.schemas.product_schemas import ProductBasicOutputSchema
 from src.apps.receptions.schemas import ReceptionStockOutputSchema
-from src.apps.stocks.schemas import StockWithoutWaitingRoomOutputSchema, StockIssueInputSchema
+from src.apps.stocks.schemas import (
+    StockIssueInputSchema,
+    StockWithoutWaitingRoomOutputSchema,
+)
 from src.apps.users.schemas import UserInfoOutputSchema
 
 
@@ -52,7 +55,7 @@ class WaitingRoomUpdateSchema(BaseModel):
         if max_weight is not None and max_weight <= 0:
             raise ValueError("Max weight must be positive!")
         return max_weight
-    
+
     class Config:
         orm_mode = True
 

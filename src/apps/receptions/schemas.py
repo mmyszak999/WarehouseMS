@@ -28,14 +28,14 @@ class ReceptionProductInputSchema(BaseModel):
 class ReceptionInputSchema(BaseModel):
     products_data: list[ReceptionProductInputSchema]
     description: Optional[str] = Field(max_length=400)
-    
+
     class Config:
         orm_mode = True
 
 
 class ReceptionUpdateSchema(BaseModel):
     description: Optional[str] = Field(max_length=400)
-    
+
     class Config:
         orm_mode = True
 

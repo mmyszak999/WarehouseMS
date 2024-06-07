@@ -31,9 +31,10 @@ async def base_create_issue(
     testing: bool = False,
 ) -> Issue:
 
-    if ((issue_input is None) or not (
-        issue_input := issue_input.dict(exclude_none=True, exclude_unset=True)
-    )) and not testing:
+    if (
+        (issue_input is None)
+        or not (issue_input := issue_input.dict(exclude_none=True, exclude_unset=True))
+    ) and not testing:
         raise MissingIssueDataException
 
     if testing:
@@ -41,7 +42,7 @@ async def base_create_issue(
         session.add(new_issue)
         await session.commit()
         return new_issue
-    
+
     stocks_data = issue_input.get("stock_ids")
     if stock_ids := [stock.pop("id") for stock in stocks_data]:
         stocks = await session.scalars(

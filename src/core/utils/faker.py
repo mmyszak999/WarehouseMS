@@ -29,7 +29,8 @@ def set_product_count() -> int:
 
 
 def set_waiting_room_weight() -> int:
-    return (random.randint(3000, 10000))
+    return random.randint(3000, 10000)
+
 
 def set_waiting_room_stocks() -> int:
-    return (random.randint(5, 10))
+    return random.randint(5, 10)

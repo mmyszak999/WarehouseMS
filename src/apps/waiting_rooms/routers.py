@@ -59,9 +59,7 @@ async def get_waiting_rooms(
 
 @waiting_room_router.get(
     "/{waiting_room_id}",
-    response_model=Union[
-        WaitingRoomOutputSchema, WaitingRoomBasicOutputSchema
-    ],
+    response_model=Union[WaitingRoomOutputSchema, WaitingRoomBasicOutputSchema],
     status_code=status.HTTP_200_OK,
 )
 async def get_waiting_room(

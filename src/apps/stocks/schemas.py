@@ -23,7 +23,7 @@ class StockBaseSchema(BaseModel):
         if product_count and (product_count < 0):
             raise ValueError("Product count must be positive! ")
         return product_count
-    
+
     class Config:
         orm_mode = True
 
@@ -32,7 +32,7 @@ class StockInputSchema(StockBaseSchema):
     product_id: str
     reception_id: Optional[str]
     waiting_room_id: Optional[str]
-    
+
     class Config:
         orm_mode = True
 
@@ -50,7 +50,7 @@ class StockWithoutWaitingRoomOutputSchema(StockBaseSchema):
     id: str
     product: ProductBasicOutputSchema
     reception: ReceptionBasicOutputSchema
-    
+
     class Config:
         orm_mode = True
 
@@ -72,7 +72,7 @@ class StockOutputSchema(StockBasicOutputSchema):
 
 class StockIssueInputSchema(BaseModel):
     id: str
-    
+
     class Config:
         orm_mode = True
 

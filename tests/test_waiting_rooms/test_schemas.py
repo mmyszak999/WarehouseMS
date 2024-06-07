@@ -4,11 +4,11 @@ from datetime import datetime, timedelta
 import pytest
 from pydantic.error_wrappers import ValidationError
 
-
 from src.core.factory.waiting_room_factory import (
+    WaitingRoomInputSchemaFactory,
     WaitingRoomUpdateSchemaFactory,
-    WaitingRoomInputSchemaFactory
 )
+
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
