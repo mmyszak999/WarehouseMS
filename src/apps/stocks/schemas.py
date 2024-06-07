@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 from typing import Optional
 
@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field, validator
 
 from src.apps.products.schemas.product_schemas import ProductBasicOutputSchema
 from src.apps.receptions.schemas import ReceptionBasicOutputSchema
+from src.apps.users.schemas import UserInfoOutputSchema
 
 
 class StockBaseSchema(BaseModel):
@@ -55,8 +56,19 @@ class StockWithoutWaitingRoomOutputSchema(StockBaseSchema):
         orm_mode = True
 
 
+class StockUserInfoOutputSchema(BaseModel):
+    first_name: str = Field(max_length=50)
+    last_name: str = Field(max_length=75)
+    employment_date: date
+    is_active: bool
+
+    class Config:
+        orm_mode = True
+
+
 class StockBasicOutputSchema(StockWithoutWaitingRoomOutputSchema):
     waiting_room: Optional[StockWaitingRoomBasicOutputSchema]
+    users: Optional[StockUserInfoOutputSchema]
 
     class Config:
         orm_mode = True

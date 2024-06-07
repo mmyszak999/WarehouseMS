@@ -5,7 +5,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.models import Product
-from src.apps.stocks.models import Stock
+from src.apps.stocks.models import Stock, UserStock
 from src.apps.stocks.schemas import (
     StockBasicOutputSchema,
     StockInputSchema,
