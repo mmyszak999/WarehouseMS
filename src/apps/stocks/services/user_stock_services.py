@@ -58,14 +58,22 @@ async def create_user_stock_object(
     return UserStockOutputSchema.from_orm(new_user_stock)
 
 
+async def get_single_user_stock(
+    session: AsyncSession, user_stock_id: int) -> UserStockOutputSchema:
+    if not (user_stock_object := await if_exists(UserStock, "id", user_stock_id, session)):
+        raise DoesNotExist(UserStock.__name__, "id", user_stock_id)
+
+    return UserStockOutputSchema.from_orm(user_stock_object)
+
+
 async def get_multiple_user_stocks(
     session: AsyncSession,
     page_params: PageParams,
-    user_stock_id: str = None,
+    stock_id: str = None,
     user_id: str = None
 ) -> PagedResponseSchema[UserStockOutputSchema]:
     query = select(UserStock)
-    if user_stock_id is not None:
+    if stock_id is not None:
         if not (stock_object := await if_exists(Stock, "id", stock_id, session)):
             raise DoesNotExist(Stock.__name__, "id", stock_id)
         query = query.filter(UserStock.stock_id == stock_id)
@@ -84,16 +92,19 @@ async def get_multiple_user_stocks(
     )
 
 
-
-async def get_single_user_stock(
-    session: AsyncSession, user_stock_id: int) -> UserStockOutputSchema:
-    if not (user_stock_object := await if_exists(UserStock, "id", user_stock_id, session)):
-        raise DoesNotExist(UserStock.__name__, "id", user_stock_id)
-
-    return UserStockOutputSchema.from_orm(user_stock_object)
-
-
 async def get_all_user_stocks(
     session: AsyncSession, page_params: PageParams
 ) -> PagedResponseSchema[UserStockOutputSchema]:
     return await get_multiple_user_stocks(session, page_params)
+
+
+async def get_all_user_stocks_with_single_user_involvement(
+    session: AsyncSession, page_params: PageParams, user_id: str
+) -> PagedResponseSchema[UserStockOutputSchema]:
+    return await get_multiple_user_stocks(session, page_params, user_id=user_id)
+
+
+async def get_all_user_stock_history_for_single_stock(
+    session: AsyncSession, page_params: PageParams, stock_id: str
+) -> PagedResponseSchema[UserStockOutputSchema]:
+    return await get_multiple_user_stocks(session, page_params, stock_id=stock_id)

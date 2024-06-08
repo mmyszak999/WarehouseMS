@@ -4,11 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.stocks.models import Stock
 from src.apps.stocks.schemas.stock_schemas import StockBasicOutputSchema, StockOutputSchema
+from src.apps.stocks.schemas.user_stock_schemas import UserStockOutputSchema
 from src.apps.stocks.services.stock_services import (
     get_all_available_stocks,
     get_all_stocks,
     get_single_stock,
 )
+from src.apps.stocks.services.user_stock_services import get_all_user_stock_history_for_single_stock
 from src.apps.users.models import User
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -58,6 +60,21 @@ async def get_stock_as_staff(
 ) -> StockOutputSchema:
     await check_if_staff(request_user)
     return await get_single_stock(session, stock_id, can_get_issued=True)
+
+@stock_router.get(
+    "/all/{stock_id}/history",
+    response_model=PagedResponseSchema[UserStockOutputSchema],
+    status_code=status.HTTP_200_OK,
+)
+async def get_stock_history(
+    stock_id: str,
+    session: AsyncSession = Depends(get_db),
+    page_params: PageParams = Depends(),
+    request_user: User = Depends(authenticate_user),
+) -> PagedResponseSchema[UserStockOutputSchema]:
+    await check_if_staff(request_user)
+    return await get_all_user_stock_history_for_single_stock(
+        session, page_params, stock_id=stock_id)
 
 
 @stock_router.get(
