@@ -66,7 +66,7 @@ async def create_issue(
     session: AsyncSession, issue_input: IssueInputSchema, user_id: str
 ) -> IssueOutputSchema:
     stocks, new_issue = await base_create_issue(session, user_id, issue_input)
-    await issue_stocks(session, stocks, new_issue.id)
+    await issue_stocks(session, stocks, new_issue.id, user_id)
 
     await session.commit()
     await session.refresh(new_issue)

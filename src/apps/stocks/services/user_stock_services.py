@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.models import Product
 from src.apps.users.models import User
+from src.apps.issues.models import Issue
 from src.apps.waiting_rooms.models import WaitingRoom
 from src.apps.stocks.models import Stock, UserStock
 from src.apps.stocks.schemas.user_stock_schemas import (
@@ -34,7 +35,10 @@ async def create_user_stock_object(
     session: AsyncSession,
     stock_id: str,
     user_id: str,
-    to_waiting_room_id: str
+    from_waiting_room_id: str = None,
+    to_waiting_room_id: str = None,
+    issue_id: str = None
+    
 ) -> UserStockOutputSchema:
     if not (stock_object := await if_exists(Stock, "id", stock_id, session)):
         raise DoesNotExist(Stock.__name__, "id", stock_id)
@@ -42,19 +46,32 @@ async def create_user_stock_object(
     if not (user_object := await if_exists(User, "id", user_id, session)):
         raise DoesNotExist(User.__name__, "id", user_id)
     
-    if not (waiting_room_object := await if_exists(WaitingRoom, "id", to_waiting_room_id, session)):
-        raise DoesNotExist(WaitingRoom.__name__, "id", to_waiting_room_id)
+    if from_waiting_room_id is not None:
+        if not (from_waiting_room_object := await if_exists(WaitingRoom, "id", from_waiting_room_id, session)):
+            raise DoesNotExist(WaitingRoom.__name__, "id", from_waiting_room_id)
+    
+    if to_waiting_room_id is not None:
+        if not (to_waiting_room_object := await if_exists(WaitingRoom, "id", to_waiting_room_id, session)):
+            raise DoesNotExist(WaitingRoom.__name__, "id", to_waiting_room_id)
+        
+    if issue_id is not None:
+        if not (issue_object := await if_exists(Issue, "id", issue_id, session)):
+            raise DoesNotExist(Issue.__name__, "id", issue_id)
+        
     
     input_schema = UserStockInputSchema(
         user_id=user_id,
         stock_id=stock_id,
-        to_waiting_room_id=to_waiting_room_id
+        to_waiting_room_id=to_waiting_room_id,
+        from_waiting_room_id=from_waiting_room_id,
+        issue_id=issue_id
     )
     
-    new_user_stock = UserStock(**input_schema.dict())
+    new_user_stock = UserStock(**input_schema.dict(exclude_none=True))
     session.add(new_user_stock)
     await session.flush()
-    print(new_user_stock.__dict__)
+    print(UserStockOutputSchema.from_orm(new_user_stock))
+    
     return UserStockOutputSchema.from_orm(new_user_stock)
 
 

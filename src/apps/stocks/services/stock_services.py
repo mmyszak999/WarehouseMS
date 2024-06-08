@@ -86,7 +86,7 @@ async def create_stocks(
         session.add(available_waiting_room)
         await session.flush()
         user_stock_object = await create_user_stock_object(
-            session, new_stock.id, user_id, available_waiting_room.id
+            session, new_stock.id, user_id, to_waiting_room_id=available_waiting_room.id
         )
     return stock_list
 
@@ -139,7 +139,7 @@ async def get_all_available_stocks(
 
 
 async def issue_stocks(
-    session: AsyncSession, stocks: list[Stock], issue_id: str
+    session: AsyncSession, stocks: list[Stock], issue_id: str, user_id: str
 ) -> list[Stock]:
     for stock in stocks:
         if stock.waiting_room:
@@ -153,6 +153,10 @@ async def issue_stocks(
                 stock_object=stock,
             )
             session.add(stock_waiting_room)
+            user_stock_object = await create_user_stock_object(
+                session, stock.id, user_id, from_waiting_room_id=stock_waiting_room.id,
+                issue_id=issue_id
+            )
             stock.issue_id = issue_id
             stock.is_issued = True
             stock.updated_at = get_current_time()

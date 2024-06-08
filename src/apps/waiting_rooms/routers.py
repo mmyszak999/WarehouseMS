@@ -117,6 +117,6 @@ async def add_stock_to_waiting_room(
 ) -> JSONResponse:
     await check_if_staff_or_has_permission(request_user, "can_move_stocks")
     result = await add_single_stock_to_waiting_room(
-        session, waiting_room_id, stock_schema
+        session, waiting_room_id, stock_schema, request_user.id
     )
     return JSONResponse(result)
