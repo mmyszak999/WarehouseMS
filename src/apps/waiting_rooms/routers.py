@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.apps.stocks.schemas import StockWaitingRoomInputSchema
+from src.apps.stocks.schemas.stock_schemas import StockWaitingRoomInputSchema
 from src.apps.users.models import User
 from src.apps.waiting_rooms.schemas import (
     WaitingRoomBasicOutputSchema,

@@ -21,7 +21,9 @@ from src.database.db_connection import Base
 
 class UserStock(Base):
     __tablename__ = 'user_stock'
-    id = Column(Integer, primary_key=True)
+    id = Column(
+        String, primary_key=True, unique=True, nullable=False, default=generate_uuid
+    )
     user_id = Column(String, ForeignKey('user.id'), nullable=False)
     user = relationship('User', back_populates='stock_user_history', foreign_keys=[user_id])
     
@@ -35,6 +37,9 @@ class UserStock(Base):
 
     to_waiting_room_id = Column(String, ForeignKey('waiting_room.id'), nullable=True)
     to_waiting_room = relationship('WaitingRoom', foreign_keys=[to_waiting_room_id])
+    
+    issue_id = Column(String, ForeignKey('issue.id'), nullable=True)
+    issue = relationship("Issue", foreign_keys=[issue_id])
 
 
 class Stock(Base):

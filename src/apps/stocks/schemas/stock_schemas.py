@@ -56,19 +56,18 @@ class StockWithoutWaitingRoomOutputSchema(StockBaseSchema):
         orm_mode = True
 
 
-class StockUserInfoOutputSchema(BaseModel):
+"""class StockUserInfoOutputSchema(BaseModel):
     first_name: str = Field(max_length=50)
     last_name: str = Field(max_length=75)
     employment_date: date
     is_active: bool
 
     class Config:
-        orm_mode = True
+        orm_mode = True"""
 
 
 class StockBasicOutputSchema(StockWithoutWaitingRoomOutputSchema):
     waiting_room: Optional[StockWaitingRoomBasicOutputSchema]
-    users: Optional[StockUserInfoOutputSchema]
 
     class Config:
         orm_mode = True

@@ -10,7 +10,7 @@ from src.apps.receptions.schemas import (
     ReceptionUpdateSchema,
 )
 from src.apps.stocks.models import Stock
-from src.apps.stocks.services import create_stocks
+from src.apps.stocks.services.stock_services import create_stocks
 from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
@@ -69,7 +69,8 @@ async def create_reception(
     products, product_counts, new_reception = await base_create_reception(
         session, user_id, reception_input
     )
-    await create_stocks(session, products, product_counts, new_reception.id)
+    await create_stocks(
+        session, user_id, products, product_counts, new_reception.id)
 
     await session.commit()
     await session.refresh(new_reception)

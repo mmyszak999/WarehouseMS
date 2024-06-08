@@ -3,8 +3,8 @@ from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.stocks.models import Stock
-from src.apps.stocks.schemas import StockBasicOutputSchema, StockOutputSchema
-from src.apps.stocks.services import (
+from src.apps.stocks.schemas.stock_schemas import StockBasicOutputSchema, StockOutputSchema
+from src.apps.stocks.services.stock_services import (
     get_all_available_stocks,
     get_all_stocks,
     get_single_stock,

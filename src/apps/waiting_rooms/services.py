@@ -6,7 +6,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.stocks.models import Stock
-from src.apps.stocks.schemas import StockWaitingRoomInputSchema
+from src.apps.stocks.schemas.stock_schemas import StockWaitingRoomInputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
 from src.apps.waiting_rooms.schemas import (
     WaitingRoomBasicOutputSchema,
