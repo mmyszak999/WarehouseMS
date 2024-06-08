@@ -70,7 +70,8 @@ async def create_reception(
         session, user_id, reception_input
     )
     await create_stocks(
-        session, user_id, products, product_counts, new_reception.id)
+        session, user_id, products, product_counts, new_reception.id
+    )
 
     await session.commit()
     await session.refresh(new_reception)

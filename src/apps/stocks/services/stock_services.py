@@ -88,8 +88,6 @@ async def create_stocks(
         user_stock_object = await create_user_stock_object(
             session, new_stock.id, user_id, available_waiting_room.id
         )
-        print(user_stock_object)
-        raise Exception
     return stock_list
 
 

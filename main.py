@@ -7,7 +7,8 @@ from src.apps.issues.routers import issue_router
 from src.apps.products.routers.category_routers import category_router
 from src.apps.products.routers.product_routers import product_router
 from src.apps.receptions.routers import reception_router
-from src.apps.stocks.routers import stock_router
+from src.apps.stocks.routers.stock_routers import stock_router
+from src.apps.stocks.routers.user_stock_routers import user_stock_router
 from src.apps.users.routers import user_router
 from src.apps.waiting_rooms.routers import waiting_room_router
 from src.core.exceptions import (
@@ -53,6 +54,7 @@ root_router.include_router(category_router)
 root_router.include_router(product_router)
 root_router.include_router(reception_router)
 root_router.include_router(stock_router)
+root_router.include_router(user_stock_router)
 root_router.include_router(issue_router)
 root_router.include_router(waiting_room_router)
 

@@ -48,7 +48,7 @@ async def create_user_stock_object(
     input_schema = UserStockInputSchema(
         user_id=user_id,
         stock_id=stock_id,
-        to_waiting_room=to_waiting_room_id
+        to_waiting_room_id=to_waiting_room_id
     )
     
     new_user_stock = UserStock(**input_schema.dict())
@@ -58,7 +58,42 @@ async def create_user_stock_object(
     return UserStockOutputSchema.from_orm(new_user_stock)
 
 
+async def get_multiple_user_stocks(
+    session: AsyncSession,
+    page_params: PageParams,
+    user_stock_id: str = None,
+    user_id: str = None
+) -> PagedResponseSchema[UserStockOutputSchema]:
+    query = select(UserStock)
+    if user_stock_id is not None:
+        if not (stock_object := await if_exists(Stock, "id", stock_id, session)):
+            raise DoesNotExist(Stock.__name__, "id", stock_id)
+        query = query.filter(UserStock.stock_id == stock_id)
     
-    
+    if user_id is not None:
+        if not (user_object := await if_exists(User, "id", user_id, session)):
+            raise DoesNotExist(User.__name__, "id", user_id)
+        query = query.filter(UserStock.user_id == user_id)
+
+    return await paginate(
+        query=query,
+        response_schema=UserStockOutputSchema,
+        table=UserStock,
+        page_params=page_params,
+        session=session,
+    )
 
 
+
+async def get_single_user_stock(
+    session: AsyncSession, user_stock_id: int) -> UserStockOutputSchema:
+    if not (user_stock_object := await if_exists(UserStock, "id", user_stock_id, session)):
+        raise DoesNotExist(UserStock.__name__, "id", user_stock_id)
+
+    return UserStockOutputSchema.from_orm(user_stock_object)
+
+
+async def get_all_user_stocks(
+    session: AsyncSession, page_params: PageParams
+) -> PagedResponseSchema[UserStockOutputSchema]:
+    return await get_multiple_user_stocks(session, page_params)
