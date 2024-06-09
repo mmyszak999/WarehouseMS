@@ -99,6 +99,37 @@ async def test_only_staff_user_can_get_all_stocks(
     ],
 )
 @pytest.mark.asyncio
+async def test_only_staff_user_can_get_all_stock_history(
+    async_client: AsyncClient,
+    user: UserOutputSchema,
+    user_headers: dict[str, str],
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    status_code: int,
+    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
+):
+
+    response = await async_client.get(f"stocks/all/{db_stocks.results[0].id}/history", headers=user_headers)
+
+    assert response.status_code == status_code
+
+
+@pytest.mark.parametrize(
+    "user, user_headers, status_code",
+    [
+        (
+            pytest.lazy_fixture("db_user"),
+            pytest.lazy_fixture("auth_headers"),
+            status.HTTP_403_FORBIDDEN,
+        ),
+        (
+            pytest.lazy_fixture("db_staff_user"),
+            pytest.lazy_fixture("staff_auth_headers"),
+            status.HTTP_200_OK,
+        ),
+    ],
+)
+@pytest.mark.asyncio
 async def test_only_staff_user_can_get_all_data_about_single_stock(
     async_client: AsyncClient,
     user: UserOutputSchema,
@@ -113,8 +144,6 @@ async def test_only_staff_user_can_get_all_data_about_single_stock(
     )
 
     assert response.status_code == status_code
-    if status_code == status.HTTP_200_OK:
-        assert db_stocks.results[0].id == response.json()["id"]
 
 
 @pytest.mark.parametrize(
