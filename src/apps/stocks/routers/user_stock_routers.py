@@ -2,14 +2,16 @@ from fastapi import Depends, Request, Response, status
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.apps.stocks.models import Stock
-from src.apps.users.models import User
-from src.apps.stocks.schemas.user_stock_schemas import UserStockInputSchema, UserStockOutputSchema
-from src.apps.stocks.services.user_stock_services import (
-    get_single_user_stock,
-    get_all_user_stocks
+from src.apps.stocks.models import Stock, UserStock
+from src.apps.stocks.schemas.user_stock_schemas import (
+    UserStockInputSchema,
+    UserStockOutputSchema,
 )
-from src.apps.stocks.models import UserStock
+from src.apps.stocks.services.user_stock_services import (
+    get_all_user_stocks,
+    get_single_user_stock,
+)
+from src.apps.users.models import User
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.permissions import check_if_staff, check_if_staff_or_has_permission

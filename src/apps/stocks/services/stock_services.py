@@ -69,7 +69,7 @@ async def create_stocks(
             raise NoAvailableWaitingRoomsException(
                 product.name, product_count, stock_weight
             )
-        
+
         stock_input = StockInputSchema(
             weight=stock_weight,
             product_count=product_count,
@@ -154,8 +154,11 @@ async def issue_stocks(
             )
             session.add(stock_waiting_room)
             user_stock_object = await create_user_stock_object(
-                session, stock.id, user_id, from_waiting_room_id=stock_waiting_room.id,
-                issue_id=issue_id
+                session,
+                stock.id,
+                user_id,
+                from_waiting_room_id=stock_waiting_room.id,
+                issue_id=issue_id,
             )
             stock.issue_id = issue_id
             stock.is_issued = True

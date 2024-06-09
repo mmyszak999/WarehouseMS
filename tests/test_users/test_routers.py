@@ -168,7 +168,6 @@ async def test_authenticated_user_can_get_their_stock_activity_history(
     assert response.status_code == status_code
 
 
-
 @pytest.mark.parametrize(
     "user, user_headers, status_code",
     [

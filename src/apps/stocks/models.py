@@ -20,25 +20,47 @@ from src.database.db_connection import Base
 
 
 class UserStock(Base):
-    __tablename__ = 'user_stock'
+    __tablename__ = "user_stock"
     id = Column(
         String, primary_key=True, unique=True, nullable=False, default=generate_uuid
     )
-    user_id = Column(String, ForeignKey('user.id', ondelete="SET NULL"), nullable=False)
-    user = relationship('User', back_populates='stock_user_history', foreign_keys=[user_id], lazy="joined")
-    
-    stock_id = Column(String, ForeignKey('stock.id', ondelete="SET NULL"), nullable=False)
-    stock = relationship('Stock', back_populates='stock_user_history', foreign_keys=[stock_id], lazy="joined")
-    
-    moved_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    
-    from_waiting_room_id = Column(String, ForeignKey('waiting_room.id', ondelete="SET NULL"), nullable=True)
-    from_waiting_room = relationship('WaitingRoom', foreign_keys=[from_waiting_room_id], lazy="joined")
+    user_id = Column(String, ForeignKey("user.id", ondelete="SET NULL"), nullable=False)
+    user = relationship(
+        "User",
+        back_populates="stock_user_history",
+        foreign_keys=[user_id],
+        lazy="joined",
+    )
 
-    to_waiting_room_id = Column(String, ForeignKey('waiting_room.id', ondelete="SET NULL"), nullable=True)
-    to_waiting_room = relationship('WaitingRoom', foreign_keys=[to_waiting_room_id], lazy="joined")
-    
-    issue_id = Column(String, ForeignKey('issue.id', ondelete="SET NULL"), nullable=True)
+    stock_id = Column(
+        String, ForeignKey("stock.id", ondelete="SET NULL"), nullable=False
+    )
+    stock = relationship(
+        "Stock",
+        back_populates="stock_user_history",
+        foreign_keys=[stock_id],
+        lazy="joined",
+    )
+
+    moved_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    from_waiting_room_id = Column(
+        String, ForeignKey("waiting_room.id", ondelete="SET NULL"), nullable=True
+    )
+    from_waiting_room = relationship(
+        "WaitingRoom", foreign_keys=[from_waiting_room_id], lazy="joined"
+    )
+
+    to_waiting_room_id = Column(
+        String, ForeignKey("waiting_room.id", ondelete="SET NULL"), nullable=True
+    )
+    to_waiting_room = relationship(
+        "WaitingRoom", foreign_keys=[to_waiting_room_id], lazy="joined"
+    )
+
+    issue_id = Column(
+        String, ForeignKey("issue.id", ondelete="SET NULL"), nullable=True
+    )
     issue = relationship("Issue", foreign_keys=[issue_id], lazy="joined")
 
 
@@ -76,8 +98,8 @@ class Stock(Base):
     is_issued = Column(Boolean, nullable=False, server_default="false")
     updated_at = Column(DateTime, nullable=True)
     stock_user_history = relationship(
-        'UserStock',
-        back_populates='stock',
-        foreign_keys='UserStock.stock_id',
-        lazy="joined"
+        "UserStock",
+        back_populates="stock",
+        foreign_keys="UserStock.stock_id",
+        lazy="joined",
     )

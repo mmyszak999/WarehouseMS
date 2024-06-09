@@ -2,7 +2,10 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
-from src.apps.stocks.schemas.stock_schemas import StockOutputSchema, StockWaitingRoomInputSchema
+from src.apps.stocks.schemas.stock_schemas import (
+    StockOutputSchema,
+    StockWaitingRoomInputSchema,
+)
 from src.apps.stocks.services.stock_services import create_stocks
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
@@ -101,7 +104,8 @@ async def test_raise_exception_while_updating_nonexistent_waiitng_room(
 
 @pytest.mark.asyncio
 async def test_raise_exception_while_requested_max_weight_is_smaller_than_the_current_stock_weight(
-    async_session: AsyncSession, db_products: PagedResponseSchema[ProductOutputSchema],
+    async_session: AsyncSession,
+    db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     waiting_room_input_1 = WaitingRoomInputSchemaFactory().generate(max_stocks=1)
@@ -137,7 +141,8 @@ async def test_raise_exception_while_requested_max_weight_is_smaller_than_the_cu
 
 @pytest.mark.asyncio
 async def test_raise_exception_while_requested_max_stock_amount_is_smaller_than_the_current_stock_amount(
-    async_session: AsyncSession, db_products: PagedResponseSchema[ProductOutputSchema],
+    async_session: AsyncSession,
+    db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     waiting_room_input_1 = WaitingRoomInputSchemaFactory().generate(max_stocks=3)
@@ -192,7 +197,9 @@ async def test_raise_exception_while_deleting_waiting_room_with_stocks_inside(
     waiting_room = await create_waiting_room(async_session, waiting_room_input)
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     stock_schema = StockWaitingRoomInputSchema(id=available_stocks[0].id)
-    await add_single_stock_to_waiting_room(async_session, waiting_room.id, stock_schema, db_staff_user.id)
+    await add_single_stock_to_waiting_room(
+        async_session, waiting_room.id, stock_schema, db_staff_user.id
+    )
     waiting_room = await get_single_waiting_room(async_session, waiting_room.id)
 
     with pytest.raises(WaitingRoomIsNotEmptyException):
@@ -225,7 +232,10 @@ async def test_raise_exception_while_adding_nonexistent_stock_to_waiting_room(
 
     with pytest.raises(DoesNotExist):
         await add_single_stock_to_waiting_room(
-            async_session, db_waiting_rooms.results[0].id, stock_schema, db_staff_user.id
+            async_session,
+            db_waiting_rooms.results[0].id,
+            stock_schema,
+            db_staff_user.id,
         )
 
 
@@ -241,7 +251,10 @@ async def test_raise_exception_while_adding_issued_stock_to_waiting_room(
 
     with pytest.raises(CannotMoveIssuedStockException):
         await add_single_stock_to_waiting_room(
-            async_session, db_waiting_rooms.results[0].id, stock_schema, db_staff_user.id
+            async_session,
+            db_waiting_rooms.results[0].id,
+            stock_schema,
+            db_staff_user.id,
         )
 
 
@@ -257,7 +270,10 @@ async def test_raise_exception_while_adding_stock_to_the_current_waiting_room(
 
     with pytest.raises(StockAlreadyInWaitingRoomException):
         await add_single_stock_to_waiting_room(
-            async_session, available_stocks[0].waiting_room.id, stock_schema, db_staff_user.id
+            async_session,
+            available_stocks[0].waiting_room.id,
+            stock_schema,
+            db_staff_user.id,
         )
 
 
@@ -273,7 +289,9 @@ async def test_raise_exception_when_waiting_room_got_no_available_space_for_new_
     waiting_room_input = WaitingRoomInputSchemaFactory().generate(max_stocks=1)
     waiting_room = await create_waiting_room(async_session, waiting_room_input)
     stock_schema = StockWaitingRoomInputSchema(id=available_stocks[0].id)
-    await add_single_stock_to_waiting_room(async_session, waiting_room.id, stock_schema, db_staff_user.id)
+    await add_single_stock_to_waiting_room(
+        async_session, waiting_room.id, stock_schema, db_staff_user.id
+    )
 
     stock_schema = StockWaitingRoomInputSchema(id=available_stocks[1].id)
 
@@ -337,7 +355,9 @@ async def test_check_if_available_weight_is_set_correctly(
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
 
     stock_schema = StockWaitingRoomInputSchema(id=available_stocks[0].id)
-    await add_single_stock_to_waiting_room(async_session, waiting_room.id, stock_schema, db_staff_user.id)
+    await add_single_stock_to_waiting_room(
+        async_session, waiting_room.id, stock_schema, db_staff_user.id
+    )
 
     new_max_weight = available_stocks[0].weight + 20
     waiting_room = await if_exists(WaitingRoom, "id", waiting_room.id, async_session)
@@ -364,7 +384,9 @@ async def test_check_if_available_stock_amount_is_set_correctly(
 
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     stock_schema = StockWaitingRoomInputSchema(id=available_stocks[0].id)
-    await add_single_stock_to_waiting_room(async_session, waiting_room.id, stock_schema, db_staff_user.id)
+    await add_single_stock_to_waiting_room(
+        async_session, waiting_room.id, stock_schema, db_staff_user.id
+    )
 
     new_max_stocks = 2
     waiting_room = await if_exists(WaitingRoom, "id", waiting_room.id, async_session)
@@ -379,7 +401,8 @@ async def test_check_if_available_stock_amount_is_set_correctly(
 
 @pytest.mark.asyncio
 async def test_check_if_old_and_new_waiting_room_state_is_managed_correctly(
-    async_session: AsyncSession, db_products: PagedResponseSchema[ProductOutputSchema],
+    async_session: AsyncSession,
+    db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     waiting_room_input_1 = WaitingRoomInputSchemaFactory().generate(max_stocks=1)
@@ -395,7 +418,10 @@ async def test_check_if_old_and_new_waiting_room_state_is_managed_correctly(
     )
 
     stocks = await create_stocks(
-        async_session, user_id=db_staff_user.id, testing=True, input_schemas=[stock_input]
+        async_session,
+        user_id=db_staff_user.id,
+        testing=True,
+        input_schemas=[stock_input],
     )
 
     stock_schema = StockWaitingRoomInputSchema(id=stocks[0].id)

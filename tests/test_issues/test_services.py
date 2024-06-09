@@ -9,7 +9,10 @@ from src.apps.issues.services import (
     get_single_issue,
     update_single_issue,
 )
-from src.apps.stocks.schemas.stock_schemas import StockIssueInputSchema, StockOutputSchema
+from src.apps.stocks.schemas.stock_schemas import (
+    StockIssueInputSchema,
+    StockOutputSchema,
+)
 from src.apps.stocks.services.stock_services import issue_stocks
 from src.apps.users.schemas import UserOutputSchema
 from src.core.exceptions import (

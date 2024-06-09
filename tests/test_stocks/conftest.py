@@ -13,7 +13,10 @@ from src.apps.receptions.schemas import (
     ReceptionProductInputSchema,
 )
 from src.apps.receptions.services import create_reception, get_all_receptions
-from src.apps.stocks.schemas.stock_schemas import StockIssueInputSchema, StockOutputSchema
+from src.apps.stocks.schemas.stock_schemas import (
+    StockIssueInputSchema,
+    StockOutputSchema,
+)
 from src.apps.stocks.schemas.user_stock_schemas import UserStockOutputSchema
 from src.apps.stocks.services.stock_services import get_all_stocks
 from src.apps.stocks.services.user_stock_services import get_all_user_stocks
@@ -72,6 +75,7 @@ async def db_stocks(
     await async_session.flush()
 
     return await get_all_stocks(async_session, PageParams())
+
 
 @pytest_asyncio.fixture
 async def db_user_stocks(

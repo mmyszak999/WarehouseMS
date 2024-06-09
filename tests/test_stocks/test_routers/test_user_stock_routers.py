@@ -43,13 +43,13 @@ async def test_only_user_with_permission_can_get_all_user_stocks(
     user_headers: dict[str, str],
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_user_stocks: PagedResponseSchema[UserStockOutputSchema]
+    db_user_stocks: PagedResponseSchema[UserStockOutputSchema],
 ):
     response = await async_client.get("user-stocks/", headers=user_headers)
 
     assert response.status_code == status_code
     if response.status_code == status.HTTP_200_OK:
-         assert db_user_stocks.total == response.json()["total"]
+        assert db_user_stocks.total == response.json()["total"]
 
 
 @pytest.mark.parametrize(
@@ -74,9 +74,11 @@ async def test_only_user_with_permission_can_get_single_user_stock(
     user_headers: dict[str, str],
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_user_stocks: PagedResponseSchema[UserStockOutputSchema]
+    db_user_stocks: PagedResponseSchema[UserStockOutputSchema],
 ):
-    response = await async_client.get(f"user-stocks/{db_user_stocks.results[0].id}", headers=user_headers)
+    response = await async_client.get(
+        f"user-stocks/{db_user_stocks.results[0].id}", headers=user_headers
+    )
 
     assert response.status_code == status_code
     if status_code == status.HTTP_200_OK:

@@ -4,8 +4,10 @@ from fastapi_jwt_auth import AuthJWT
 from httpx import AsyncClient, Response
 
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
-
-from src.apps.stocks.schemas.stock_schemas import StockOutputSchema, StockWaitingRoomInputSchema
+from src.apps.stocks.schemas.stock_schemas import (
+    StockOutputSchema,
+    StockWaitingRoomInputSchema,
+)
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
 from src.core.factory.waiting_room_factory import (

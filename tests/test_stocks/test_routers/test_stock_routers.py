@@ -109,7 +109,9 @@ async def test_only_staff_user_can_get_all_stock_history(
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
 
-    response = await async_client.get(f"stocks/all/{db_stocks.results[0].id}/history", headers=user_headers)
+    response = await async_client.get(
+        f"stocks/all/{db_stocks.results[0].id}/history", headers=user_headers
+    )
 
     assert response.status_code == status_code
 

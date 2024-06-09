@@ -32,8 +32,8 @@ class Issue(Base):
     user = relationship("User", back_populates="issues", lazy="joined")
     stocks = relationship("Stock", back_populates="issue", lazy="joined")
     stock_user_history = relationship(
-        'UserStock',
-        back_populates='issue',
-        foreign_keys='UserStock.issue_id',
-        lazy="joined"
+        "UserStock",
+        back_populates="issue",
+        foreign_keys="UserStock.issue_id",
+        lazy="joined",
     )

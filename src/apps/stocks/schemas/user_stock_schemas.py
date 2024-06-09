@@ -2,10 +2,10 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from src.apps.waiting_rooms.schemas import WaitingRoomBasicOutputSchema
-from src.apps.users.schemas import UserInfoOutputSchema
-from src.apps.stocks.schemas.stock_schemas import StockBasicOutputSchema
 from src.apps.issues.schemas import IssueBasicOutputSchema
+from src.apps.stocks.schemas.stock_schemas import StockBasicOutputSchema
+from src.apps.users.schemas import UserInfoOutputSchema
+from src.apps.waiting_rooms.schemas import WaitingRoomBasicOutputSchema
 
 
 class UserStockInputSchema(BaseModel):
@@ -23,6 +23,6 @@ class UserStockOutputSchema(BaseModel):
     from_waiting_room: Optional[WaitingRoomBasicOutputSchema]
     to_waiting_room: Optional[WaitingRoomBasicOutputSchema]
     issue: Optional[IssueBasicOutputSchema]
-    
+
     class Config:
         orm_mode = True

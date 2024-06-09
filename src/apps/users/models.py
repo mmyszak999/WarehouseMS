@@ -28,8 +28,8 @@ class User(Base):
     issues = relationship("Issue", back_populates="user", lazy="joined")
     receptions = relationship("Reception", back_populates="user", lazy="joined")
     stock_user_history = relationship(
-        'UserStock',
-        back_populates='user',
-        foreign_keys='UserStock.user_id',
-        lazy="joined"
+        "UserStock",
+        back_populates="user",
+        foreign_keys="UserStock.user_id",
+        lazy="joined",
     )

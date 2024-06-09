@@ -5,20 +5,23 @@ from src.apps.issues.services import create_issue
 from src.apps.products.models import Product
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.stocks.models import Stock
-from src.apps.stocks.schemas.stock_schemas import StockIssueInputSchema, StockOutputSchema
+from src.apps.stocks.schemas.stock_schemas import (
+    StockIssueInputSchema,
+    StockOutputSchema,
+)
 from src.apps.stocks.schemas.user_stock_schemas import UserStockOutputSchema
 from src.apps.stocks.services.user_stock_services import (
     create_user_stock_object,
-    get_single_user_stock,
-    get_multiple_user_stocks,
     get_all_user_stock_history_for_single_stock,
+    get_all_user_stocks,
     get_all_user_stocks_with_single_user_involvement,
-    get_all_user_stocks
+    get_multiple_user_stocks,
+    get_single_user_stock,
 )
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
-from src.apps.waiting_rooms.services import create_waiting_room
 from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
+from src.apps.waiting_rooms.services import create_waiting_room
 from src.core.exceptions import (
     AlreadyExists,
     CannotRetrieveIssuedStockException,
@@ -50,20 +53,21 @@ async def test_user_stock_object_is_created_correctly(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_staff_user: UserOutputSchema,
-    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema]
+    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
     user_stock = await create_user_stock_object(
-            async_session, user_id=db_staff_user.id,
-            stock_id=db_stocks.results[0].id,
-            from_waiting_room_id=db_waiting_rooms.results[0].id,
-            to_waiting_room_id=db_waiting_rooms.results[1].id  
-        )
-    
+        async_session,
+        user_id=db_staff_user.id,
+        stock_id=db_stocks.results[0].id,
+        from_waiting_room_id=db_waiting_rooms.results[0].id,
+        to_waiting_room_id=db_waiting_rooms.results[1].id,
+    )
+
     assert user_stock.user.id == db_staff_user.id
     assert user_stock.stock.id == db_stocks.results[0].id
     assert user_stock.from_waiting_room.id == db_waiting_rooms.results[0].id
     assert user_stock.to_waiting_room.id == db_waiting_rooms.results[1].id
-    
+
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_creating_user_stock_with_nonexistent_waiting_rooms(
@@ -73,15 +77,20 @@ async def test_raise_exception_when_creating_user_stock_with_nonexistent_waiting
 ):
     with pytest.raises(DoesNotExist):
         await create_user_stock_object(
-            async_session, from_waiting_room_id=generate_uuid(),
-            user_id=db_staff_user.id, stock_id=db_stocks.results[0].id
-    )
-    
+            async_session,
+            from_waiting_room_id=generate_uuid(),
+            user_id=db_staff_user.id,
+            stock_id=db_stocks.results[0].id,
+        )
+
     with pytest.raises(DoesNotExist):
         await create_user_stock_object(
-            async_session, to_waiting_room_id=generate_uuid(),
-            user_id=db_staff_user.id, stock_id=db_stocks.results[0].id
-    )
+            async_session,
+            to_waiting_room_id=generate_uuid(),
+            user_id=db_staff_user.id,
+            stock_id=db_stocks.results[0].id,
+        )
+
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_creating_user_stock_with_nonexistent_user(
@@ -92,7 +101,8 @@ async def test_raise_exception_when_creating_user_stock_with_nonexistent_user(
     with pytest.raises(DoesNotExist):
         await create_user_stock_object(
             async_session, user_id=generate_uuid(), stock_id=db_stocks.results[0].id
-    )
+        )
+
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_creating_user_stock_with_nonexistent_stock(
@@ -102,7 +112,7 @@ async def test_raise_exception_when_creating_user_stock_with_nonexistent_stock(
     with pytest.raises(DoesNotExist):
         await create_user_stock_object(
             async_session, stock_id=generate_uuid(), user_id=db_staff_user.id
-    )
+        )
 
 
 @pytest.mark.asyncio
@@ -113,9 +123,11 @@ async def test_raise_exception_when_creating_user_stock_with_nonexistent_issue(
 ):
     with pytest.raises(DoesNotExist):
         await create_user_stock_object(
-            async_session, issue_id=generate_uuid(), user_id=db_staff_user.id,
-            stock_id=db_stocks.results[0].id
-    )
+            async_session,
+            issue_id=generate_uuid(),
+            user_id=db_staff_user.id,
+            stock_id=db_stocks.results[0].id,
+        )
 
 
 @pytest.mark.asyncio
@@ -135,7 +147,9 @@ async def test_check_if_single_user_stock_was_returned(
     db_user_stocks: PagedResponseSchema[UserStockOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
-    user_stock = await get_single_user_stock(async_session, db_user_stocks.results[0].id)
+    user_stock = await get_single_user_stock(
+        async_session, db_user_stocks.results[0].id
+    )
     assert db_user_stocks.results[0].id == user_stock.id
     assert db_user_stocks.results[0].stock.id == user_stock.stock.id
 
@@ -151,9 +165,11 @@ async def test_check_if_returned_stock_history_is_complete_and_got_only_one_stoc
     user_stocks = await get_all_user_stock_history_for_single_stock(
         async_session, PageParams(), stock_id=issued_stocks[0].id
     )
-    
+
     assert user_stocks.total == 2
-    assert {user_stock.stock.id for user_stock in user_stocks.results} == {issued_stocks[0].id}
+    assert {user_stock.stock.id for user_stock in user_stocks.results} == {
+        issued_stocks[0].id
+    }
 
 
 @pytest.mark.asyncio
@@ -165,8 +181,8 @@ async def test_raise_exception_when_getting_stock_history_for_nonexistent_stock(
 ):
     with pytest.raises(DoesNotExist):
         await get_all_user_stock_history_for_single_stock(
-        async_session, PageParams(), stock_id=generate_uuid()
-    )
+            async_session, PageParams(), stock_id=generate_uuid()
+        )
 
 
 @pytest.mark.asyncio
@@ -179,8 +195,10 @@ async def test_check_if_returned_stock_history_contain_only_single_user_activiti
     user_stocks = await get_all_user_stocks_with_single_user_involvement(
         async_session, PageParams(), user_id=db_staff_user.id
     )
-    
-    assert {user_stock.user.id for user_stock in user_stocks.results} == {db_staff_user.id}
+
+    assert {user_stock.user.id for user_stock in user_stocks.results} == {
+        db_staff_user.id
+    }
 
 
 @pytest.mark.asyncio
@@ -193,4 +211,4 @@ async def test_raise_exception_when_getting_stock_history_containing_only_single
     with pytest.raises(DoesNotExist):
         await get_all_user_stocks_with_single_user_involvement(
             async_session, PageParams(), user_id=generate_uuid()
-    )
+        )
