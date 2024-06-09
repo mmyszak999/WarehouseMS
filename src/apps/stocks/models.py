@@ -24,21 +24,21 @@ class UserStock(Base):
     id = Column(
         String, primary_key=True, unique=True, nullable=False, default=generate_uuid
     )
-    user_id = Column(String, ForeignKey('user.id'), nullable=False)
+    user_id = Column(String, ForeignKey('user.id', ondelete="SET NULL"), nullable=False)
     user = relationship('User', back_populates='stock_user_history', foreign_keys=[user_id], lazy="joined")
     
-    stock_id = Column(String, ForeignKey('stock.id'), nullable=False)
+    stock_id = Column(String, ForeignKey('stock.id', ondelete="SET NULL"), nullable=False)
     stock = relationship('Stock', back_populates='stock_user_history', foreign_keys=[stock_id], lazy="joined")
     
     moved_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     
-    from_waiting_room_id = Column(String, ForeignKey('waiting_room.id'), nullable=True)
+    from_waiting_room_id = Column(String, ForeignKey('waiting_room.id', ondelete="SET NULL"), nullable=True)
     from_waiting_room = relationship('WaitingRoom', foreign_keys=[from_waiting_room_id], lazy="joined")
 
-    to_waiting_room_id = Column(String, ForeignKey('waiting_room.id'), nullable=True)
+    to_waiting_room_id = Column(String, ForeignKey('waiting_room.id', ondelete="SET NULL"), nullable=True)
     to_waiting_room = relationship('WaitingRoom', foreign_keys=[to_waiting_room_id], lazy="joined")
     
-    issue_id = Column(String, ForeignKey('issue.id'), nullable=True)
+    issue_id = Column(String, ForeignKey('issue.id', ondelete="SET NULL"), nullable=True)
     issue = relationship("Issue", foreign_keys=[issue_id], lazy="joined")
 
 

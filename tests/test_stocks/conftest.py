@@ -13,8 +13,8 @@ from src.apps.receptions.schemas import (
     ReceptionProductInputSchema,
 )
 from src.apps.receptions.services import create_reception, get_all_receptions
-from src.apps.stocks.schemas import StockIssueInputSchema, StockOutputSchema
-from src.apps.stocks.services import get_all_stocks
+from src.apps.stocks.schemas.stock_schemas import StockIssueInputSchema, StockOutputSchema
+from src.apps.stocks.services.stock_services import get_all_stocks
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
 from src.apps.waiting_rooms.services import create_waiting_room, get_all_waiting_rooms

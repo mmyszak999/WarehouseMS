@@ -50,7 +50,7 @@ class StockWaitingRoomBasicOutputSchema(BaseModel):
 class StockWithoutWaitingRoomOutputSchema(StockBaseSchema):
     id: str
     product: ProductBasicOutputSchema
-    reception: ReceptionBasicOutputSchema
+    reception: Optional[ReceptionBasicOutputSchema]
 
     class Config:
         orm_mode = True

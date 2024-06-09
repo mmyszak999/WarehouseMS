@@ -2,7 +2,7 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.apps.stocks.schemas import StockOutputSchema
+from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
 from src.apps.waiting_rooms.services import create_waiting_room, get_all_waiting_rooms
 from src.core.factory.waiting_room_factory import WaitingRoomInputSchemaFactory

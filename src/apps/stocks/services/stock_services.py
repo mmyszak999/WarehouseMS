@@ -69,7 +69,7 @@ async def create_stocks(
             raise NoAvailableWaitingRoomsException(
                 product.name, product_count, stock_weight
             )
-
+        
         stock_input = StockInputSchema(
             weight=stock_weight,
             product_count=product_count,

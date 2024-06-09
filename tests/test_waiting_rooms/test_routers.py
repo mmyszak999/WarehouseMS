@@ -3,10 +3,9 @@ from fastapi import status
 from fastapi_jwt_auth import AuthJWT
 from httpx import AsyncClient, Response
 
-from src.apps.issues.schemas import IssueOutputSchema
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
-from src.apps.receptions.schemas import ReceptionOutputSchema
-from src.apps.stocks.schemas import StockOutputSchema, StockWaitingRoomInputSchema
+
+from src.apps.stocks.schemas.stock_schemas import StockOutputSchema, StockWaitingRoomInputSchema
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
 from src.core.factory.waiting_room_factory import (
@@ -14,9 +13,7 @@ from src.core.factory.waiting_room_factory import (
     WaitingRoomUpdateSchemaFactory,
 )
 from src.core.pagination.schemas import PagedResponseSchema
-from tests.test_issues.conftest import db_issues
 from tests.test_products.conftest import db_categories, db_products
-from tests.test_receptions.conftest import db_receptions
 from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,
@@ -84,8 +81,6 @@ async def test_authenticated_user_can_get_waiting_rooms(
     user_headers: dict[str, str],
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
     response = await async_client.get("waiting_rooms/", headers=user_headers)
@@ -115,8 +110,6 @@ async def test_authenticated_can_get_single_waiting_room(
     user_headers: dict[str, str],
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
     response = await async_client.get(
@@ -148,8 +141,6 @@ async def test_only_user_with_proper_permission_can_update_waiting_room(
     user_headers: dict[str, str],
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
     update_data = WaitingRoomUpdateSchemaFactory().generate(max_stocks=1111)
@@ -186,8 +177,6 @@ async def test_only_user_with_proper_permission_can_delete_waiting_room(
     user_headers: dict[str, str],
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
     available_waiting_rooms = [
@@ -223,8 +212,6 @@ async def test_only_user_with_proper_permission_can_add_stock_to_waiting_room(
     user_headers: dict[str, str],
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]

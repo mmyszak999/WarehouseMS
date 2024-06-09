@@ -9,10 +9,8 @@ from src.apps.issues.services import (
     get_single_issue,
     update_single_issue,
 )
-from src.apps.products.schemas.product_schemas import ProductOutputSchema
-from src.apps.receptions.schemas import ReceptionOutputSchema
-from src.apps.stocks.schemas import StockIssueInputSchema, StockOutputSchema
-from src.apps.stocks.services import issue_stocks
+from src.apps.stocks.schemas.stock_schemas import StockIssueInputSchema, StockOutputSchema
+from src.apps.stocks.services.stock_services import issue_stocks
 from src.apps.users.schemas import UserOutputSchema
 from src.core.exceptions import (
     AlreadyExists,
@@ -28,8 +26,6 @@ from src.core.factory.issue_factory import (
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.utils import generate_uuid
-from tests.test_products.conftest import db_products
-from tests.test_receptions.conftest import db_receptions
 from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,
@@ -43,7 +39,6 @@ from tests.test_users.conftest import (
 async def test_if_issue_was_created_correctly(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -64,7 +59,6 @@ async def test_if_issue_was_created_correctly(
 async def test_raise_exception_when_issue_data_is_missing(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -76,7 +70,6 @@ async def test_raise_exception_when_issue_data_is_missing(
 async def test_if_only_one_issue_was_returned(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -89,7 +82,6 @@ async def test_if_only_one_issue_was_returned(
 async def test_raise_exception_while_getting_nonexistent_issue(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -101,7 +93,6 @@ async def test_raise_exception_while_getting_nonexistent_issue(
 async def test_if_multiple_issues_were_returned(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -113,7 +104,6 @@ async def test_if_multiple_issues_were_returned(
 async def test_raise_exception_while_updating_nonexistent_issue(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):

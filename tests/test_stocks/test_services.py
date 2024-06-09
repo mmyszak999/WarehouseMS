@@ -1,14 +1,12 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.apps.issues.schemas import IssueOutputSchema
-from src.apps.issues.services import base_create_issue, create_issue
+from src.apps.issues.services import create_issue
 from src.apps.products.models import Product
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
-from src.apps.receptions.schemas import ReceptionOutputSchema
 from src.apps.stocks.models import Stock
-from src.apps.stocks.schemas import StockIssueInputSchema, StockOutputSchema
-from src.apps.stocks.services import (
+from src.apps.stocks.schemas.stock_schemas import StockIssueInputSchema, StockOutputSchema
+from src.apps.stocks.services.stock_services import (
     create_stocks,
     get_all_available_stocks,
     get_all_stocks,
@@ -33,9 +31,7 @@ from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid
-from tests.test_issues.conftest import db_issues
 from tests.test_products.conftest import db_products
-from tests.test_receptions.conftest import db_receptions
 from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,
@@ -63,7 +59,7 @@ async def test_if_stocks_were_created_correctly(
     ]
 
     stocks = await create_stocks(
-        async_session, testing=True, input_schemas=stock_inputs
+        async_session, db_staff_user.id, testing=True, input_schemas=stock_inputs
     )
 
     assert {product_count} == {stock.product_count for stock in stocks}
@@ -79,7 +75,7 @@ async def test_raise_exception_when_product_data_is_missing(
     db_staff_user: UserOutputSchema,
 ):
     with pytest.raises(MissingProductDataException):
-        await create_stocks(async_session)
+        await create_stocks(async_session, user_id=db_staff_user.id)
 
 
 @pytest.mark.asyncio
@@ -93,7 +89,9 @@ async def test_raise_exception_when_there_is_no_waiting_room_available_for_new_s
     ]
     product_counts = [4]
     with pytest.raises(NoAvailableWaitingRoomsException):
-        await create_stocks(async_session, products, product_counts)
+        await create_stocks(
+            async_session, user_id=db_staff_user.id, products=products, product_counts=product_counts
+        )
 
 
 @pytest.mark.asyncio
@@ -108,13 +106,14 @@ async def test_check_if_new_stock_will_be_correctly_added_to_available_waiting_r
     waiting_room = await create_waiting_room(
         async_session, waiting_room_input, testing=True
     )
+    await async_session.flush()
 
     products = [
         await if_exists(Product, "id", db_products.results[0].id, async_session)
     ]
     product_counts = [4]
-    stocks = await create_stocks(async_session, products, product_counts)
-    await async_session.refresh(waiting_room)
+    stocks = await create_stocks(async_session, db_staff_user.id, products, product_counts)
+    await async_session.flush()
 
     assert stocks[0].waiting_room_id == waiting_room.id
     assert waiting_room.current_stock_weight == stocks[0].weight
@@ -124,8 +123,7 @@ async def test_check_if_new_stock_will_be_correctly_added_to_available_waiting_r
 @pytest.mark.asyncio
 async def test_raise_exception_while_getting_nonexistent_stock(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
+    db_stocks: PagedResponseSchema[StockOutputSchema]
 ):
     with pytest.raises(DoesNotExist):
         await get_single_stock(async_session, generate_uuid())
@@ -134,9 +132,7 @@ async def test_raise_exception_while_getting_nonexistent_stock(
 @pytest.mark.asyncio
 async def test_raise_exception_while_getting_issued_stock(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema],
+    db_stocks: PagedResponseSchema[StockOutputSchema]
 ):
     issued_stocks = [stock for stock in db_stocks.results if stock.is_issued]
     with pytest.raises(CannotRetrieveIssuedStockException):
@@ -146,9 +142,7 @@ async def test_raise_exception_while_getting_issued_stock(
 @pytest.mark.asyncio
 async def test_if_all_available_stocks_were_returned(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema],
+    db_stocks: PagedResponseSchema[StockOutputSchema]
 ):
     stocks = await get_all_available_stocks(async_session, PageParams(page=1, size=5))
     assert stocks.total == db_stocks.total - 1
@@ -157,9 +151,7 @@ async def test_if_all_available_stocks_were_returned(
 @pytest.mark.asyncio
 async def test_if_all_stocks_were_returned(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema],
+    db_stocks: PagedResponseSchema[StockOutputSchema]
 ):
     stocks = await get_all_stocks(async_session, PageParams(page=1, size=5))
     assert stocks.total == db_stocks.total
@@ -169,7 +161,6 @@ async def test_if_all_stocks_were_returned(
 async def test_if_stocks_are_issued_correctly(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]

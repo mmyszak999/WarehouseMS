@@ -70,7 +70,6 @@ async def create_user_stock_object(
     new_user_stock = UserStock(**input_schema.dict(exclude_none=True))
     session.add(new_user_stock)
     await session.flush()
-    print(UserStockOutputSchema.from_orm(new_user_stock))
     
     return UserStockOutputSchema.from_orm(new_user_stock)
 
