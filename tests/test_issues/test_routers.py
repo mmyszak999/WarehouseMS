@@ -87,7 +87,6 @@ async def test_only_user_with_proper_permission_can_get_all_issues(
 ):
 
     response = await async_client.get("issues/", headers=user_headers)
-    print(response.json())
 
     assert response.status_code == status_code
     if status_code == status.HTTP_200_OK:
