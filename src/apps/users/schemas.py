@@ -76,6 +76,7 @@ class UserUpdateSchema(BaseModel):
 
 
 class UserInfoOutputSchema(UserBaseSchema):
+    id: str
     is_active: bool
 
     class Config:
