@@ -5,12 +5,13 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.models import Product
-from src.apps.stocks.models import Stock
-from src.apps.stocks.schemas import (
+from src.apps.stocks.models import Stock, UserStock
+from src.apps.stocks.schemas.stock_schemas import (
     StockBasicOutputSchema,
     StockInputSchema,
     StockOutputSchema,
 )
+from src.apps.stocks.services.user_stock_services import create_user_stock_object
 from src.apps.waiting_rooms.models import WaitingRoom
 from src.apps.waiting_rooms.services import manage_waiting_room_state
 from src.core.exceptions import (
@@ -31,6 +32,7 @@ from src.core.utils.time import get_current_time
 
 async def create_stocks(
     session: AsyncSession,
+    user_id: str,
     products: list[Product] = [],
     product_counts: list[int] = [],
     reception_id: str = None,
@@ -82,7 +84,10 @@ async def create_stocks(
             available_waiting_room, stocks_involved=True, stock_object=new_stock
         )
         session.add(available_waiting_room)
-    await session.flush()
+        await session.flush()
+        user_stock_object = await create_user_stock_object(
+            session, new_stock.id, user_id, to_waiting_room_id=available_waiting_room.id
+        )
     return stock_list
 
 
@@ -134,7 +139,7 @@ async def get_all_available_stocks(
 
 
 async def issue_stocks(
-    session: AsyncSession, stocks: list[Stock], issue_id: str
+    session: AsyncSession, stocks: list[Stock], issue_id: str, user_id: str
 ) -> list[Stock]:
     for stock in stocks:
         if stock.waiting_room:
@@ -148,6 +153,13 @@ async def issue_stocks(
                 stock_object=stock,
             )
             session.add(stock_waiting_room)
+            user_stock_object = await create_user_stock_object(
+                session,
+                stock.id,
+                user_id,
+                from_waiting_room_id=stock_waiting_room.id,
+                issue_id=issue_id,
+            )
             stock.issue_id = issue_id
             stock.is_issued = True
             stock.updated_at = get_current_time()

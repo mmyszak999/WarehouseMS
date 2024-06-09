@@ -13,8 +13,13 @@ from src.apps.receptions.schemas import (
     ReceptionProductInputSchema,
 )
 from src.apps.receptions.services import create_reception, get_all_receptions
-from src.apps.stocks.schemas import StockIssueInputSchema, StockOutputSchema
-from src.apps.stocks.services import get_all_stocks
+from src.apps.stocks.schemas.stock_schemas import (
+    StockIssueInputSchema,
+    StockOutputSchema,
+)
+from src.apps.stocks.schemas.user_stock_schemas import UserStockOutputSchema
+from src.apps.stocks.services.stock_services import get_all_stocks
+from src.apps.stocks.services.user_stock_services import get_all_user_stocks
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
 from src.apps.waiting_rooms.services import create_waiting_room, get_all_waiting_rooms
@@ -70,3 +75,12 @@ async def db_stocks(
     await async_session.flush()
 
     return await get_all_stocks(async_session, PageParams())
+
+
+@pytest_asyncio.fixture
+async def db_user_stocks(
+    async_session: AsyncSession,
+    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_staff_user: UserOutputSchema,
+) -> PagedResponseSchema[StockOutputSchema]:
+    return await get_all_user_stocks(async_session, PageParams())

@@ -7,6 +7,10 @@ from fastapi_jwt_auth import AuthJWT
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.jwt.schemas import AccessTokenOutputSchema
+from src.apps.stocks.schemas.user_stock_schemas import UserStockOutputSchema
+from src.apps.stocks.services.user_stock_services import (
+    get_all_user_stocks_with_single_user_involvement,
+)
 from src.apps.users.models import User
 from src.apps.users.schemas import (
     UserInfoOutputSchema,
@@ -28,7 +32,7 @@ from src.apps.users.services.user_services import (
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
-from src.core.permissions import check_if_staff
+from src.core.permissions import check_if_staff, check_if_staff_or_owner
 from src.dependencies.get_db import get_db
 from src.dependencies.user import authenticate_user
 
@@ -118,6 +122,24 @@ async def get_user(
     if request_user.is_staff:
         return await get_single_user(session, user_id)
     return await get_single_user(session, user_id, output_schema=UserInfoOutputSchema)
+
+
+@user_router.get(
+    "/{user_id}/history",
+    status_code=status.HTTP_200_OK,
+    response_model=PagedResponseSchema[UserStockOutputSchema],
+)
+async def get_user_stocks_involvement_history(
+    user_id: str,
+    session: AsyncSession = Depends(get_db),
+    page_params: PageParams = Depends(),
+    request_user: User = Depends(authenticate_user),
+) -> PagedResponseSchema[UserStockOutputSchema]:
+    user = await get_single_user(session, user_id)
+    await check_if_staff_or_owner(request_user, "id", user.id)
+    return await get_all_user_stocks_with_single_user_involvement(
+        session, page_params, user_id=user_id
+    )
 
 
 @user_router.patch(

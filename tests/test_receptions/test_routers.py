@@ -5,7 +5,7 @@ from httpx import AsyncClient, Response
 
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.receptions.schemas import ReceptionOutputSchema
-from src.apps.stocks.schemas import StockOutputSchema
+from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.users.schemas import UserOutputSchema
 from src.core.factory.reception_factory import (
     ReceptionInputSchemaFactory,
@@ -13,7 +13,6 @@ from src.core.factory.reception_factory import (
     ReceptionUpdateSchemaFactory,
 )
 from src.core.pagination.schemas import PagedResponseSchema
-from tests.test_issues.conftest import db_issues
 from tests.test_products.conftest import db_products
 from tests.test_receptions.conftest import db_receptions
 from tests.test_stocks.conftest import db_stocks

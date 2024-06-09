@@ -10,7 +10,7 @@ from src.apps.issues.schemas import (
 )
 from src.apps.products.models import Product
 from src.apps.stocks.models import Stock
-from src.apps.stocks.services import issue_stocks
+from src.apps.stocks.services.stock_services import issue_stocks
 from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
@@ -66,7 +66,7 @@ async def create_issue(
     session: AsyncSession, issue_input: IssueInputSchema, user_id: str
 ) -> IssueOutputSchema:
     stocks, new_issue = await base_create_issue(session, user_id, issue_input)
-    await issue_stocks(session, stocks, new_issue.id)
+    await issue_stocks(session, stocks, new_issue.id, user_id)
 
     await session.commit()
     await session.refresh(new_issue)

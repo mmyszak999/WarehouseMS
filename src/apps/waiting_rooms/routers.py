@@ -5,7 +5,7 @@ from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.apps.stocks.schemas import StockWaitingRoomInputSchema
+from src.apps.stocks.schemas.stock_schemas import StockWaitingRoomInputSchema
 from src.apps.users.models import User
 from src.apps.waiting_rooms.schemas import (
     WaitingRoomBasicOutputSchema,
@@ -117,6 +117,6 @@ async def add_stock_to_waiting_room(
 ) -> JSONResponse:
     await check_if_staff_or_has_permission(request_user, "can_move_stocks")
     result = await add_single_stock_to_waiting_room(
-        session, waiting_room_id, stock_schema
+        session, waiting_room_id, stock_schema, request_user.id
     )
     return JSONResponse(result)

@@ -6,7 +6,7 @@ from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.stocks.models import Stock
-from src.apps.stocks.schemas import StockWaitingRoomInputSchema
+from src.apps.stocks.schemas.stock_schemas import StockWaitingRoomInputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
 from src.apps.waiting_rooms.schemas import (
     WaitingRoomBasicOutputSchema,
@@ -176,7 +176,10 @@ async def add_single_stock_to_waiting_room(
     session: AsyncSession,
     waiting_room_id: str,
     stock_schema: StockWaitingRoomInputSchema,
+    user_id: str,
 ) -> dict[str, str]:
+    from src.apps.stocks.services.user_stock_services import create_user_stock_object
+
     if not (
         waiting_room_object := await if_exists(
             WaitingRoom, "id", waiting_room_id, session
@@ -210,6 +213,14 @@ async def add_single_stock_to_waiting_room(
             stock_object=stock_object,
         )
         session.add(old_waiting_room_object)
+        user_stock_object = await create_user_stock_object(
+            session,
+            stock_object.id,
+            user_id,
+            from_waiting_room_id=old_waiting_room_object.id,
+            to_waiting_room_id=waiting_room_object.id,
+        )
+
     waiting_room_object = await manage_waiting_room_state(
         waiting_room_object, stocks_involved=True, stock_object=stock_object
     )

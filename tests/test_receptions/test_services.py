@@ -9,7 +9,7 @@ from src.apps.receptions.services import (
     get_single_reception,
     update_single_reception,
 )
-from src.apps.stocks.schemas import StockOutputSchema
+from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.users.schemas import UserOutputSchema
 from src.core.exceptions import (
     AlreadyExists,

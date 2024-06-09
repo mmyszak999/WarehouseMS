@@ -5,7 +5,10 @@ from pydantic import BaseModel, Field, validator
 
 from src.apps.products.schemas.product_schemas import ProductBasicOutputSchema
 from src.apps.receptions.schemas import ReceptionStockOutputSchema
-from src.apps.stocks.schemas import StockBasicOutputSchema, StockIssueInputSchema
+from src.apps.stocks.schemas.stock_schemas import (
+    StockBasicOutputSchema,
+    StockIssueInputSchema,
+)
 from src.apps.users.schemas import UserInfoOutputSchema
 
 

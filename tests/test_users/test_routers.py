@@ -84,7 +84,6 @@ async def test_staff_and_authenticated_user_can_get_active_users(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
-    request: pytest.FixtureRequest,
     status_code: int,
 ):
     response = await async_client.get("users/", headers=user_headers)
@@ -135,10 +134,36 @@ async def test_only_staff_user_can_get_all_users(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
-    request: pytest.FixtureRequest,
     status_code: int,
 ):
     response = await async_client.get("users/all", headers=user_headers)
+
+    assert response.status_code == status_code
+
+
+@pytest.mark.parametrize(
+    "user, user_headers, status_code",
+    [
+        (
+            pytest.lazy_fixture("db_user"),
+            pytest.lazy_fixture("auth_headers"),
+            status.HTTP_200_OK,
+        ),
+        (
+            pytest.lazy_fixture("db_staff_user"),
+            pytest.lazy_fixture("staff_auth_headers"),
+            status.HTTP_200_OK,
+        ),
+    ],
+)
+@pytest.mark.asyncio
+async def test_authenticated_user_can_get_their_stock_activity_history(
+    async_client: AsyncClient,
+    user: UserOutputSchema,
+    user_headers: dict[str, str],
+    status_code: int,
+):
+    response = await async_client.get(f"users/{user.id}/history", headers=user_headers)
 
     assert response.status_code == status_code
 
@@ -164,7 +189,6 @@ async def test_only_staff_user_and_authenticated_user_can_get_single_user(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
-    request: pytest.FixtureRequest,
     status_code: int,
     db_user: UserOutputSchema,
 ):
@@ -194,7 +218,6 @@ async def test_only_staff_user_can_update_single_user(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
-    request: pytest.FixtureRequest,
     status_code: int,
     db_user: UserOutputSchema,
 ):
@@ -227,7 +250,6 @@ async def test_only_staff_user_can_deactivate_single_user(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
-    request: pytest.FixtureRequest,
     status_code: int,
     db_user: UserOutputSchema,
 ):
@@ -259,7 +281,6 @@ async def test_only_staff_user_can_activate_single_user(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
-    request: pytest.FixtureRequest,
     status_code: int,
     db_user: UserOutputSchema,
 ):

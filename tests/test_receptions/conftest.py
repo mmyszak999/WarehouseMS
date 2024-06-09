@@ -7,7 +7,7 @@ from src.apps.receptions.schemas import (
     ReceptionProductInputSchema,
 )
 from src.apps.receptions.services import get_all_receptions
-from src.apps.stocks.schemas import StockOutputSchema
+from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.users.schemas import UserOutputSchema
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
