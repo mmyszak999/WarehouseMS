@@ -18,6 +18,7 @@ from src.apps.stocks.services.user_stock_services import (
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
 from src.apps.waiting_rooms.services import create_waiting_room
+from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
 from src.core.exceptions import (
     AlreadyExists,
     CannotRetrieveIssuedStockException,
@@ -43,6 +44,26 @@ from tests.test_users.conftest import (
 )
 from tests.test_waiting_rooms.conftest import db_waiting_rooms
 
+
+@pytest.mark.asyncio
+async def test_user_stock_object_is_created_correctly(
+    async_session: AsyncSession,
+    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_staff_user: UserOutputSchema,
+    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema]
+):
+    user_stock = await create_user_stock_object(
+            async_session, user_id=db_staff_user.id,
+            stock_id=db_stocks.results[0].id,
+            from_waiting_room_id=db_waiting_rooms.results[0].id,
+            to_waiting_room_id=db_waiting_rooms.results[1].id  
+        )
+    
+    assert user_stock.user.id == db_staff_user.id
+    assert user_stock.stock.id == db_stocks.results[0].id
+    assert user_stock.from_waiting_room.id == db_waiting_rooms.results[0].id
+    assert user_stock.to_waiting_room.id == db_waiting_rooms.results[1].id
+    
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_creating_user_stock_with_nonexistent_waiting_rooms(
