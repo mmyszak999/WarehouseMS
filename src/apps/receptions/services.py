@@ -53,8 +53,10 @@ async def base_create_reception(
     product_counts = [product.pop("product_count") for product in products_data]
     if not len(products) == len(product_counts):
         raise ServiceException("Products does not match the product count data")
-    
-    waiting_rooms_ids = [product.get("waiting_room_id", None) for product in products_data]
+
+    waiting_rooms_ids = [
+        product.get("waiting_room_id", None) for product in products_data
+    ]
 
     new_reception = Reception(
         user_id=user_id, description=reception_input.get("description")
@@ -68,11 +70,16 @@ async def create_reception(
     session: AsyncSession, reception_input: ReceptionInputSchema, user_id: str
 ) -> ReceptionOutputSchema:
 
-    products, product_counts, new_reception, waiting_room_ids = await base_create_reception(
-        session, user_id, reception_input
+    products, product_counts, new_reception, waiting_room_ids = (
+        await base_create_reception(session, user_id, reception_input)
     )
     await create_stocks(
-        session, user_id, products, product_counts, new_reception.id, waiting_room_ids
+        session,
+        user_id,
+        waiting_room_ids,
+        products,
+        product_counts,
+        new_reception.id,
     )
 
     await session.commit()

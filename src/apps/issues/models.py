@@ -20,7 +20,12 @@ from src.database.db_connection import Base
 class Issue(Base):
     __tablename__ = "issue"
     id = Column(
-        String, primary_key=True, unique=True, nullable=False, index=True, default=generate_uuid
+        String,
+        primary_key=True,
+        unique=True,
+        nullable=False,
+        index=True,
+        default=generate_uuid,
     )
     issue_date = Column(DateTime, nullable=False, default=get_current_time)
     description = Column(String(length=400), nullable=True)

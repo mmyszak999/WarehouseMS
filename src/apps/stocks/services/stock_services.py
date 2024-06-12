@@ -33,10 +33,10 @@ from src.core.utils.time import get_current_time
 async def create_stocks(
     session: AsyncSession,
     user_id: str,
+    waiting_rooms_ids: list[str],
     products: list[Product] = [],
     product_counts: list[int] = [],
     reception_id: str = None,
-    waiting_rooms_ids: list[str] = [],
     testing: bool = False,
     input_schemas: list[StockInputSchema] = None,
 ) -> list[Stock]:
@@ -52,32 +52,26 @@ async def create_stocks(
     if not (products or product_counts):
         raise MissingProductDataException
 
-    for (
-        product,
-        product_count,
-        waiting_room_id
-    ) in zip(products, product_counts, waiting_rooms_ids):
+    for product, product_count, waiting_room_id in zip(
+        products, product_counts, waiting_rooms_ids
+    ):
         stock_weight = product_count * product.weight
         statement = select(WaitingRoom).filter(
-                WaitingRoom.available_slots >= 1,
-                WaitingRoom.available_stock_weight >= stock_weight,
-            )
+            WaitingRoom.available_slots >= 1,
+            WaitingRoom.available_stock_weight >= stock_weight,
+        )
         if waiting_room_id is not None:
-            if not (await if_exists(
-                WaitingRoom, "id", waiting_room_id, session
-            )):
+            if not (await if_exists(WaitingRoom, "id", waiting_room_id, session)):
                 raise DoesNotExist(WaitingRoom.__name__, "id", waiting_room_id)
-            statement = statement.where(
-                WaitingRoom.id.in_([waiting_room_id])
-            ).limit(1)
+            statement = statement.where(WaitingRoom.id.in_([waiting_room_id])).limit(1)
             waiting_room = await session.execute(statement)
             waiting_room = waiting_room.scalar()
             if not waiting_room:
                 raise NoAvailableWaitingRoomsException(
                     product.name, product_count, stock_weight
                 )
-    
-        else:     
+
+        else:
             statement = statement.limit(1)
             available_waiting_rooms = await session.execute(statement)
             waiting_room = available_waiting_rooms.scalar()

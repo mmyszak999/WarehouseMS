@@ -10,7 +10,12 @@ from src.database.db_connection import Base
 class User(Base):
     __tablename__ = "user"
     id = Column(
-        String, primary_key=True, unique=True, nullable=False, index=True, default=generate_uuid
+        String,
+        primary_key=True,
+        unique=True,
+        nullable=False,
+        index=True,
+        default=generate_uuid,
     )
     first_name = Column(String(length=50), nullable=False)
     last_name = Column(String(length=75), nullable=False)

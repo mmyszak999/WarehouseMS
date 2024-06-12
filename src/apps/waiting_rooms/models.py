@@ -21,7 +21,12 @@ from src.database.db_connection import Base
 class WaitingRoom(Base):
     __tablename__ = "waiting_room"
     id = Column(
-        String, primary_key=True, unique=True, nullable=False, index=True, default=generate_uuid
+        String,
+        primary_key=True,
+        unique=True,
+        nullable=False,
+        index=True,
+        default=generate_uuid,
     )
     max_stocks = Column(Integer, nullable=False)
     max_weight = Column(DECIMAL, nullable=False)

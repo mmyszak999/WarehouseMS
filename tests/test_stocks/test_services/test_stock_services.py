@@ -62,7 +62,11 @@ async def test_if_stocks_were_created_correctly(
     ]
 
     stocks = await create_stocks(
-        async_session, db_staff_user.id, testing=True, input_schemas=stock_inputs
+        async_session,
+        user_id=db_staff_user.id,
+        waiting_rooms_ids=[None, None, None],
+        testing=True,
+        input_schemas=stock_inputs,
     )
 
     assert {product_count} == {stock.product_count for stock in stocks}
@@ -78,7 +82,9 @@ async def test_raise_exception_when_product_data_is_missing(
     db_staff_user: UserOutputSchema,
 ):
     with pytest.raises(MissingProductDataException):
-        await create_stocks(async_session, user_id=db_staff_user.id)
+        await create_stocks(
+            async_session, user_id=db_staff_user.id, waiting_rooms_ids=[None]
+        )
 
 
 @pytest.mark.asyncio
@@ -97,7 +103,7 @@ async def test_raise_exception_when_there_is_no_waiting_room_available_for_new_s
             user_id=db_staff_user.id,
             products=products,
             product_counts=product_counts,
-            waiting_rooms_ids=[None]
+            waiting_rooms_ids=[None],
         )
 
 
@@ -120,10 +126,10 @@ async def test_check_if_new_stock_will_be_correctly_added_to_available_waiting_r
     ]
     product_counts = [4]
     stocks = await create_stocks(
-        async_session, db_staff_user.id, products, product_counts, waiting_rooms_ids=[waiting_room.id]
+        async_session, db_staff_user.id, [waiting_room.id], products, product_counts
     )
     await async_session.flush()
-    
+
     assert stocks[0].waiting_room_id == waiting_room.id
     assert waiting_room.current_stock_weight == stocks[0].weight
     assert waiting_room.occupied_slots == 1

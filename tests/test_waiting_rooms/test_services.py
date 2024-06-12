@@ -121,7 +121,11 @@ async def test_raise_exception_while_requested_max_weight_is_smaller_than_the_cu
     )
 
     stocks = await create_stocks(
-        async_session, db_staff_user.id, testing=True, input_schemas=[stock_input]
+        async_session,
+        db_staff_user.id,
+        waiting_rooms_ids=[None],
+        testing=True,
+        input_schemas=[stock_input],
     )
 
     stock_schemas = [StockWaitingRoomInputSchema(id=stock.id) for stock in stocks]
@@ -161,7 +165,11 @@ async def test_raise_exception_while_requested_max_stock_amount_is_smaller_than_
     ]
 
     stocks = await create_stocks(
-        async_session, db_staff_user.id, testing=True, input_schemas=stock_inputs
+        async_session,
+        db_staff_user.id,
+        waiting_rooms_ids=[None, None, None],
+        testing=True,
+        input_schemas=stock_inputs,
     )
 
     stock_schemas = [StockWaitingRoomInputSchema(id=stock.id) for stock in stocks]
@@ -420,6 +428,7 @@ async def test_check_if_old_and_new_waiting_room_state_is_managed_correctly(
     stocks = await create_stocks(
         async_session,
         user_id=db_staff_user.id,
+        waiting_rooms_ids=[None],
         testing=True,
         input_schemas=[stock_input],
     )
