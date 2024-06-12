@@ -18,6 +18,7 @@ class StockInputSchemaFactory(SchemaFactory):
         product_count: int = None,
         product_id: str = None,
         reception_id: str = None,
+        waiting_room_id: str = None,
     ):
         if not product_count:
             product_count = set_product_count()
@@ -26,4 +27,5 @@ class StockInputSchemaFactory(SchemaFactory):
             weight=product_weight * product_count,
             product_id=product_id,
             reception_id=reception_id,
+            waiting_room_id=waiting_room_id,
         )
