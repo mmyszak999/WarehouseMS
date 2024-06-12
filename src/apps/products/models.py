@@ -35,7 +35,12 @@ category_product_association_table = Table(
 class Category(Base):
     __tablename__ = "category"
     id = Column(
-        String, primary_key=True, unique=True, nullable=False, default=generate_uuid
+        String,
+        primary_key=True,
+        unique=True,
+        nullable=False,
+        index=True,
+        default=generate_uuid,
     )
     name = Column(String(length=75), nullable=False, unique=True)
     products = relationship(
@@ -48,7 +53,12 @@ class Category(Base):
 class Product(Base):
     __tablename__ = "product"
     id = Column(
-        String, primary_key=True, unique=True, nullable=False, default=generate_uuid
+        String,
+        primary_key=True,
+        unique=True,
+        nullable=False,
+        index=True,
+        default=generate_uuid,
     )
     name = Column(String(length=75), nullable=False, unique=True)
     wholesale_price = Column(DECIMAL, nullable=False)
@@ -62,4 +72,4 @@ class Product(Base):
         back_populates="products",
         lazy="joined",
     )
-    stocks = relationship("Stock", back_populates="product", lazy="joined")
+    stocks = relationship("Stock", back_populates="product", lazy="selectin")
