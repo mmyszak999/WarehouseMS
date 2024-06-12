@@ -97,6 +97,15 @@ async def test_raise_exception_when_there_is_no_waiting_room_available_for_new_s
         await if_exists(Product, "id", db_products.results[0].id, async_session)
     ]
     product_counts = [4]
+
+    waiting_room_input = WaitingRoomInputSchemaFactory().generate(
+        max_stocks=5, max_weight=1
+    )
+    waiting_room = await create_waiting_room(
+        async_session, waiting_room_input, testing=True
+    )
+    await async_session.flush()
+
     with pytest.raises(NoAvailableWaitingRoomsException):
         await create_stocks(
             async_session,
@@ -104,6 +113,85 @@ async def test_raise_exception_when_there_is_no_waiting_room_available_for_new_s
             products=products,
             product_counts=product_counts,
             waiting_rooms_ids=[None],
+        )
+
+
+@pytest.mark.asyncio
+async def test_raise_exception_when_waiting_room_with_provided_id_does_not_exist_when_creating_stocks(
+    async_session: AsyncSession,
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    products = [
+        await if_exists(Product, "id", db_products.results[0].id, async_session)
+    ]
+    product_counts = [4]
+    with pytest.raises(DoesNotExist):
+        await create_stocks(
+            async_session,
+            user_id=db_staff_user.id,
+            products=products,
+            product_counts=product_counts,
+            waiting_rooms_ids=[generate_uuid()],
+        )
+
+
+@pytest.mark.asyncio
+async def test_check_if_stocks_are_created_correctly_with_provided_waiting_room_id(
+    async_session: AsyncSession,
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    products = [
+        await if_exists(Product, "id", db_products.results[0].id, async_session)
+    ]
+    product_counts = [4]
+
+    waiting_room_input = WaitingRoomInputSchemaFactory().generate(
+        max_stocks=5, max_weight=9000
+    )
+    waiting_room = await create_waiting_room(
+        async_session, waiting_room_input, testing=True
+    )
+    await async_session.flush()
+
+    stocks = await create_stocks(
+        async_session,
+        user_id=db_staff_user.id,
+        products=products,
+        product_counts=product_counts,
+        waiting_rooms_ids=[waiting_room.id],
+    )
+
+    assert stocks[0].waiting_room_id == waiting_room.id
+
+
+@pytest.mark.asyncio
+async def test_raise_exception_when_waiting_room_with_provided_id_is_not_available_for_new_stocks(
+    async_session: AsyncSession,
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    products = [
+        await if_exists(Product, "id", db_products.results[0].id, async_session)
+    ]
+    product_counts = [4]
+
+    waiting_room_input = WaitingRoomInputSchemaFactory().generate(
+        max_stocks=5, max_weight=1
+    )
+    waiting_room = await create_waiting_room(
+        async_session, waiting_room_input, testing=True
+    )
+    await async_session.flush()
+
+    with pytest.raises(NoAvailableWaitingRoomsException):
+        await create_stocks(
+            async_session,
+            user_id=db_staff_user.id,
+            products=products,
+            product_counts=product_counts,
+            waiting_rooms_ids=[waiting_room.id],
         )
 
 

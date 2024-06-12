@@ -169,6 +169,6 @@ class NoAvailableWaitingRoomsException(ServiceException):
         self, product_name: Decimal, product_count: int, stock_weight: Decimal
     ) -> None:
         super().__init__(
-            f"The stock can't be recepted because there is no available waiting rooms for the stock! "
+            f"The stock can't be recepted because there is no available waiting rooms for the stock (due to lack of space/weight limit)! "
             f"Stock data: product_name: {product_name}, count: {product_count}, weight: {stock_weight} "
         )
