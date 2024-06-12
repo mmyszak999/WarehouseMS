@@ -37,7 +37,7 @@ async def base_create_reception(
         return new_reception
 
     if (reception_input is None) or not (
-        reception_input := reception_input.dict(exclude_none=True, exclude_unset=True)
+        reception_input := reception_input.dict(exclude_unset=True)
     ):
         raise MissingReceptionDataException
 
@@ -53,23 +53,27 @@ async def base_create_reception(
     product_counts = [product.pop("product_count") for product in products_data]
     if not len(products) == len(product_counts):
         raise ServiceException("Products does not match the product count data")
+    
+    waiting_rooms_ids = [product.pop("waiting_room_id") for product in products_data]
 
     new_reception = Reception(
         user_id=user_id, description=reception_input.get("description")
     )
     session.add(new_reception)
     await session.flush()
-    return products, product_counts, new_reception
+    return products, product_counts, new_reception, waiting_rooms_ids
 
 
 async def create_reception(
     session: AsyncSession, reception_input: ReceptionInputSchema, user_id: str
 ) -> ReceptionOutputSchema:
 
-    products, product_counts, new_reception = await base_create_reception(
+    products, product_counts, new_reception, waiting_room_ids = await base_create_reception(
         session, user_id, reception_input
     )
-    await create_stocks(session, user_id, products, product_counts, new_reception.id)
+    await create_stocks(
+        session, user_id, products, product_counts, new_reception.id, waiting_room_ids
+    )
 
     await session.commit()
     await session.refresh(new_reception)

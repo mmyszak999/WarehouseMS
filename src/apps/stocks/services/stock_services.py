@@ -36,6 +36,7 @@ async def create_stocks(
     products: list[Product] = [],
     product_counts: list[int] = [],
     reception_id: str = None,
+    waiting_rooms_ids: list[str] = [],
     testing: bool = False,
     input_schemas: list[StockInputSchema] = None,
 ) -> list[Stock]:
@@ -54,39 +55,60 @@ async def create_stocks(
     for (
         product,
         product_count,
-    ) in zip(products, product_counts):
+        waiting_room_id
+    ) in zip(products, product_counts, waiting_rooms_ids):
         stock_weight = product_count * product.weight
-        available_waiting_room = await session.execute(
-            select(WaitingRoom)
-            .filter(
+        statement = select(WaitingRoom).filter(
                 WaitingRoom.available_slots >= 1,
                 WaitingRoom.available_stock_weight >= stock_weight,
             )
-            .limit(1)
-        )
-        available_waiting_room = available_waiting_room.scalar()
-        if not available_waiting_room:
-            raise NoAvailableWaitingRoomsException(
-                product.name, product_count, stock_weight
-            )
+        print("1111")
+        if waiting_room_id is not None:
+            if not (await if_exists(
+                WaitingRoom, "id", waiting_room_id, session
+            )):
+                raise DoesNotExist(WaitingRoom.__name__, "id", waiting_room_id)
+            print("2222")
+            statement = statement.where(
+                WaitingRoom.id.in_([waiting_room_id])
+            ).limit(1)
+            print("3333")
+            waiting_room = await session.execute(statement)
+            print("4444")
+            waiting_room = waiting_room.scalar()
+            print("5555")
+            if not waiting_room:
+                raise NoAvailableWaitingRoomsException(
+                    product.name, product_count, stock_weight
+                )
+    
+        else:     
+            statement = statement.limit(1)
+            available_waiting_rooms = await session.execute(statement)
+            waiting_room = available_waiting_rooms.scalar()
+            if not waiting_room:
+                raise NoAvailableWaitingRoomsException(
+                    product.name, product_count, stock_weight
+                )
 
         stock_input = StockInputSchema(
             weight=stock_weight,
             product_count=product_count,
             product_id=product.id,
             reception_id=reception_id,
-            waiting_room_id=available_waiting_room.id,
+            waiting_room_id=waiting_room.id,
         )
+        print(stock_input)
         new_stock = Stock(**stock_input.dict())
         session.add(new_stock)
         stock_list.append(new_stock)
-        available_waiting_room = await manage_waiting_room_state(
-            available_waiting_room, stocks_involved=True, stock_object=new_stock
+        waiting_room = await manage_waiting_room_state(
+            waiting_room, stocks_involved=True, stock_object=new_stock
         )
-        session.add(available_waiting_room)
+        session.add(waiting_room)
         await session.flush()
         user_stock_object = await create_user_stock_object(
-            session, new_stock.id, user_id, to_waiting_room_id=available_waiting_room.id
+            session, new_stock.id, user_id, to_waiting_room_id=waiting_room.id
         )
     return stock_list
 

@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from src.settings.db_settings import settings
 
 engine = create_async_engine(
-    settings.postgres_url, echo=False, future=True, pool_size=20, max_overflow=64
+    settings.postgres_url, echo=True, future=True, pool_size=30, max_overflow=64
 )
 
 async_session = sessionmaker(
