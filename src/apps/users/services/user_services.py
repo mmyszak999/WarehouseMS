@@ -4,6 +4,7 @@ from fastapi import BackgroundTasks
 from fastapi_jwt_auth import AuthJWT
 from pydantic import BaseModel
 from sqlalchemy import delete, select, update
+from sqlalchemy.orm import load_only
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.emails.services import send_activation_email
@@ -67,7 +68,13 @@ async def authenticate(
 ) -> User:
     login_data = user_login_schema.dict()
     user = await session.scalar(
-        select(User).filter(User.email == login_data["email"]).limit(1)
+        select(User).options(load_only(
+            User.is_superuser,
+            User.email,
+            User.password,
+            User.is_active,
+            User.has_password_set
+            )).filter(User.email == login_data["email"]).limit(1)
     )
     if not (
         user.is_superuser

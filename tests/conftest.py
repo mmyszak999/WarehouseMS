@@ -32,7 +32,7 @@ def meta_migration():
 @pytest_asyncio.fixture(scope="session")
 async def async_engine() -> AsyncEngine:
     settings = DatabaseSettings(TESTING=True)
-    engine = create_async_engine(settings.postgres_url, echo=True, poolclass=NullPool)
+    engine = create_async_engine(settings.postgres_url, echo=False, poolclass=NullPool)
 
     yield engine
 

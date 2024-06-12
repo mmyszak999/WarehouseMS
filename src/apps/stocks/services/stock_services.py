@@ -62,21 +62,16 @@ async def create_stocks(
                 WaitingRoom.available_slots >= 1,
                 WaitingRoom.available_stock_weight >= stock_weight,
             )
-        print("1111")
         if waiting_room_id is not None:
             if not (await if_exists(
                 WaitingRoom, "id", waiting_room_id, session
             )):
                 raise DoesNotExist(WaitingRoom.__name__, "id", waiting_room_id)
-            print("2222")
             statement = statement.where(
                 WaitingRoom.id.in_([waiting_room_id])
             ).limit(1)
-            print("3333")
             waiting_room = await session.execute(statement)
-            print("4444")
             waiting_room = waiting_room.scalar()
-            print("5555")
             if not waiting_room:
                 raise NoAvailableWaitingRoomsException(
                     product.name, product_count, stock_weight

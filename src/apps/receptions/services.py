@@ -54,7 +54,7 @@ async def base_create_reception(
     if not len(products) == len(product_counts):
         raise ServiceException("Products does not match the product count data")
     
-    waiting_rooms_ids = [product.pop("waiting_room_id") for product in products_data]
+    waiting_rooms_ids = [product.get("waiting_room_id", None) for product in products_data]
 
     new_reception = Reception(
         user_id=user_id, description=reception_input.get("description")

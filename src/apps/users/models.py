@@ -10,7 +10,7 @@ from src.database.db_connection import Base
 class User(Base):
     __tablename__ = "user"
     id = Column(
-        String, primary_key=True, unique=True, nullable=False, default=generate_uuid
+        String, primary_key=True, unique=True, nullable=False, index=True, default=generate_uuid
     )
     first_name = Column(String(length=50), nullable=False)
     last_name = Column(String(length=75), nullable=False)
@@ -25,8 +25,8 @@ class User(Base):
     can_move_stocks = Column(Boolean, nullable=False, server_default="false")
     can_recept_stocks = Column(Boolean, nullable=False, server_default="false")
     can_issue_stocks = Column(Boolean, nullable=False, server_default="false")
-    issues = relationship("Issue", back_populates="user", lazy="joined")
-    receptions = relationship("Reception", back_populates="user", lazy="joined")
+    issues = relationship("Issue", back_populates="user")
+    receptions = relationship("Reception", back_populates="user")
     stock_user_history = relationship(
         "UserStock",
         back_populates="user",
