@@ -49,13 +49,13 @@ async def test_only_user_with_proper_permission_can_create_issue(
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
 ):
+    available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     issue_input = IssueInputSchemaFactory().generate(
-        stock_ids=[StockIssueInputSchema(id=db_stocks.results[2].id)]
+        stock_ids=[StockIssueInputSchema(id=available_stocks[0].id)]
     )
     response = await async_client.post(
         "issues/", headers=user_headers, content=issue_input.json()
     )
-
     assert response.status_code == status_code
     if status_code == status.HTTP_200_OK:
         assert response.json()["user"]["id"] == user.id

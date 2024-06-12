@@ -93,7 +93,6 @@ async def create_stocks(
             reception_id=reception_id,
             waiting_room_id=waiting_room.id,
         )
-        print(stock_input)
         new_stock = Stock(**stock_input.dict())
         session.add(new_stock)
         stock_list.append(new_stock)
