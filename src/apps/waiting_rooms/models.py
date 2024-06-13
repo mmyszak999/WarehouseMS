@@ -28,6 +28,7 @@ class WaitingRoom(Base):
         index=True,
         default=generate_uuid,
     )
+    name = Column(String(length=400), nullable=True)
     max_stocks = Column(Integer, nullable=False)
     max_weight = Column(DECIMAL, nullable=False)
     occupied_slots = Column(Integer, nullable=False, default=0)
@@ -37,3 +38,9 @@ class WaitingRoom(Base):
         DECIMAL, nullable=False, default=default_available_stock_weight
     )
     stocks = relationship("Stock", back_populates="waiting_room", lazy="joined")
+    warehouse_id = Column(
+        String,
+        ForeignKey("warehouse.id", ondelete="SET NULL", onupdate="cascade"),
+        nullable=True,
+    )
+    warehouse = relationship("Warehouse", back_populates="waiting_rooms", lazy="joined")

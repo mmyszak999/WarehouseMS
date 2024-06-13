@@ -15,6 +15,7 @@ from sqlalchemy.sql.sqltypes import DateTime
 from src.core.utils.time import get_current_time
 from src.core.utils.utils import generate_uuid
 from src.database.db_connection import Base
+from src.core.utils.orm import default_available_section_weight, default_available_section_racks
 
 
 class Section(Base):
@@ -24,7 +25,9 @@ class Section(Base):
     )
     section_name = Column(String(length=400), nullable=False)
     max_weight = Column(DECIMAL, nullable=False)
+    available_weight = Column(DECIMAL, nullable=False, default=default_available_section_weight)
     max_racks = Column(Integer, nullable=False)
+    available_racks = Column(DECIMAL, nullable=False, default=default_available_section_racks)
     warehouse_id = Column(
         String,
         ForeignKey("warehouse.id", onupdate="cascade"),

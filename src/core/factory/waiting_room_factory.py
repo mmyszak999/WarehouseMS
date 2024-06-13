@@ -14,10 +14,11 @@ class WaitingRoomInputSchemaFactory(SchemaFactory):
     def __init__(self, schema_class=WaitingRoomInputSchema):
         super().__init__(schema_class)
 
-    def generate(self, max_stocks: int = None, max_weight: Decimal = None):
+    def generate(self, max_stocks: int = None, max_weight: Decimal = None, name: str=None):
         return self.schema_class(
             max_stocks=max_stocks or set_waiting_room_stocks(),
             max_weight=max_weight or set_waiting_room_weight(),
+            name=name or self.faker.ecommerce_name()
         )
 
 
@@ -26,6 +27,7 @@ class WaitingRoomUpdateSchemaFactory(SchemaFactory):
         super().__init__(schema_class)
 
     def generate(
-        self, max_stocks: Optional[int] = None, max_weight: Optional[Decimal] = None
+        self, max_stocks: Optional[int] = None, max_weight: Optional[Decimal] = None,
+        name: Optional[str]=None
     ):
-        return self.schema_class(max_stocks=max_stocks, max_weight=max_weight)
+        return self.schema_class(max_stocks=max_stocks, max_weight=max_weight, name=name)
