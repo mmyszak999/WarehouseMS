@@ -156,14 +156,6 @@ class NoAvailableWeightInWaitingRoomException(ServiceException):
         )
 
 
-class TooLittleWaitingRoomSpaceException(ServiceException):
-    def __init__(self, value1: Decimal, value2: Decimal) -> None:
-        super().__init__(
-            f"The Requested waiting room stock slots amount ({value1}) is lower than the amount of "
-            f"the stocks in the waiting room({value2}) !"
-        )
-
-
 class NoAvailableWaitingRoomsException(ServiceException):
     def __init__(
         self, product_name: Decimal, product_count: int, stock_weight: Decimal
@@ -210,3 +202,25 @@ class WarehouseIsNotEmptyException(ServiceException):
 class SectionIsNotEmptyException(ServiceException):
     def __init__(self) -> None:
         super().__init__(f"The section cannot be deleted because it still contains not empty racks with stocks inside! ")
+
+
+class NotEnoughWarehouseResourcesException(ServiceException):
+    def __init__(self, resource: str) -> None:
+        super().__init__(
+            f"The warehouse can have no more {resource} !"
+        )
+
+class TooLittleWeightAmountException(ServiceException):
+    def __init__(self, value1: Decimal, value2: Decimal) -> None:
+        super().__init__(
+            f"The requested section max weight amount ({value1}) is lower than the weight of "
+            f"the stocks in the section({value2}) !"
+        )
+
+
+class TooLittleRacksAmountException(ServiceException):
+    def __init__(self, value1: int, value2: int) -> None:
+        super().__init__(
+            f"The requested section max racks amount ({value1}) is lower than the amount of "
+            f"the racks in the section({value2}) !"
+        )

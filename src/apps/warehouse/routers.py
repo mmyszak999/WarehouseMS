@@ -27,7 +27,7 @@ warehouse_router = APIRouter(prefix="/warehouse", tags=["warehouse"])
 
 @warehouse_router.post(
     "/",
-    response_model=WarehouseInputSchema,
+    response_model=WarehouseBaseOutputSchema,
     status_code=status.HTTP_201_CREATED,
 )
 async def post_warehouse(

@@ -36,6 +36,7 @@ async def create_warehouse(
     new_warehouse = Warehouse(**warehouse_data)
     session.add(new_warehouse)
     await session.commit()
+    await session.refresh(new_warehouse)
 
     return WarehouseOutputSchema.from_orm(new_warehouse)
 
@@ -72,7 +73,7 @@ async def manage_warehouse_state(
 ) -> Warehouse:
     if warehouse_object is None:
         raise ServiceException("Warehouse object was not provided! ")
-    multiplier = 1 if adding_resources_to_warehouse else -1
+    multiplier = -1 if adding_resources_to_warehouse else 1
     if sections_involved:
         warehouse_object.available_sections -= multiplier
         warehouse_object.occupied_sections += multiplier

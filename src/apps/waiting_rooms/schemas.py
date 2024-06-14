@@ -16,7 +16,7 @@ from src.apps.users.schemas import UserInfoOutputSchema
 class WaitingRoomBaseSchema(BaseModel):
     max_stocks: int
     max_weight: Decimal
-    name: Optional[int]
+    name: Optional[str]
 
     @validator("max_stocks")
     def validate_max_stocks(cls, max_stocks: int) -> int:
@@ -44,7 +44,7 @@ class WaitingRoomInputSchema(WaitingRoomBaseSchema):
 class WaitingRoomUpdateSchema(BaseModel):
     max_stocks: Optional[int]
     max_weight: Optional[Decimal]
-    name: Optional[int]
+    name: Optional[str]
 
     @validator("max_stocks")
     def validate_max_stocks(cls, max_stocks: Optional[int]) -> Optional[int]:
@@ -64,17 +64,17 @@ class WaitingRoomUpdateSchema(BaseModel):
 
 class WaitingRoomBasicOutputSchema(WaitingRoomBaseSchema):
     id: str
-    stocks: list[StockWithoutWaitingRoomOutputSchema]
+    occupied_slots: int
+    current_stock_weight: Decimal
+    available_slots: int
+    available_stock_weight: Decimal
 
     class Config:
         orm_mode = True
 
 
 class WaitingRoomOutputSchema(WaitingRoomBasicOutputSchema):
-    occupied_slots: int
-    current_stock_weight: Decimal
-    available_slots: int
-    available_stock_weight: Decimal
+    stocks: list[StockWithoutWaitingRoomOutputSchema]
 
     class Config:
         orm_mode = True

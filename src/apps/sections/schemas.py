@@ -50,9 +50,12 @@ class SectionUpdateSchema(BaseModel):
 
 
 class SectionBaseOutputSchema(SectionBaseSchema):
+    id: str
     available_weight: Decimal
     available_racks: int
-
+    occupied_weight: Decimal
+    occupied_racks: int
+    
     class Config:
         orm_mode = True
         

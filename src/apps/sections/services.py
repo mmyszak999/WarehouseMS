@@ -14,9 +14,13 @@ from src.core.exceptions import (
     AlreadyExists, DoesNotExist, IsOccupied,
     WarehouseAlreadyExistsException,
     WarehouseDoesNotExistException,
-    SectionIsNotEmptyException
+    SectionIsNotEmptyException,
+    NotEnoughWarehouseResourcesException,
+    TooLittleRacksAmountException,
+    TooLittleWeightAmountException
 )
-from src.apps.warehouse.services import get_all_warehouses
+from src.apps.warehouse.services import get_all_warehouses, manage_warehouse_state
+from src.apps.warehouse.models import Warehouse
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
@@ -31,9 +35,20 @@ async def create_section(
     warehouses = await get_all_warehouses(session, PageParams())
     if not warehouses.total:
         raise WarehouseDoesNotExistException
+    
+    warehouse = await if_exists(Warehouse, "id", warehouses.results[0].id, session)
+    if not warehouse.available_sections:
+        raise NotEnoughWarehouseResourcesException(resource="sections")
+    
+    section_data["warehouse_id"] = warehouse.id
 
     new_section = Section(**section_data)
     session.add(new_section)
+    
+    await manage_warehouse_state(
+        warehouse, adding_resources_to_warehouse=False, sections_involved=True
+    )
+    session.add(warehouse)
     await session.commit()
 
     return SectionOutputSchema.from_orm(new_section)
@@ -73,7 +88,7 @@ async def manage_section_state(
     if section_object is None:
         raise ServiceException("Section object was not provided! ")
     
-    multiplier = 1 if adding_resources_to_section else -1
+    multiplier = -1 if adding_resources_to_section else 1
     if racks_involved:
         section_object.available_racks -= multiplier
         section_object.occupied_racks += multiplier
@@ -86,7 +101,7 @@ async def manage_section_state(
         new_available_weight = max_weight - section_object.occupied_weight
         section_object.available_weight = new_available_weight
     if max_racks is not None:
-        new_available_racks = max_racks- section_object.occupied_racks
+        new_available_racks = max_racks - section_object.occupied_racks
         section_object.available_racks = new_available_racks
 
     return section_object
@@ -100,20 +115,20 @@ async def update_single_section(
 
     section_data = section_input.dict(exclude_unset=True)
 
-    if new_max_sections := section_data.get("max_sections"):
-        if new_max_sections < section_object.occupied_sections:
-            raise TooLittleSectionAmountException(
-                new_max_sections, section_object.occupied_sections
+    if new_max_weight := section_data.get("max_weight"):
+        if new_max_weight < section_object.occupied_weight:
+            raise TooLittleWeightAmountException(
+                new_max_weight, section_object.occupied_weight
             )
 
-    if new_max_waiting_rooms := section_data.get("max_waiting_rooms"):
-        if new_max_waiting_rooms < section_object.occupied_waiting_rooms:
-            raise TooLittleWaitingRoomAmountException(
-                new_max_waiting_rooms, section_object.occupied_waiting_rooms
+    if new_max_racks := section_data.get("max_racks"):
+        if new_max_racks< section_object.occupied_racks:
+            raise TooLittleRacksAmountException(
+                new_max_racks, section_object.occupied_racks
             )
             
     section_object = await manage_section_state(
-        section_object, new_max_sections, new_max_waiting_rooms
+        section_object, new_max_weight, new_max_racks, adding_resources_to_section=False
     )
     session.add(section_object)
     
@@ -137,13 +152,17 @@ async def delete_single_section(session: AsyncSession, section_id: str):
     ):
         raise DoesNotExist(Section.__name__, "id", section_id)
 
-    if section_object.racks:
-        raise SectionIsNotEmptyException(resource="sections")
+    """if section_object.racks:
+        raise SectionIsNotEmptyException(resource="sections")"""
     
     statement = delete(Section).filter(Section.id == section_id)
     result = await session.execute(statement)
+    warehouse = await if_exists(Warehouse, "id", section_object.warehouse_id, session)
+    
+    warehouse = await manage_warehouse_state(warehouse, sections_involved=True)
+    session.add(warehouse)
+    
     await session.commit()
-
     return result
 
 

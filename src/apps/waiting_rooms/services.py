@@ -14,7 +14,8 @@ from src.apps.waiting_rooms.schemas import (
     WaitingRoomOutputSchema,
     WaitingRoomUpdateSchema,
 )
-from src.apps.warehouse.services import get_all_warehouses
+from src.apps.warehouse.services import get_all_warehouses, manage_warehouse_state
+from src.apps.warehouse.models import Warehouse
 from src.core.exceptions import (
     AlreadyExists,
     CannotMoveIssuedStockException,
@@ -27,8 +28,8 @@ from src.core.exceptions import (
     TooLittleWaitingRoomSpaceException,
     TooLittleWaitingRoomWeightException,
     WaitingRoomIsNotEmptyException,
-    WarehouseDoesNotExistException
-    
+    WarehouseDoesNotExistException,
+    NotEnoughWarehouseResourcesException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -45,14 +46,27 @@ async def create_waiting_room(
     if not warehouses.total:
         raise WarehouseDoesNotExistException
 
+    warehouse = await if_exists(Warehouse, "id", warehouses.results[0].id, session)
+    
+    if not warehouse.available_waiting_rooms:
+        raise NotEnoughWarehouseResourcesException(resource="waiting rooms")
+
     waiting_room_input = waiting_room_input.dict()
     new_waiting_room = WaitingRoom(
         max_stocks=waiting_room_input.pop("max_stocks"),
         max_weight=waiting_room_input.pop("max_weight"),
+        name=waiting_room_input.get("name"),
+        warehouse_id=warehouse.id
     )
 
     session.add(new_waiting_room)
+    warehouse = await manage_warehouse_state(
+        warehouse, adding_resources_to_warehouse=False, waiting_rooms_involved=True
+    )
+    session.add(warehouse)
+    
     if testing:
+        
         await session.commit()
         return new_waiting_room
     await session.commit()
@@ -174,6 +188,11 @@ async def delete_single_waiting_room(session: AsyncSession, waiting_room_id: str
         raise WaitingRoomIsNotEmptyException
     statement = delete(WaitingRoom).filter(WaitingRoom.id == waiting_room_id)
     result = await session.execute(statement)
+    
+    warehouse = await if_exists(Warehouse, "id", waiting_room_object.warehouse_id, session)
+    
+    warehouse = await manage_warehouse_state(warehouse, waiting_rooms_involved=True)
+    session.add(warehouse)
     await session.commit()
 
     return result

@@ -5,6 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, Field, validator
 
 from src.apps.sections.schemas import SectionBaseOutputSchema
+from src.apps.waiting_rooms.schemas import WaitingRoomBasicOutputSchema
 
 
 class WarehouseBaseSchema(BaseModel):
@@ -63,6 +64,7 @@ class WarehouseBaseOutputSchema(WarehouseBaseSchema):
 
 class WarehouseOutputSchema(WarehouseBaseOutputSchema):
     sections: list[SectionBaseOutputSchema]
+    waiting_rooms: list[WaitingRoomBasicOutputSchema]
 
     class Config:
         orm_mode = True
