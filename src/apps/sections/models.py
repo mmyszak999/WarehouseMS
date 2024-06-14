@@ -30,7 +30,7 @@ class Section(Base):
     available_racks = Column(DECIMAL, nullable=False, default=default_available_section_racks)
     warehouse_id = Column(
         String,
-        ForeignKey("warehouse.id", onupdate="cascade"),
+        ForeignKey("warehouse.id", onupdate="SET NULL"),
         nullable=False,
     )
     warehouse = relationship("Warehouse", back_populates="sections", lazy="joined")

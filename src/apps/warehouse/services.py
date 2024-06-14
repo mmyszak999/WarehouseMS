@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,7 +15,8 @@ from src.core.exceptions import (
     WarehouseAlreadyExistsException,
     TooLittleSectionAmountException,
     TooLittleWaitingRoomAmountException,
-    WarehouseIsNotEmptyException
+    WarehouseIsNotEmptyException,
+    WarehouseAlreadyExistsException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -28,7 +31,7 @@ async def create_warehouse(
 
     warehouses = await get_all_warehouses(session, PageParams())
     if warehouses.total:
-        raise Exception
+        raise WarehouseAlreadyExistsException
 
     new_warehouse = Warehouse(**warehouse_data)
     session.add(new_warehouse)
@@ -38,7 +41,7 @@ async def create_warehouse(
 
 
 async def get_single_warehouse(
-    session: AsyncSession, warehouse_id: int
+    session: AsyncSession, warehouse_id: str
 ) -> WarehouseOutputSchema:
     if not (warehouse_object := await if_exists(Warehouse, "id", warehouse_id, session)):
         raise DoesNotExist(Warehouse.__name__, "id", warehouse_id)
@@ -62,35 +65,33 @@ async def get_all_warehouses(
 async def manage_warehouse_state(
     warehouse_object: Warehouse,
     max_sections: Decimal = None,
-    max_warehouses: int = None,
+    max_waiting_rooms: int = None,
     adding_resources_to_warehouse: bool = True,
     sections_involved: bool = None,
-    warehouses_involved: bool = None,
-    stock_object: Stock = None,
-) -> WaitingRoom:
+    waiting_rooms_involved: bool = None
+) -> Warehouse:
     if warehouse_object is None:
         raise ServiceException("Warehouse object was not provided! ")
-    multiplier = 1 if adding_resuources_to_warehouse else -1
-    if adding_resources_to_warehouse:  
-        if sections_involved:
-            warehouse_object.available_sections -= multiplier
-            warehouse_object.occupied_sections += multiplier
-        if warehouses_involved:
-            warehouse_object.available_warehouses -= multiplier
-            warehouse_object.occupied_warehouses += multiplier
-    else:
-        if max_sections is not None:
-            new_available_sections = max_sections - warehouse_object.occupied_sections
-            warehouse_object.available_sections = new_available_sections
-        if max_warehouses is not None:
-            new_available_warehouses = max_warehouses - warehouse_object.occupied_warehouses
-            warehouse_object.available_warehouses = new_available_warehouses
+    multiplier = 1 if adding_resources_to_warehouse else -1
+    if sections_involved:
+        warehouse_object.available_sections -= multiplier
+        warehouse_object.occupied_sections += multiplier
+    if waiting_rooms_involved:
+        warehouse_object.available_waiting_rooms -= multiplier
+        warehouse_object.occupied_waiting_rooms += multiplier
+        
+    if max_sections is not None:
+        new_available_sections = max_sections - warehouse_object.occupied_sections
+        warehouse_object.available_sections = new_available_sections
+    if max_waiting_rooms is not None:
+        new_available_waiting_rooms = max_waiting_rooms - warehouse_object.occupied_waiting_rooms
+        warehouse_object.available_waiting_rooms = new_available_waiting_rooms
 
     return warehouse_object
     
     
 async def update_single_warehouse(
-    session: AsyncSession, warehouse_input: WarehouseUpdateSchema, warehouse_id: int
+    session: AsyncSession, warehouse_input: WarehouseUpdateSchema, warehouse_id: str
 ) -> WarehouseOutputSchema:
     if not (warehouse_object := await if_exists(Warehouse, "id", warehouse_id, session)):
         raise DoesNotExist(Warehouse.__name__, "id", warehouse_id)
@@ -104,11 +105,16 @@ async def update_single_warehouse(
             )
 
     if new_max_waiting_rooms := warehouse_data.get("max_waiting_rooms"):
-        if new_max_waiting_rooms < warehouse_object.waiting_rooms:
+        if new_max_waiting_rooms < warehouse_object.occupied_waiting_rooms:
             raise TooLittleWaitingRoomAmountException(
-                new_max_waiting_rooms, warehouse_object.waiting_rooms
+                new_max_waiting_rooms, warehouse_object.occupied_waiting_rooms
             )
-
+            
+    warehouse_object = await manage_warehouse_state(
+        warehouse_object, new_max_sections, new_max_waiting_rooms
+    )
+    session.add(warehouse_object)
+    
     if warehouse_data:
         statement = (
             update(Warehouse).filter(Warehouse.id == warehouse_id).values(**warehouse_data)

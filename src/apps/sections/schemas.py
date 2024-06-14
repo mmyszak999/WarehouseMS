@@ -10,11 +10,13 @@ class SectionBaseSchema(BaseModel):
     section_name: str = Field(max_length=400)
     max_weight: Decimal
     max_racks: int
+    
+    class Config:
+        orm_mode = True
 
 
 class SectionInputSchema(SectionBaseSchema):
     pass
-
 
 
 class SectionUpdateSchema(BaseModel):
