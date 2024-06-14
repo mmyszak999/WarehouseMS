@@ -39,6 +39,7 @@ from src.core.exceptions import (
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
     WaitingRoomIsNotEmptyException,
+    WarehouseAlreadyExistsException
 )
 
 app = FastAPI(
@@ -305,6 +306,15 @@ async def no_available_weight_in_waiting_room_exception(
 @app.exception_handler(NoAvailableWaitingRoomsException)
 async def no_available_waiting_rooms_exception(
     request: Request, exception: NoAvailableWaitingRoomsException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(WarehouseAlreadyExistsException)
+async def warehouse_already_exists_exception(
+    request: Request, exception: WarehouseAlreadyExistsException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
