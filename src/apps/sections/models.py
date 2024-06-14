@@ -26,8 +26,10 @@ class Section(Base):
     section_name = Column(String(length=400), nullable=False)
     max_weight = Column(DECIMAL, nullable=False)
     available_weight = Column(DECIMAL, nullable=False, default=default_available_section_weight)
+    occupied_weight = Column(Integer, nullable=False, default=0)
     max_racks = Column(Integer, nullable=False)
     available_racks = Column(DECIMAL, nullable=False, default=default_available_section_racks)
+    occupied_racks = Column(Integer, nullable=False, default=0)
     warehouse_id = Column(
         String,
         ForeignKey("warehouse.id", onupdate="SET NULL"),

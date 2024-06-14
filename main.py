@@ -43,7 +43,9 @@ from src.core.exceptions import (
     WarehouseAlreadyExistsException,
     TooLittleWaitingRoomAmountException,
     TooLittleSectionAmountException,
-    WarehouseIsNotEmptyException
+    WarehouseIsNotEmptyException,
+    WarehouseDoesNotExistException,
+    SectionIsNotEmptyException
 )
 
 app = FastAPI(
@@ -356,3 +358,20 @@ async def warehouse_is_not_empty_exception(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
 
+
+@app.exception_handler(WarehouseDoesNotExistException)
+async def warehouse_does_not_exist_exception(
+    request: Request, exception: WarehouseDoesNotExistException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(SectionIsNotEmptyException)
+async def section_is_not_empty_exception(
+    request: Request, exception: SectionIsNotEmptyException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )

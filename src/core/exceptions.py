@@ -179,6 +179,12 @@ class WarehouseAlreadyExistsException(ServiceException):
             f"The warehouses instance already exists and the second one cannot be created!"
         )
 
+class WarehouseDoesNotExistException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"The object cannot be created because the warehouse instance does not exist !"
+        )
+
 
 class TooLittleSectionAmountException(ServiceException):
     def __init__(self, max_sections: int, occupied_sections: int) -> None:
@@ -199,3 +205,8 @@ class TooLittleWaitingRoomAmountException(ServiceException):
 class WarehouseIsNotEmptyException(ServiceException):
     def __init__(self, resource: str) -> None:
         super().__init__(f"The warehouse cannot be deleted because it still contains not empty {resource} inside! ")
+        
+        
+class SectionIsNotEmptyException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(f"The section cannot be deleted because it still contains not empty racks with stocks inside! ")

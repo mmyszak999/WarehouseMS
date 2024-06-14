@@ -14,6 +14,7 @@ from src.apps.waiting_rooms.schemas import (
     WaitingRoomOutputSchema,
     WaitingRoomUpdateSchema,
 )
+from src.apps.warehouse.services import get_all_warehouses
 from src.core.exceptions import (
     AlreadyExists,
     CannotMoveIssuedStockException,
@@ -26,6 +27,8 @@ from src.core.exceptions import (
     TooLittleWaitingRoomSpaceException,
     TooLittleWaitingRoomWeightException,
     WaitingRoomIsNotEmptyException,
+    WarehouseDoesNotExistException
+    
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -38,6 +41,10 @@ async def create_waiting_room(
     waiting_room_input: WaitingRoomInputSchema,
     testing: bool = False,
 ) -> WaitingRoomOutputSchema:
+    warehouses = await get_all_warehouses(session, PageParams())
+    if not warehouses.total:
+        raise WarehouseDoesNotExistException
+
     waiting_room_input = waiting_room_input.dict()
     new_waiting_room = WaitingRoom(
         max_stocks=waiting_room_input.pop("max_stocks"),
