@@ -1,7 +1,9 @@
 from decimal import Decimal
+from typing import Union
 
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import BaseModel
 
 from src.apps.sections.models import Section
 from src.apps.sections.schemas import (
@@ -55,12 +57,12 @@ async def create_section(
 
 
 async def get_single_section(
-    session: AsyncSession, section_id: str
-) -> SectionOutputSchema:
+    session: AsyncSession, section_id: str, output_schema: BaseModel=SectionOutputSchema
+) -> Union[SectionOutputSchema, SectionBaseOutputSchema]:
     if not (section_object := await if_exists(Section, "id", section_id, session)):
         raise DoesNotExist(Section.__name__, "id", section_id)
 
-    return SectionOutputSchema.from_orm(section_object)
+    return output_schema.from_orm(section_object)
 
 
 async def get_all_sections(

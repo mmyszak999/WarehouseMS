@@ -331,11 +331,6 @@ async def warehouse_already_exists_exception(
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
-
-    """TooLittleWaitingRoomAmountException,
-    TooLittleSectionAmountException,
-    WarehouseIsNotEmptyException
-    """
     
 @app.exception_handler(TooLittleWaitingRoomAmountException)
 async def too_little_waiting_room_amount_exception_exception(

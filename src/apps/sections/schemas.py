@@ -62,6 +62,6 @@ class SectionBaseOutputSchema(SectionBaseSchema):
 
 class SectionOutputSchema(SectionBaseOutputSchema):
     pass
-
+    
     class Config:
         orm_mode = True
