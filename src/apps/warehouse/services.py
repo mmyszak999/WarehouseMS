@@ -18,6 +18,7 @@ from src.core.exceptions import (
     TooLittleWaitingRoomAmountException,
     WarehouseAlreadyExistsException,
     WarehouseIsNotEmptyException,
+    ServiceException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -68,7 +69,7 @@ async def get_all_warehouses(
 
 
 async def manage_warehouse_state(
-    warehouse_object: Warehouse,
+    warehouse_object: Warehouse = None,
     max_sections: Decimal = None,
     max_waiting_rooms: int = None,
     adding_resources_to_warehouse: bool = True,
