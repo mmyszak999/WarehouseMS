@@ -165,11 +165,13 @@ class NoAvailableWaitingRoomsException(ServiceException):
             f"Stock data: product_name: {product_name}, count: {product_count}, weight: {stock_weight} "
         )
 
+
 class WarehouseAlreadyExistsException(ServiceException):
     def __init__(self) -> None:
         super().__init__(
             f"The warehouses instance already exists and the second one cannot be created!"
         )
+
 
 class WarehouseDoesNotExistException(ServiceException):
     def __init__(self) -> None:
@@ -196,19 +198,22 @@ class TooLittleWaitingRoomAmountException(ServiceException):
 
 class WarehouseIsNotEmptyException(ServiceException):
     def __init__(self, resource: str) -> None:
-        super().__init__(f"The warehouse cannot be deleted because it still contains not empty {resource} inside! ")
-        
-        
+        super().__init__(
+            f"The warehouse cannot be deleted because it still contains not empty {resource} inside! "
+        )
+
+
 class SectionIsNotEmptyException(ServiceException):
     def __init__(self) -> None:
-        super().__init__(f"The section cannot be deleted because it still contains not empty racks with stocks inside! ")
+        super().__init__(
+            f"The section cannot be deleted because it still contains not empty racks with stocks inside! "
+        )
 
 
 class NotEnoughWarehouseResourcesException(ServiceException):
     def __init__(self, resource: str) -> None:
-        super().__init__(
-            f"The warehouse can have no more {resource} !"
-        )
+        super().__init__(f"The warehouse can have no more {resource} !")
+
 
 class TooLittleWeightAmountException(ServiceException):
     def __init__(self, value1: Decimal, value2: Decimal) -> None:

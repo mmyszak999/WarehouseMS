@@ -5,10 +5,10 @@ from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.sections.schemas import (
+    SectionBaseOutputSchema,
     SectionInputSchema,
     SectionOutputSchema,
     SectionUpdateSchema,
-    SectionBaseOutputSchema
 )
 from src.apps.sections.services import (
     create_section,
@@ -66,7 +66,9 @@ async def get_section(
 ) -> Union[SectionBaseOutputSchema, SectionOutputSchema]:
     if request_user.is_staff or request_user.can_move_stocks:
         return await get_single_section(session, section_id)
-    return await get_single_section(session, section_id, output_schema=SectionBaseOutputSchema)
+    return await get_single_section(
+        session, section_id, output_schema=SectionBaseOutputSchema
+    )
 
 
 @section_router.patch(

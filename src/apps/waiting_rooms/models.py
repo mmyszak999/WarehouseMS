@@ -12,10 +12,10 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import DateTime
 
+from src.apps.warehouse.models import Warehouse
 from src.core.utils.orm import default_available_slots, default_available_stock_weight
 from src.core.utils.time import get_current_time
 from src.core.utils.utils import generate_uuid
-from src.apps.warehouse.models import Warehouse
 from src.database.db_connection import Base
 
 

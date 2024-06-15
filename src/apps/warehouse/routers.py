@@ -2,11 +2,12 @@ from fastapi import Depends, Request, Response, status
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.apps.users.models import User
 from src.apps.warehouse.schemas import (
+    WarehouseBaseOutputSchema,
     WarehouseInputSchema,
     WarehouseOutputSchema,
     WarehouseUpdateSchema,
-    WarehouseBaseOutputSchema
 )
 from src.apps.warehouse.services import (
     create_warehouse,
@@ -15,7 +16,6 @@ from src.apps.warehouse.services import (
     get_single_warehouse,
     update_single_warehouse,
 )
-from src.apps.users.models import User
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.permissions import check_if_staff
