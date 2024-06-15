@@ -30,10 +30,12 @@ from src.core.factory.reception_factory import (
 )
 from src.core.factory.stock_factory import StockInputSchemaFactory
 from src.core.factory.waiting_room_factory import WaitingRoomInputSchemaFactory
+from src.apps.warehouse.schemas import WarehouseOutputSchema
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from tests.test_products.conftest import db_categories, db_products
+from tests.test_warehouse.conftest import db_warehouse
 from tests.test_users.conftest import (
     auth_headers,
     create_superuser,
@@ -51,6 +53,7 @@ DB_WAITING_ROOMS_SCHEMAS = [
 @pytest_asyncio.fixture
 async def db_stocks(
     async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ) -> PagedResponseSchema[StockOutputSchema]:

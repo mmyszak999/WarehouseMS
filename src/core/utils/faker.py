@@ -34,3 +34,13 @@ def set_waiting_room_weight() -> int:
 
 def set_waiting_room_stocks() -> int:
     return random.randint(5, 10)
+
+
+def set_max_waiting_rooms() -> int:
+    return random.randint(4, 6)
+
+
+def set_max_sections() -> int:
+    return random.randint(4, 8)
+
+
