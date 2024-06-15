@@ -20,24 +20,30 @@ from src.apps.warehouse.services import (
     manage_warehouse_state,
     update_single_warehouse,
 )
+from src.core.factory.waiting_room_factory import (
+    WaitingRoomInputSchemaFactory,
+)
+from src.apps.waiting_rooms.services import (
+    create_waiting_room
+)
 from src.core.exceptions import (
     DoesNotExist,
     WarehouseAlreadyExistsException,
     ServiceException,
-    TooLittleWaitingRoomAmountException,
+    TooLittleSectionAmountException,
     TooLittleSectionAmountException,
     WarehouseIsNotEmptyException
 )
-from src.apps.waiting_rooms.services import (
-    create_waiting_room
+from src.apps.sections.services import (
+    create_section
 )
 from src.core.factory.stock_factory import StockInputSchemaFactory
 from src.core.factory.warehouse_factory import (
     WarehouseInputSchemaFactory,
     WarehouseUpdateSchemaFactory,
 )
-from src.core.factory.waiting_room_factory import (
-    WaitingRoomInputSchemaFactory,
+from src.core.factory.section_factory import (
+    SectionInputSchemaFactory,
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -113,19 +119,19 @@ async def test_if_warehouse_section_limits_are_correctly_managed(
 
 
 @pytest.mark.asyncio
-async def test_if_warehouse_waiting_rooms_limits_are_correctly_managed(
+async def test_if_warehouse_sections_limits_are_correctly_managed(
     async_session: AsyncSession,
     db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
 ):
     warehouse = await if_exists(Warehouse, "id", db_warehouse.results[0].id, async_session)
-    #decrement max_waiting_rooms by 1
-    warehouse = await manage_warehouse_state(warehouse, waiting_rooms_involved=True)
+    #decrement max_sections by 1
+    warehouse = await manage_warehouse_state(warehouse, sections_involved=True)
     
-    assert warehouse.available_waiting_rooms == db_warehouse.results[0].available_waiting_rooms + 1
+    assert warehouse.available_sections == db_warehouse.results[0].available_sections + 1
 
 
 @pytest.mark.asyncio
-async def test_if_warehouse_limits_are_correctly_managed_when_changing_max_sections_and_waiting_rooms(
+async def test_if_warehouse_limits_are_correctly_managed_when_changing_max_sections_and_sections(
     async_session: AsyncSession,
     db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
 ):
@@ -136,12 +142,12 @@ async def test_if_warehouse_limits_are_correctly_managed_when_changing_max_secti
         warehouse, max_sections=new_max_sections, max_waiting_rooms=new_max_waiting_rooms
     )
     
-    assert warehouse.available_waiting_rooms == db_warehouse.results[0].available_waiting_rooms + (
-        new_max_waiting_rooms - db_warehouse.results[0].max_waiting_rooms
-    )
-    
     assert warehouse.available_sections == db_warehouse.results[0].available_sections + (
         new_max_sections - db_warehouse.results[0].max_sections
+    )
+    
+    assert warehouse.available_waiting_rooms == db_warehouse.results[0].available_waiting_rooms + (
+        new_max_waiting_rooms - db_warehouse.results[0].max_waiting_rooms
     )
 
 @pytest.mark.asyncio
@@ -158,57 +164,59 @@ async def test_raise_exception_when_updating_nonexistent_warehouse(
         )
 
 @pytest.mark.asyncio
-async def test_raise_when_new_max_waiting_rooms_smaller_than_occupied_waiting_rooms_amount(
+async def test_raise_when_new_max_sections_smaller_than_occupied_sections_amount(
     async_session: AsyncSession
 ):
-    warehouse_input = WarehouseInputSchemaFactory().generate(max_waiting_rooms=2)
+    warehouse_input = WarehouseInputSchemaFactory().generate(max_sections=2)
     warehouse = await create_warehouse(async_session, warehouse_input)
     
-    waiting_room_input_1 = WaitingRoomInputSchemaFactory().generate()
-    waiting_room_1 = await create_waiting_room(
-        async_session, waiting_room_input_1
+    section_input_1 = SectionInputSchemaFactory().generate()
+    section_1 = await create_section(
+        async_session, section_input_1
     )
     
-    waiting_room_input_2 = WaitingRoomInputSchemaFactory().generate()
-    waiting_room_2 = await create_waiting_room(
-        async_session, waiting_room_input_2
+    section_input_2 = SectionInputSchemaFactory().generate()
+    section_2 = await create_section(
+        async_session, section_input_2
     )
     
-    warehouse_input = WarehouseUpdateSchemaFactory().generate(max_waiting_rooms=1)
+    warehouse_input = WarehouseUpdateSchemaFactory().generate(max_sections=1)
     
-    with pytest.raises(TooLittleWaitingRoomAmountException):
+    with pytest.raises(TooLittleSectionAmountException):
         await update_single_warehouse(
             async_session,
             warehouse_input,
             warehouse.id
         )
 
-"""@pytest.mark.asyncio
+@pytest.mark.asyncio
 async def test_raise_when_new_max_sections_smaller_than_occupied_sections_amount(
     async_session: AsyncSession
 ):
-    warehouse_input = WarehouseInputSchemaFactory().generate(max_waiting_rooms=2)
+    warehouse_input = WarehouseInputSchemaFactory().generate(max_sections=2)
     warehouse = await create_warehouse(async_session, warehouse_input)
     
-    waiting_room_input_1 = WaitingRoomInputSchemaFactory().generate()
-    waiting_room_1 = await create_waiting_room(
-        async_session, waiting_room_input_1
+    section_input_1 = SectionInputSchemaFactory().generate()
+    section_1 = await create_section(
+        async_session, section_input_1
     )
     
-    waiting_room_input_2 = WaitingRoomInputSchemaFactory().generate()
-    waiting_room_2 = await create_waiting_room(
-        async_session, waiting_room_input_2
+    section_input_2 = SectionInputSchemaFactory().generate()
+    section_2 = await create_section(
+        async_session, section_input_2
     )
     
-    warehouse_input = WarehouseUpdateSchemaFactory().generate(max_waiting_rooms=1)
+    warehouse = await if_exists(Warehouse, "id", warehouse.id, async_session)
     
-    with pytest.raises(TooLittleWaitingRoomAmountException):
+    warehouse_input = WarehouseUpdateSchemaFactory().generate(max_sections=1)
+    
+    with pytest.raises(TooLittleSectionAmountException):
         await update_single_warehouse(
             async_session,
             warehouse_input,
             warehouse.id
         )
-        """
+        
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_deleting_nonexistent_warehouse(
@@ -223,34 +231,15 @@ async def test_raise_exception_when_deleting_nonexistent_warehouse(
 
 
 @pytest.mark.asyncio
-async def test_raise_when_deleting_warehouse_with_occupied_waiting_rooms(
-    async_session: AsyncSession
-):
-    warehouse_input = WarehouseInputSchemaFactory().generate()
-    warehouse = await create_warehouse(async_session, warehouse_input)
-    
-    waiting_room_input_1 = WaitingRoomInputSchemaFactory().generate()
-    waiting_room_1 = await create_waiting_room(
-        async_session, waiting_room_input_1
-    )
-    
-    with pytest.raises(WarehouseIsNotEmptyException):
-        await delete_single_warehouse(
-            async_session,
-            warehouse.id
-        )
-
-
-    """@pytest.mark.asyncio
 async def test_raise_when_deleting_warehouse_with_occupied_sections(
     async_session: AsyncSession
 ):
     warehouse_input = WarehouseInputSchemaFactory().generate()
     warehouse = await create_warehouse(async_session, warehouse_input)
     
-    waiting_room_input_1 = WaitingRoomInputSchemaFactory().generate()
-    waiting_room_1 = await create_waiting_room(
-        async_session, waiting_room_input_1
+    section_input_1 = SectionInputSchemaFactory().generate()
+    section_1 = await create_section(
+        async_session, section_input_1
     )
     
     with pytest.raises(WarehouseIsNotEmptyException):
@@ -258,4 +247,33 @@ async def test_raise_when_deleting_warehouse_with_occupied_sections(
             async_session,
             warehouse.id
         )
-    """
+
+
+@pytest.mark.asyncio
+async def test_raise_when_deleting_warehouse_with_occupied_sections(
+    async_session: AsyncSession
+):
+    warehouse_input = WarehouseInputSchemaFactory().generate()
+    warehouse = await create_warehouse(async_session, warehouse_input)
+    
+    waiting_room_input = WaitingRoomInputSchemaFactory().generate()
+    waiting_room = await create_waiting_room(
+        async_session, waiting_room_input
+    )
+    
+    with pytest.raises(WarehouseIsNotEmptyException):
+        await delete_single_warehouse(
+            async_session,
+            warehouse.id
+        )
+    
+    section_input = SectionInputSchemaFactory().generate()
+    section = await create_section(
+        async_session, section_input
+    )
+    
+    with pytest.raises(WarehouseIsNotEmptyException):
+        await delete_single_warehouse(
+            async_session,
+            warehouse.id
+        )
