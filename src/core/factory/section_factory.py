@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Optional
 
-from src.apps.weight.schemas import (
+from src.apps.sections.schemas import (
     SectionInputSchema,
     SectionUpdateSchema
 )

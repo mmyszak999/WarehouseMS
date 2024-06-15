@@ -120,7 +120,7 @@ async def update_single_section(
     if not (section_object := await if_exists(Section, "id", section_id, session)):
         raise DoesNotExist(Section.__name__, "id", section_id)
 
-    section_data = section_input.dict(exclude_unset=True)
+    section_data = section_input.dict(exclude_unset=True, exclude_none=True)
 
     if new_max_weight := section_data.get("max_weight"):
         if new_max_weight < section_object.occupied_weight:
