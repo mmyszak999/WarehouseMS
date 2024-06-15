@@ -7,12 +7,12 @@ from src.apps.issues.routers import issue_router
 from src.apps.products.routers.category_routers import category_router
 from src.apps.products.routers.product_routers import product_router
 from src.apps.receptions.routers import reception_router
+from src.apps.sections.routers import section_router
 from src.apps.stocks.routers.stock_routers import stock_router
 from src.apps.stocks.routers.user_stock_routers import user_stock_router
 from src.apps.users.routers import user_router
 from src.apps.waiting_rooms.routers import waiting_room_router
 from src.apps.warehouse.routers import warehouse_router
-from src.apps.sections.routers import section_router
 from src.core.exceptions import (
     AccountAlreadyActivatedException,
     AccountAlreadyDeactivatedException,
@@ -31,25 +31,25 @@ from src.core.exceptions import (
     NoAvailableSlotsInWaitingRoomException,
     NoAvailableWaitingRoomsException,
     NoAvailableWeightInWaitingRoomException,
+    NotEnoughWarehouseResourcesException,
     PasswordAlreadySetException,
     PasswordNotSetException,
     ProductIsAlreadyLegacyException,
+    SectionIsNotEmptyException,
     ServiceException,
     StockAlreadyInWaitingRoomException,
+    TooLittleRacksAmountException,
+    TooLittleSectionAmountException,
+    TooLittleWaitingRoomAmountException,
     TooLittleWaitingRoomSpaceException,
     TooLittleWaitingRoomWeightException,
+    TooLittleWeightAmountException,
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
     WaitingRoomIsNotEmptyException,
     WarehouseAlreadyExistsException,
-    TooLittleWaitingRoomAmountException,
-    TooLittleSectionAmountException,
-    WarehouseIsNotEmptyException,
     WarehouseDoesNotExistException,
-    SectionIsNotEmptyException,
-    NotEnoughWarehouseResourcesException,
-    TooLittleWeightAmountException,
-    TooLittleRacksAmountException
+    WarehouseIsNotEmptyException,
 )
 
 app = FastAPI(
@@ -332,11 +332,7 @@ async def warehouse_already_exists_exception(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
 
-    """TooLittleWaitingRoomAmountException,
-    TooLittleSectionAmountException,
-    WarehouseIsNotEmptyException
-    """
-    
+
 @app.exception_handler(TooLittleWaitingRoomAmountException)
 async def too_little_waiting_room_amount_exception_exception(
     request: Request, exception: TooLittleWaitingRoomAmountException
@@ -398,6 +394,7 @@ async def too_little_racks_amount_exception(
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
+
 
 @app.exception_handler(TooLittleWeightAmountException)
 async def too_little_weight_amount_exception(

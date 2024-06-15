@@ -1,12 +1,14 @@
+from typing import Union
+
 from fastapi import Depends, Request, Response, status
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.sections.schemas import (
+    SectionBaseOutputSchema,
     SectionInputSchema,
     SectionOutputSchema,
     SectionUpdateSchema,
-    SectionBaseOutputSchema
 )
 from src.apps.sections.services import (
     create_section,
@@ -54,16 +56,19 @@ async def get_sections(
 
 @section_router.get(
     "/{section_id}",
-    response_model=SectionOutputSchema,
+    response_model=Union[SectionBaseOutputSchema, SectionOutputSchema],
     status_code=status.HTTP_200_OK,
 )
 async def get_section(
     section_id: str,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
-) -> SectionOutputSchema:
-    await check_if_staff(request_user)
-    return await get_single_section(session, section_id)
+) -> Union[SectionBaseOutputSchema, SectionOutputSchema]:
+    if request_user.is_staff or request_user.can_move_stocks:
+        return await get_single_section(session, section_id)
+    return await get_single_section(
+        session, section_id, output_schema=SectionBaseOutputSchema
+    )
 
 
 @section_router.patch(
