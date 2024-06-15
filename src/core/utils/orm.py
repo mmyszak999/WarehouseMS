@@ -17,3 +17,19 @@ def default_available_slots(context):
 
 def default_available_stock_weight(context):
     return context.get_current_parameters()["max_weight"]
+
+
+def default_available_sections(context):
+    return context.get_current_parameters()["max_sections"]
+
+
+def default_available_waiting_rooms(context):
+    return context.get_current_parameters()["max_waiting_rooms"]
+
+
+def default_available_section_weight(context):
+    return context.get_current_parameters()["max_weight"]
+
+
+def default_available_section_racks(context):
+    return context.get_current_parameters()["max_racks"]

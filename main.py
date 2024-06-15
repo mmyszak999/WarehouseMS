@@ -11,6 +11,8 @@ from src.apps.stocks.routers.stock_routers import stock_router
 from src.apps.stocks.routers.user_stock_routers import user_stock_router
 from src.apps.users.routers import user_router
 from src.apps.waiting_rooms.routers import waiting_room_router
+from src.apps.warehouse.routers import warehouse_router
+from src.apps.sections.routers import section_router
 from src.core.exceptions import (
     AccountAlreadyActivatedException,
     AccountAlreadyDeactivatedException,
@@ -39,6 +41,15 @@ from src.core.exceptions import (
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
     WaitingRoomIsNotEmptyException,
+    WarehouseAlreadyExistsException,
+    TooLittleWaitingRoomAmountException,
+    TooLittleSectionAmountException,
+    WarehouseIsNotEmptyException,
+    WarehouseDoesNotExistException,
+    SectionIsNotEmptyException,
+    NotEnoughWarehouseResourcesException,
+    TooLittleWeightAmountException,
+    TooLittleRacksAmountException
 )
 
 app = FastAPI(
@@ -57,6 +68,8 @@ root_router.include_router(stock_router)
 root_router.include_router(user_stock_router)
 root_router.include_router(issue_router)
 root_router.include_router(waiting_room_router)
+root_router.include_router(warehouse_router)
+root_router.include_router(section_router)
 
 app.include_router(root_router)
 
@@ -305,6 +318,90 @@ async def no_available_weight_in_waiting_room_exception(
 @app.exception_handler(NoAvailableWaitingRoomsException)
 async def no_available_waiting_rooms_exception(
     request: Request, exception: NoAvailableWaitingRoomsException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(WarehouseAlreadyExistsException)
+async def warehouse_already_exists_exception(
+    request: Request, exception: WarehouseAlreadyExistsException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+    """TooLittleWaitingRoomAmountException,
+    TooLittleSectionAmountException,
+    WarehouseIsNotEmptyException
+    """
+    
+@app.exception_handler(TooLittleWaitingRoomAmountException)
+async def too_little_waiting_room_amount_exception_exception(
+    request: Request, exception: TooLittleWaitingRoomAmountException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(TooLittleSectionAmountException)
+async def too_little_section_amount_exception_exception(
+    request: Request, exception: TooLittleSectionAmountException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(WarehouseIsNotEmptyException)
+async def warehouse_is_not_empty_exception(
+    request: Request, exception: WarehouseIsNotEmptyException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(WarehouseDoesNotExistException)
+async def warehouse_does_not_exist_exception(
+    request: Request, exception: WarehouseDoesNotExistException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(SectionIsNotEmptyException)
+async def section_is_not_empty_exception(
+    request: Request, exception: SectionIsNotEmptyException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(NotEnoughWarehouseResourcesException)
+async def not_enough_warehouse_resources_exception(
+    request: Request, exception: NotEnoughWarehouseResourcesException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(TooLittleRacksAmountException)
+async def too_little_racks_amount_exception(
+    request: Request, exception: TooLittleRacksAmountException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+@app.exception_handler(TooLittleWeightAmountException)
+async def too_little_weight_amount_exception(
+    request: Request, exception: TooLittleWeightAmountException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
