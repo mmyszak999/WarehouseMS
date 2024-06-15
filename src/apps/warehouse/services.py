@@ -105,7 +105,7 @@ async def update_single_warehouse(
     ):
         raise DoesNotExist(Warehouse.__name__, "id", warehouse_id)
 
-    warehouse_data = warehouse_input.dict(exclude_unset=True)
+    warehouse_data = warehouse_input.dict(exclude_unset=True, exclude_none=True)
 
     if new_max_sections := warehouse_data.get("max_sections"):
         if new_max_sections < warehouse_object.occupied_sections:
