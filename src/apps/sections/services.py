@@ -159,8 +159,8 @@ async def delete_single_section(session: AsyncSession, section_id: str):
     if not (section_object := await if_exists(Section, "id", section_id, session)):
         raise DoesNotExist(Section.__name__, "id", section_id)
 
-    """if section_object.racks:
-        raise SectionIsNotEmptyException(resource="sections")"""
+    if section_object.racks:
+        raise SectionIsNotEmptyException(resource="sections")
 
     statement = delete(Section).filter(Section.id == section_id)
     result = await session.execute(statement)

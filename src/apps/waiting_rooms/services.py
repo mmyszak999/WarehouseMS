@@ -66,9 +66,9 @@ async def create_waiting_room(
     session.add(warehouse)
 
     if testing:
-
         await session.commit()
         return new_waiting_room
+    
     await session.commit()
     await session.refresh(new_waiting_room)
 
