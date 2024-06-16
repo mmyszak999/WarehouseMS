@@ -14,6 +14,7 @@ from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
     IsOccupied,
+    ServiceException,
     TooLittleSectionAmountException,
     TooLittleWaitingRoomAmountException,
     WarehouseAlreadyExistsException,
@@ -68,7 +69,7 @@ async def get_all_warehouses(
 
 
 async def manage_warehouse_state(
-    warehouse_object: Warehouse,
+    warehouse_object: Warehouse = None,
     max_sections: Decimal = None,
     max_waiting_rooms: int = None,
     adding_resources_to_warehouse: bool = True,
@@ -105,7 +106,7 @@ async def update_single_warehouse(
     ):
         raise DoesNotExist(Warehouse.__name__, "id", warehouse_id)
 
-    warehouse_data = warehouse_input.dict(exclude_unset=True)
+    warehouse_data = warehouse_input.dict(exclude_unset=True, exclude_none=True)
 
     if new_max_sections := warehouse_data.get("max_sections"):
         if new_max_sections < warehouse_object.occupied_sections:

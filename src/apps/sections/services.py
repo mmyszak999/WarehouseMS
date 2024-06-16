@@ -20,6 +20,7 @@ from src.core.exceptions import (
     IsOccupied,
     NotEnoughWarehouseResourcesException,
     SectionIsNotEmptyException,
+    ServiceException,
     TooLittleRacksAmountException,
     TooLittleWeightAmountException,
     WarehouseAlreadyExistsException,
@@ -84,7 +85,7 @@ async def get_all_sections(
 
 
 async def manage_section_state(
-    section_object: Section,
+    section_object: Section = None,
     max_weight: Decimal = None,
     max_racks: int = None,
     adding_resources_to_section: bool = True,
@@ -101,12 +102,15 @@ async def manage_section_state(
         section_object.occupied_racks += multiplier
 
     if weight_involved:
+        if stock_weight is None:
+            raise ServiceException("Stock weight was not provided! ")
         section_object.available_weight -= multiplier * stock_weight
         section_object.occupied_weight += multiplier * stock_weight
 
     if max_weight is not None:
         new_available_weight = max_weight - section_object.occupied_weight
         section_object.available_weight = new_available_weight
+
     if max_racks is not None:
         new_available_racks = max_racks - section_object.occupied_racks
         section_object.available_racks = new_available_racks
@@ -120,7 +124,7 @@ async def update_single_section(
     if not (section_object := await if_exists(Section, "id", section_id, session)):
         raise DoesNotExist(Section.__name__, "id", section_id)
 
-    section_data = section_input.dict(exclude_unset=True)
+    section_data = section_input.dict(exclude_unset=True, exclude_none=True)
 
     if new_max_weight := section_data.get("max_weight"):
         if new_max_weight < section_object.occupied_weight:
@@ -155,8 +159,8 @@ async def delete_single_section(session: AsyncSession, section_id: str):
     if not (section_object := await if_exists(Section, "id", section_id, session)):
         raise DoesNotExist(Section.__name__, "id", section_id)
 
-    """if section_object.racks:
-        raise SectionIsNotEmptyException(resource="sections")"""
+    if section_object.racks:
+        raise SectionIsNotEmptyException(resource="sections")
 
     statement = delete(Section).filter(Section.id == section_id)
     result = await session.execute(statement)

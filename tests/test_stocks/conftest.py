@@ -13,6 +13,7 @@ from src.apps.receptions.schemas import (
     ReceptionProductInputSchema,
 )
 from src.apps.receptions.services import create_reception, get_all_receptions
+from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.schemas.stock_schemas import (
     StockIssueInputSchema,
     StockOutputSchema,
@@ -34,6 +35,7 @@ from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from tests.test_products.conftest import db_categories, db_products
+from tests.test_sections.conftest import db_sections
 from tests.test_users.conftest import (
     auth_headers,
     create_superuser,
@@ -51,6 +53,7 @@ DB_WAITING_ROOMS_SCHEMAS = [
 @pytest_asyncio.fixture
 async def db_stocks(
     async_session: AsyncSession,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ) -> PagedResponseSchema[StockOutputSchema]:
