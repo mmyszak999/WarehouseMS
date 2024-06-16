@@ -3,6 +3,7 @@ from decimal import Decimal
 from typing import Optional
 
 from pydantic import BaseModel, Field, validator
+from src.apps.racks.schemas import RackBaseOutputSchema
 
 
 class SectionBaseSchema(BaseModel):
@@ -11,13 +12,13 @@ class SectionBaseSchema(BaseModel):
     max_racks: int
 
     @validator("max_weight")
-    def validate_max_weight(cls, max_weight: int) -> int:
+    def validate_max_weight(cls, max_weight: Decimal) -> Decimal:
         if max_weight is not None and max_weight <= 0:
             raise ValueError("Max section weight must be positive!")
         return max_weight
 
     @validator("max_racks")
-    def validate_max_racks(cls, max_racks: Decimal) -> Decimal:
+    def validate_max_racks(cls, max_racks: int) -> int:
         if max_racks is not None and max_racks <= 0:
             raise ValueError("Max section racks must be positive!")
         return max_racks
@@ -36,13 +37,13 @@ class SectionUpdateSchema(BaseModel):
     max_racks: Optional[int]
 
     @validator("max_weight")
-    def validate_max_weight(cls, max_weight: Optional[int]) -> Optional[int]:
+    def validate_max_weight(cls, max_weight: Optional[Decimal]) -> Optional[Decimal]:
         if max_weight is not None and max_weight <= 0:
             raise ValueError("Max section weight must be positive!")
         return max_weight
 
     @validator("max_racks")
-    def validate_max_racks(cls, max_racks: Optional[Decimal]) -> Optional[Decimal]:
+    def validate_max_racks(cls, max_racks: Optional[int]) -> Optional[int]:
         if max_racks is not None and max_racks <= 0:
             raise ValueError("Max section racks must be positive!")
         return max_racks
@@ -51,8 +52,8 @@ class SectionUpdateSchema(BaseModel):
 class SectionBaseOutputSchema(SectionBaseSchema):
     id: str
     available_weight: Decimal
-    available_racks: int
     occupied_weight: Decimal
+    available_racks: int
     occupied_racks: int
 
     class Config:
@@ -60,7 +61,7 @@ class SectionBaseOutputSchema(SectionBaseSchema):
 
 
 class SectionOutputSchema(SectionBaseOutputSchema):
-    pass
+    racks: list[RackBaseOutputSchema]
 
     class Config:
         orm_mode = True
