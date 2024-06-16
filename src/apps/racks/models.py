@@ -13,16 +13,16 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import DateTime
 
 from src.core.utils.orm import (
-    default_available_section_racks,
-    default_available_section_weight,
+    default_available_rack_weight,
+    default_available_rack_levels,
 )
 from src.core.utils.time import get_current_time
 from src.core.utils.utils import generate_uuid
 from src.database.db_connection import Base
 
 
-class Section(Base):
-    __tablename__ = "section"
+class Rack(Base):
+    __tablename__ = "rack"
     id = Column(
         String,
         primary_key=True,
@@ -31,21 +31,20 @@ class Section(Base):
         index=True,
         default=generate_uuid,
     )
-    section_name = Column(String(length=400), nullable=False)
+    rack_name = Column(String(length=400), nullable=False)
     max_weight = Column(DECIMAL, nullable=False)
     available_weight = Column(
-        DECIMAL, nullable=False, default=default_available_section_weight
+        DECIMAL, nullable=False, default=default_available_rack_weight
     )
     occupied_weight = Column(Integer, nullable=False, default=0)
-    max_racks = Column(Integer, nullable=False)
-    available_racks = Column(
-        DECIMAL, nullable=False, default=default_available_section_racks
+    max_levels = Column(Integer, nullable=False)
+    available_levels = Column(
+        DECIMAL, nullable=False, default=default_available_rack_levels
     )
-    occupied_racks = Column(Integer, nullable=False, default=0)
-    warehouse_id = Column(
+    occupied_levels = Column(Integer, nullable=False, default=0)
+    section_id = Column(
         String,
-        ForeignKey("warehouse.id", onupdate="SET NULL"),
+        ForeignKey("section.id", onupdate="SET NULL"),
         nullable=False,
     )
-    warehouse = relationship("Warehouse", back_populates="sections", lazy="joined")
-    racks = relationship("Rack", back_populates="section", lazy="joined")
+    section = relationship("Section", back_populates="racks", lazy="joined")
