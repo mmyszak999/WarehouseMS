@@ -102,6 +102,8 @@ async def manage_section_state(
         section_object.occupied_racks += multiplier
 
     if weight_involved:
+        if stock_weight is None:
+            raise ServiceException("Stock weight was not provided! ")
         section_object.available_weight -= multiplier * stock_weight
         section_object.occupied_weight += multiplier * stock_weight
 

@@ -98,13 +98,6 @@ async def test_raise_exception_when_warehouse_not_provided_when_managing_state(
     with pytest.raises(ServiceException):
         await manage_warehouse_state()
 
-@pytest.mark.asyncio
-async def test_raise_exception_when_warehouse_not_provided_when_managing_state(
-    async_session: AsyncSession,
-    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
-):
-    with pytest.raises(ServiceException):
-        await manage_warehouse_state()
 
 @pytest.mark.asyncio
 async def test_if_warehouse_section_limits_are_correctly_managed(
@@ -250,7 +243,7 @@ async def test_raise_when_deleting_warehouse_with_occupied_sections(
 
 
 @pytest.mark.asyncio
-async def test_raise_when_deleting_warehouse_with_occupied_sections(
+async def test_raise_when_deleting_warehouse_with_occupied_waiting_rooms(
     async_session: AsyncSession
 ):
     warehouse_input = WarehouseInputSchemaFactory().generate()
@@ -259,17 +252,6 @@ async def test_raise_when_deleting_warehouse_with_occupied_sections(
     waiting_room_input = WaitingRoomInputSchemaFactory().generate()
     waiting_room = await create_waiting_room(
         async_session, waiting_room_input
-    )
-    
-    with pytest.raises(WarehouseIsNotEmptyException):
-        await delete_single_warehouse(
-            async_session,
-            warehouse.id
-        )
-    
-    section_input = SectionInputSchemaFactory().generate()
-    section = await create_section(
-        async_session, section_input
     )
     
     with pytest.raises(WarehouseIsNotEmptyException):

@@ -144,18 +144,28 @@ async def test_if_section_racks_limits_are_correctly_managed(
     assert section.available_racks == db_sections.results[0].available_racks + 1
 
 
-"""
-modify test when stocks can be placed in the rack levels
+
 @pytest.mark.asyncio
 async def test_if_section_weight_limits_are_correctly_managed(
     async_session: AsyncSession,
     db_sections: PagedResponseSchema[SectionOutputSchema],
 ):
     section = await if_exists(Section, "id", db_sections.results[0].id, async_session)
-    #decrement max_weight by 1
-    section = await manage_section_state(section, weight_involved=True)
+    #decrement max_weight by stock_weight
+    stock_weight = 100
+    section = await manage_section_state(section, weight_involved=True, stock_weight=stock_weight)
     
-    assert section.available_weight == db_sections.results[0].available_weight + 1"""
+    assert section.available_weight == db_sections.results[0].available_weight + stock_weight
+
+
+@pytest.mark.asyncio
+async def test_raise_exception_when_stock_weight_is_not_provided(
+    async_session: AsyncSession,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
+):
+    section = await if_exists(Section, "id", db_sections.results[0].id, async_session)
+    with pytest.raises(ServiceException):
+        await manage_section_state(section, weight_involved=True)
 
 
 @pytest.mark.asyncio
