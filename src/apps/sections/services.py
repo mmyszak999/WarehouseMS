@@ -25,6 +25,7 @@ from src.core.exceptions import (
     TooLittleWeightAmountException,
     WarehouseAlreadyExistsException,
     WarehouseDoesNotExistException,
+    TooLittleRackLevelsAmountException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -129,7 +130,7 @@ async def update_single_section(
     if new_max_weight := section_data.get("max_weight"):
         if new_max_weight < section_object.occupied_weight:
             raise TooLittleWeightAmountException(
-                new_max_weight, section_object.occupied_weight
+                new_max_weight, section_object.occupied_weight, Section.__name__
             )
 
     if new_max_racks := section_data.get("max_racks"):
@@ -160,7 +161,10 @@ async def delete_single_section(session: AsyncSession, section_id: str):
         raise DoesNotExist(Section.__name__, "id", section_id)
 
     if section_object.racks:
-        raise SectionIsNotEmptyException(resource="sections")
+        raise SectionIsNotEmptyException(resource="racks")
+    
+    if section_object.occupied_weight:
+        raise SectionIsNotEmptyException(resource="occupied weight")
 
     statement = delete(Section).filter(Section.id == section_id)
     result = await session.execute(statement)

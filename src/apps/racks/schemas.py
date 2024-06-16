@@ -27,7 +27,7 @@ class RackBaseSchema(BaseModel):
 
 
 class RackInputSchema(RackBaseSchema):
-    pass
+    section_id: str
 
 
 class RackUpdateSchema(BaseModel):

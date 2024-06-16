@@ -204,9 +204,9 @@ class WarehouseIsNotEmptyException(ServiceException):
 
 
 class SectionIsNotEmptyException(ServiceException):
-    def __init__(self) -> None:
+    def __init__(self, resource: str) -> None:
         super().__init__(
-            f"The section cannot be deleted because it still contains not empty racks with stocks inside! "
+            f"The section cannot be deleted because it is not empty! Reason: positive amount of{resource} "
         )
 
 
@@ -216,10 +216,10 @@ class NotEnoughWarehouseResourcesException(ServiceException):
 
 
 class TooLittleWeightAmountException(ServiceException):
-    def __init__(self, value1: Decimal, value2: Decimal) -> None:
+    def __init__(self, value1: Decimal, value2: Decimal, model: str) -> None:
         super().__init__(
-            f"The requested section max weight amount ({value1}) is lower than the weight of "
-            f"the stocks in the section({value2}) !"
+            f"The requested {model} max weight amount ({value1}) is lower than the weight of "
+            f"the stocks in the {model} ({value2}) !"
         )
 
 
@@ -228,4 +228,12 @@ class TooLittleRacksAmountException(ServiceException):
         super().__init__(
             f"The requested section max racks amount ({value1}) is lower than the amount of "
             f"the racks in the section({value2}) !"
+        )
+
+
+class TooLittleRackLevelsAmountException(ServiceException):
+    def __init__(self, value1: int, value2: int) -> None:
+        super().__init__(
+            f"The requested rack level amount ({value1}) is lower than the amount of "
+            f"the rack levels in the rack({value2}) !"
         )
