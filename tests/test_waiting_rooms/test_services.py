@@ -14,12 +14,6 @@ from src.apps.waiting_rooms.schemas import (
     WaitingRoomOutputSchema,
     WaitingRoomUpdateSchema,
 )
-from src.apps.warehouse.services import (
-    create_warehouse
-)
-from src.core.factory.warehouse_factory import (
-    WarehouseInputSchemaFactory
-)
 from src.apps.waiting_rooms.services import (
     add_single_stock_to_waiting_room,
     create_waiting_room,
@@ -29,6 +23,7 @@ from src.apps.waiting_rooms.services import (
     manage_waiting_room_state,
     update_single_waiting_room,
 )
+from src.apps.warehouse.services import create_warehouse
 from src.core.exceptions import (
     AlreadyExists,
     CannotMoveIssuedStockException,
@@ -36,27 +31,27 @@ from src.core.exceptions import (
     IsOccupied,
     NoAvailableSlotsInWaitingRoomException,
     NoAvailableWeightInWaitingRoomException,
+    NotEnoughWarehouseResourcesException,
     ServiceException,
     StockAlreadyInWaitingRoomException,
     TooLittleWaitingRoomSpaceException,
     TooLittleWaitingRoomWeightException,
     WaitingRoomIsNotEmptyException,
     WarehouseDoesNotExistException,
-    NotEnoughWarehouseResourcesException
 )
 from src.core.factory.stock_factory import StockInputSchemaFactory
 from src.core.factory.waiting_room_factory import (
     WaitingRoomInputSchemaFactory,
     WaitingRoomUpdateSchemaFactory,
 )
+from src.core.factory.warehouse_factory import WarehouseInputSchemaFactory
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid
 from tests.test_products.conftest import db_categories, db_products
-from tests.test_stocks.conftest import db_stocks
 from tests.test_sections.conftest import db_sections
-from tests.test_warehouse.conftest import db_warehouse
+from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,
     db_staff_user,
@@ -64,6 +59,7 @@ from tests.test_users.conftest import (
     staff_auth_headers,
 )
 from tests.test_waiting_rooms.conftest import db_waiting_rooms
+from tests.test_warehouse.conftest import db_warehouse
 
 
 @pytest.mark.asyncio
@@ -72,10 +68,8 @@ async def test_raise_exception_when_creating_waiting_room_with_no_warehouse_crea
 ):
     waiting_room_input = WaitingRoomInputSchemaFactory().generate()
     with pytest.raises(WarehouseDoesNotExistException):
-        await create_waiting_room(
-            async_session, 
-            waiting_room_input
-        )
+        await create_waiting_room(async_session, waiting_room_input)
+
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_there_is_no_more_available_waiting_room_when_creating_one(
@@ -83,12 +77,12 @@ async def test_raise_exception_when_there_is_no_more_available_waiting_room_when
 ):
     warehouse_input = WarehouseInputSchemaFactory().generate(max_waiting_rooms=1)
     warehouse = await create_warehouse(async_session, warehouse_input)
-    
+
     waiting_room_input_1 = WaitingRoomInputSchemaFactory().generate()
     waiting_room_1 = await create_waiting_room(async_session, waiting_room_input_1)
-    
+
     waiting_room_input_2 = WaitingRoomInputSchemaFactory().generate()
-    
+
     with pytest.raises(NotEnoughWarehouseResourcesException):
         await create_waiting_room(async_session, waiting_room_input_2)
 

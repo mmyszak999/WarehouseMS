@@ -3,7 +3,7 @@ import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
-from src.apps.warehouse.schemas import WarehouseOutputSchema, WarehouseInputSchema
+from src.apps.warehouse.schemas import WarehouseInputSchema, WarehouseOutputSchema
 from src.apps.warehouse.services import create_warehouse, get_all_warehouses
 from src.core.factory.warehouse_factory import WarehouseInputSchemaFactory
 from src.core.pagination.models import PageParams
@@ -21,10 +21,8 @@ from tests.test_users.conftest import (
 
 @pytest_asyncio.fixture
 async def db_warehouse(
-    async_session: AsyncSession
+    async_session: AsyncSession,
 ) -> PagedResponseSchema[WarehouseOutputSchema]:
     warehouse_input = WarehouseInputSchemaFactory().generate()
-    warehouse = await create_warehouse(
-        async_session, warehouse_input
-    )
+    warehouse = await create_warehouse(async_session, warehouse_input)
     return await get_all_warehouses(async_session, PageParams())

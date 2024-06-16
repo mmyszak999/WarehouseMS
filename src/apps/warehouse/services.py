@@ -14,11 +14,11 @@ from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
     IsOccupied,
+    ServiceException,
     TooLittleSectionAmountException,
     TooLittleWaitingRoomAmountException,
     WarehouseAlreadyExistsException,
     WarehouseIsNotEmptyException,
-    ServiceException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema

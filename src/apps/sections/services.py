@@ -20,11 +20,11 @@ from src.core.exceptions import (
     IsOccupied,
     NotEnoughWarehouseResourcesException,
     SectionIsNotEmptyException,
+    ServiceException,
     TooLittleRacksAmountException,
     TooLittleWeightAmountException,
     WarehouseAlreadyExistsException,
     WarehouseDoesNotExistException,
-    ServiceException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -110,7 +110,7 @@ async def manage_section_state(
     if max_weight is not None:
         new_available_weight = max_weight - section_object.occupied_weight
         section_object.available_weight = new_available_weight
-        
+
     if max_racks is not None:
         new_available_racks = max_racks - section_object.occupied_racks
         section_object.available_racks = new_available_racks

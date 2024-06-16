@@ -13,6 +13,7 @@ from src.apps.receptions.schemas import (
     ReceptionProductInputSchema,
 )
 from src.apps.receptions.services import create_reception, get_all_receptions
+from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.schemas.stock_schemas import (
     StockIssueInputSchema,
     StockOutputSchema,
@@ -30,7 +31,6 @@ from src.core.factory.reception_factory import (
 )
 from src.core.factory.stock_factory import StockInputSchemaFactory
 from src.core.factory.waiting_room_factory import WaitingRoomInputSchemaFactory
-from src.apps.sections.schemas import SectionOutputSchema
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists

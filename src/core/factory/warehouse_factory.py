@@ -2,12 +2,9 @@ from datetime import date
 from decimal import Decimal
 from typing import Optional
 
-from src.apps.warehouse.schemas import (
-    WarehouseInputSchema,
-    WarehouseUpdateSchema
-)
+from src.apps.warehouse.schemas import WarehouseInputSchema, WarehouseUpdateSchema
 from src.core.factory.core import SchemaFactory
-from src.core.utils.faker import set_max_waiting_rooms, set_max_sections
+from src.core.utils.faker import set_max_sections, set_max_waiting_rooms
 
 
 class WarehouseInputSchemaFactory(SchemaFactory):
@@ -15,7 +12,10 @@ class WarehouseInputSchemaFactory(SchemaFactory):
         super().__init__(schema_class)
 
     def generate(
-        self, warehouse_name: str = None, max_sections: int = None, max_waiting_rooms: int = None
+        self,
+        warehouse_name: str = None,
+        max_sections: int = None,
+        max_waiting_rooms: int = None,
     ):
         return self.schema_class(
             warehouse_name=warehouse_name or self.faker.ecommerce_name(),
@@ -30,7 +30,9 @@ class WarehouseUpdateSchemaFactory(SchemaFactory):
 
     def generate(
         self,
-        warehouse_name: Optional[str] = None, max_sections: Optional[int] = None, max_waiting_rooms: Optional[int] = None
+        warehouse_name: Optional[str] = None,
+        max_sections: Optional[int] = None,
+        max_waiting_rooms: Optional[int] = None,
     ):
         return self.schema_class(
             warehouse_name=warehouse_name,

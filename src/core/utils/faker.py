@@ -50,5 +50,3 @@ def set_max_section_weight() -> int:
 
 def set_max_racks() -> int:
     return random.randint(4, 6)
-
-
