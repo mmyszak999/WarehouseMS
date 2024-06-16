@@ -13,8 +13,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import DateTime
 
 from src.core.utils.orm import (
-    default_available_rack_weight,
     default_available_rack_levels,
+    default_available_rack_weight,
 )
 from src.core.utils.time import get_current_time
 from src.core.utils.utils import generate_uuid

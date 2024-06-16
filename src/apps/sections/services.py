@@ -21,11 +21,11 @@ from src.core.exceptions import (
     NotEnoughWarehouseResourcesException,
     SectionIsNotEmptyException,
     ServiceException,
+    TooLittleRackLevelsAmountException,
     TooLittleRacksAmountException,
     TooLittleWeightAmountException,
     WarehouseAlreadyExistsException,
     WarehouseDoesNotExistException,
-    TooLittleRackLevelsAmountException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -105,6 +105,8 @@ async def manage_section_state(
     if weight_involved:
         if stock_weight is None:
             raise ServiceException("Stock weight was not provided! ")
+        print("wow")
+        print(multiplier, stock_weight)
         section_object.available_weight -= multiplier * stock_weight
         section_object.occupied_weight += multiplier * stock_weight
 
@@ -162,7 +164,7 @@ async def delete_single_section(session: AsyncSession, section_id: str):
 
     if section_object.racks:
         raise SectionIsNotEmptyException(resource="racks")
-    
+
     if section_object.occupied_weight:
         raise SectionIsNotEmptyException(resource="occupied weight")
 

@@ -206,7 +206,7 @@ class WarehouseIsNotEmptyException(ServiceException):
 class SectionIsNotEmptyException(ServiceException):
     def __init__(self, resource: str) -> None:
         super().__init__(
-            f"The section cannot be deleted because it is not empty! Reason: positive amount of{resource} "
+            f"The section cannot be deleted because it is not empty! Reason: positive amount of {resource} "
         )
 
 
@@ -236,4 +236,18 @@ class TooLittleRackLevelsAmountException(ServiceException):
         super().__init__(
             f"The requested rack level amount ({value1}) is lower than the amount of "
             f"the rack levels in the rack({value2}) !"
+        )
+
+
+class RackIsNotEmptyException(ServiceException):
+    def __init__(self, resource: str) -> None:
+        super().__init__(
+            f"The rack cannot be deleted because it is not empty! Reason: positive amount of {resource} "
+        )
+
+
+class NotEnoughSectionResourcesException(ServiceException):
+    def __init__(self, resource: str) -> None:
+        super().__init__(
+            f"The warehouse can have no more racks - {resource} exceeded !"
         )

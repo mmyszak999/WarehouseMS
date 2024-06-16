@@ -20,14 +20,15 @@ from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
     IsOccupied,
+    NotEnoughSectionResourcesException,
     NotEnoughWarehouseResourcesException,
     RackIsNotEmptyException,
     ServiceException,
+    TooLittleRackLevelsAmountException,
     TooLittleRacksAmountException,
     TooLittleWeightAmountException,
     WarehouseAlreadyExistsException,
     WarehouseDoesNotExistException,
-    TooLittleRackLevelsAmountException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -46,14 +47,23 @@ async def create_rack(
     if not section_object.available_racks:
         raise NotEnoughSectionResourcesException(resource="racks")
 
+    if (
+        rack_max_weight := rack_data.get("max_weight")
+    ) > section_object.available_weight:
+        raise NotEnoughSectionResourcesException(resource="available section weight")
+
     new_rack = Rack(**rack_data)
     session.add(new_rack)
-    
+    print(rack_max_weight)
     section = await manage_section_state(
-        section_object, racks_involved=True, adding_resources_to_section=False
+        section_object,
+        adding_resources_to_section=False,
+        racks_involved=True,
+        weight_involved=True,
+        stock_weight=rack_max_weight,
     )
     session.add(section)
-    
+
     await session.commit()
     return RackOutputSchema.from_orm(new_rack)
 
@@ -137,15 +147,11 @@ async def update_single_rack(
                 new_max_levels, rack_object.occupied_levels
             )
 
-    rack_object = await manage_rack_state(
-        rack_object, new_max_weight, new_max_levels
-    )
+    rack_object = await manage_rack_state(rack_object, new_max_weight, new_max_levels)
     session.add(rack_object)
 
     if rack_data:
-        statement = (
-            update(Rack).filter(Rack.id == rack_id).values(**rack_data)
-        )
+        statement = update(Rack).filter(Rack.id == rack_id).values(**rack_data)
 
         await session.execute(statement)
         await session.commit()
@@ -160,17 +166,20 @@ async def delete_single_rack(session: AsyncSession, rack_id: str):
 
     """if rack_object.rack_levels:
         raise RackIsNotEmptyException(resource="rack levels")"""
-    
+
     if rack_object.occupied_weight:
         raise RackIsNotEmptyException(resource="occupied weight")
 
     statement = delete(Rack).filter(Rack.id == rack_id)
     result = await session.execute(statement)
-    
+
     section = await if_exists(Section, "id", rack_object.section_id, session)
-    
+
     section = await manage_section_state(
-        section, racks_involved=True
+        section,
+        racks_involved=True,
+        weight_involved=True,
+        stock_weight=rack_object.max_weight,
     )
     session.add(section)
 
