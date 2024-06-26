@@ -32,16 +32,26 @@ class Section(Base):
         default=generate_uuid,
     )
     section_name = Column(String(length=400), nullable=False)
+    
     max_weight = Column(DECIMAL, nullable=False)
+    
     available_weight = Column(
         DECIMAL, nullable=False, default=default_available_section_weight
     )
-    occupied_weight = Column(Integer, nullable=False, default=0)
+    occupied_weight = Column(DECIMAL, nullable=False, default=0)
+    
+    reserved_weight = Column(DECIMAL, nullable=False, default=0)
+    weight_to_reserve = Column(
+        DECIMAL, nullable=False, default=default_available_section_weight
+    )
+    
     max_racks = Column(Integer, nullable=False)
+    
     available_racks = Column(
         DECIMAL, nullable=False, default=default_available_section_racks
     )
     occupied_racks = Column(Integer, nullable=False, default=0)
+    
     warehouse_id = Column(
         String,
         ForeignKey("warehouse.id", onupdate="SET NULL"),

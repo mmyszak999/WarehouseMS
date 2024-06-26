@@ -54,6 +54,7 @@ from src.core.exceptions import (
     WarehouseAlreadyExistsException,
     WarehouseDoesNotExistException,
     WarehouseIsNotEmptyException,
+    WeightLimitExceededException
 )
 
 app = FastAPI(
@@ -435,3 +436,12 @@ async def not_enough_section_resources_exception(
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
+    
+@app.exception_handler(WeightLimitExceededException)
+async def weight_limit_exceeded_exception(
+    request: Request, exception: WeightLimitExceededException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+

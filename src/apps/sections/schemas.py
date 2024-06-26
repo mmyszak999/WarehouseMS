@@ -54,6 +54,8 @@ class SectionBaseOutputSchema(SectionBaseSchema):
     id: str
     available_weight: Decimal
     occupied_weight: Decimal
+    reserved_weight: Decimal
+    weight_to_reserve: Decimal
     available_racks: int
     occupied_racks: int
 
