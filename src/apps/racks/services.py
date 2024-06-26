@@ -29,7 +29,7 @@ from src.core.exceptions import (
     TooLittleWeightAmountException,
     WarehouseAlreadyExistsException,
     WarehouseDoesNotExistException,
-    WeightLimitExceededException
+    WeightLimitExceededException,
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -51,7 +51,9 @@ async def create_rack(
     if (
         rack_max_weight := rack_data.get("max_weight")
     ) > section_object.weight_to_reserve:
-        raise NotEnoughSectionResourcesException(resource="available section weight to reserve")
+        raise NotEnoughSectionResourcesException(
+            resource="available section weight to reserve"
+        )
 
     new_rack = Rack(**rack_data)
     session.add(new_rack)
@@ -132,31 +134,34 @@ async def update_single_rack(
 ) -> RackOutputSchema:
     if not (rack_object := await if_exists(Rack, "id", rack_id, session)):
         raise DoesNotExist(Rack.__name__, "id", rack_id)
-    
-    if not (section_object := await if_exists(Section, "id", rack_object.section_id, session)):
+
+    if not (
+        section_object := await if_exists(
+            Section, "id", rack_object.section_id, session
+        )
+    ):
         raise DoesNotExist(Section.__name__, "id", rack_object.section_id)
 
     rack_data = rack_input.dict(exclude_unset=True, exclude_none=True)
 
     if new_max_weight := rack_data.get("max_weight"):
-        if (new_max_weight < rack_object.occupied_weight):
+        if new_max_weight < rack_object.occupied_weight:
             raise TooLittleWeightAmountException(
                 new_max_weight, rack_object.occupied_weight, Rack.__name__
             )
-            
-        if (new_max_weight > (section_object.weight_to_reserve + rack_object.max_weight)):
+
+        if new_max_weight > (section_object.weight_to_reserve + rack_object.max_weight):
             raise WeightLimitExceededException(
                 new_max_weight,
-                (section_object.weight_to_reserve + rack_object.max_weight)
+                (section_object.weight_to_reserve + rack_object.max_weight),
             )
-        
+
         max_weight_difference = new_max_weight - rack_object.max_weight
         section_object = await manage_section_state(
             rack_object.section,
             max_weight=section_object.max_weight,
-            stock_weight=max_weight_difference
-            )
-            
+            stock_weight=max_weight_difference,
+        )
 
     if new_max_levels := rack_data.get("max_levels"):
         if new_max_levels < rack_object.occupied_levels:

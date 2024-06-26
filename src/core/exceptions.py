@@ -252,6 +252,7 @@ class NotEnoughSectionResourcesException(ServiceException):
             f"The warehouse can have no more racks - {resource} exceeded !"
         )
 
+
 class WeightLimitExceededException(ServiceException):
     def __init__(self, value1: Decimal, value2: Decimal) -> None:
         super().__init__(
