@@ -122,8 +122,12 @@ async def manage_section_state(
         new_available_weight = max_weight - section_object.occupied_weight
         section_object.available_weight = new_available_weight
         
-        section_object.weight_to_reserve += (stock_weight * multiplier)
-        section_object.reserved_weight -= (stock_weight * multiplier)
+        if stock_weight is not None:
+            section_object.weight_to_reserve += (stock_weight * multiplier)
+            section_object.reserved_weight -= (stock_weight * multiplier)
+        else:
+            weight_difference = max_weight - section_object.max_weight
+            section_object.weight_to_reserve += weight_difference
 
     if max_racks is not None:
         new_available_racks = max_racks - section_object.occupied_racks
@@ -145,8 +149,14 @@ async def update_single_section(
             raise TooLittleWeightAmountException(
                 new_max_weight, section_object.occupied_weight, Section.__name__
             )
+        
+        if new_max_weight < section_object.reserved_weight:
+            raise TooLittleWeightAmountException(
+                new_max_weight, section_object.reserved_weight, Section.__name__
+            )
+            
         section_object = await manage_section_state(
-            section_object, new_max_weight
+            section_object, new_max_weight, 
         )
 
     if new_max_racks := section_data.get("max_racks"):

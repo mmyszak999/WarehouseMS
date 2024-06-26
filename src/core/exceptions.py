@@ -218,8 +218,8 @@ class NotEnoughWarehouseResourcesException(ServiceException):
 class TooLittleWeightAmountException(ServiceException):
     def __init__(self, value1: Decimal, value2: Decimal, model: str) -> None:
         super().__init__(
-            f"The requested {model} max weight amount ({value1}) is lower than the weight of "
-            f"the stocks in the {model} ({value2}) !"
+            f"The requested {model} weight amount ({value1}) is lower than the available weight of "
+            f"the stocks or the reserved weight amount for the racks in the {model} ({value2}) !"
         )
 
 
