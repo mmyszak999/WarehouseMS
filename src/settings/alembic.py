@@ -1,5 +1,6 @@
 from src.apps.issues.models import *
 from src.apps.products.models import *
+from src.apps.racks.models import *
 from src.apps.receptions.models import *
 from src.apps.sections.models import *
 from src.apps.stocks.models import *

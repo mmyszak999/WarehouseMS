@@ -56,14 +56,14 @@ async def get_sections(
 
 @section_router.get(
     "/{section_id}",
-    response_model=Union[SectionBaseOutputSchema, SectionOutputSchema],
+    response_model=Union[SectionOutputSchema, SectionBaseOutputSchema],
     status_code=status.HTTP_200_OK,
 )
 async def get_section(
     section_id: str,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
-) -> Union[SectionBaseOutputSchema, SectionOutputSchema]:
+) -> Union[SectionOutputSchema, SectionBaseOutputSchema]:
     if request_user.is_staff or request_user.can_move_stocks:
         return await get_single_section(session, section_id)
     return await get_single_section(

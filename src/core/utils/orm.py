@@ -33,3 +33,11 @@ def default_available_section_weight(context):
 
 def default_available_section_racks(context):
     return context.get_current_parameters()["max_racks"]
+
+
+def default_available_rack_weight(context):
+    return context.get_current_parameters()["max_weight"]
+
+
+def default_available_rack_levels(context):
+    return context.get_current_parameters()["max_levels"]

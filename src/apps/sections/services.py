@@ -21,10 +21,12 @@ from src.core.exceptions import (
     NotEnoughWarehouseResourcesException,
     SectionIsNotEmptyException,
     ServiceException,
+    TooLittleRackLevelsAmountException,
     TooLittleRacksAmountException,
     TooLittleWeightAmountException,
     WarehouseAlreadyExistsException,
     WarehouseDoesNotExistException,
+    WeightLimitExceededException,
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -56,7 +58,7 @@ async def create_section(
     session.add(warehouse)
     await session.commit()
 
-    return SectionOutputSchema.from_orm(new_section)
+    return SectionBaseOutputSchema.from_orm(new_section)
 
 
 async def get_single_section(
@@ -92,14 +94,12 @@ async def manage_section_state(
     racks_involved: bool = None,
     weight_involved: bool = None,
     stock_weight: Decimal = None,
+    reserved_weight_involved: bool = None,
 ) -> Section:
-    if section_object is None:
+    if not (isinstance(section_object, Section)):
         raise ServiceException("Section object was not provided! ")
 
     multiplier = -1 if adding_resources_to_section else 1
-    if racks_involved:
-        section_object.available_racks -= multiplier
-        section_object.occupied_racks += multiplier
 
     if weight_involved:
         if stock_weight is None:
@@ -107,9 +107,26 @@ async def manage_section_state(
         section_object.available_weight -= multiplier * stock_weight
         section_object.occupied_weight += multiplier * stock_weight
 
+    if reserved_weight_involved:
+        if stock_weight is None:
+            raise ServiceException("Stock weight was not provided! ")
+        section_object.weight_to_reserve -= multiplier * stock_weight
+        section_object.reserved_weight += multiplier * stock_weight
+
+    if racks_involved:
+        section_object.available_racks -= multiplier
+        section_object.occupied_racks += multiplier
+
     if max_weight is not None:
         new_available_weight = max_weight - section_object.occupied_weight
         section_object.available_weight = new_available_weight
+
+        if stock_weight is not None:
+            section_object.weight_to_reserve += stock_weight * multiplier
+            section_object.reserved_weight -= stock_weight * multiplier
+        else:
+            new_weight_to_reserve = max_weight - section_object.reserved_weight
+            section_object.weight_to_reserve = new_weight_to_reserve
 
     if max_racks is not None:
         new_available_racks = max_racks - section_object.occupied_racks
@@ -129,18 +146,26 @@ async def update_single_section(
     if new_max_weight := section_data.get("max_weight"):
         if new_max_weight < section_object.occupied_weight:
             raise TooLittleWeightAmountException(
-                new_max_weight, section_object.occupied_weight
+                new_max_weight, section_object.occupied_weight, Section.__name__
             )
+
+        if new_max_weight < section_object.reserved_weight:
+            raise TooLittleWeightAmountException(
+                new_max_weight, section_object.reserved_weight, Section.__name__
+            )
+
+        section_object = await manage_section_state(
+            section_object,
+            new_max_weight,
+        )
 
     if new_max_racks := section_data.get("max_racks"):
         if new_max_racks < section_object.occupied_racks:
             raise TooLittleRacksAmountException(
                 new_max_racks, section_object.occupied_racks
             )
+        section_object = await manage_section_state(section_object, new_max_racks)
 
-    section_object = await manage_section_state(
-        section_object, new_max_weight, new_max_racks, adding_resources_to_section=False
-    )
     session.add(section_object)
 
     if section_data:
@@ -160,7 +185,10 @@ async def delete_single_section(session: AsyncSession, section_id: str):
         raise DoesNotExist(Section.__name__, "id", section_id)
 
     if section_object.racks:
-        raise SectionIsNotEmptyException(resource="sections")
+        raise SectionIsNotEmptyException(resource="racks")
+
+    if section_object.occupied_weight or section_object.reserved_weight:
+        raise SectionIsNotEmptyException(resource="occupied or reserved weight")
 
     statement = delete(Section).filter(Section.id == section_id)
     result = await session.execute(statement)
