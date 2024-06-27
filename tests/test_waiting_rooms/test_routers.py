@@ -17,6 +17,9 @@ from src.core.factory.waiting_room_factory import (
 from src.core.pagination.schemas import PagedResponseSchema
 from tests.test_products.conftest import db_categories, db_products
 from tests.test_stocks.conftest import db_stocks
+from tests.test_sections.conftest import db_sections
+from tests.test_warehouse.conftest import db_warehouse
+
 from tests.test_users.conftest import (
     auth_headers,
     db_staff_user,
@@ -186,6 +189,7 @@ async def test_only_user_with_proper_permission_can_delete_waiting_room(
         for waiting_room in db_waiting_rooms.results
         if not waiting_room.stocks
     ]
+
     response = await async_client.delete(
         f"waiting_rooms/{available_waiting_rooms[0].id}", headers=user_headers
     )
@@ -217,17 +221,16 @@ async def test_only_user_with_proper_permission_can_add_stock_to_waiting_room(
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
+    stock_data = StockWaitingRoomInputSchema(id=available_stocks[0].id)
+    
     available_waiting_rooms = [
         waiting_room
         for waiting_room in db_waiting_rooms.results
-        if waiting_room.id != available_stocks[0].waiting_room.id
+        if not waiting_room.stocks
     ]
-
-    stock_data = StockWaitingRoomInputSchema(id=available_stocks[0].id)
     response = await async_client.patch(
         f"waiting_rooms/{available_waiting_rooms[0].id}/add-stock",
         headers=user_headers,
         content=stock_data.json(),
     )
-    print(response.json())
     assert response.status_code == status_code

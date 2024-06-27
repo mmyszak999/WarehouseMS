@@ -5,6 +5,7 @@ from src.apps.issues.services import create_issue
 from src.apps.products.models import Product
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.stocks.models import Stock
+from src.apps.warehouse.schemas import WarehouseOutputSchema
 from src.apps.stocks.schemas.stock_schemas import (
     StockIssueInputSchema,
     StockOutputSchema,
@@ -36,6 +37,8 @@ from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid
 from tests.test_products.conftest import db_products
 from tests.test_stocks.conftest import db_stocks
+from tests.test_sections.conftest import db_sections
+from tests.test_warehouse.conftest import db_warehouse
 from tests.test_users.conftest import (
     auth_headers,
     db_staff_user,
@@ -90,6 +93,7 @@ async def test_raise_exception_when_product_data_is_missing(
 @pytest.mark.asyncio
 async def test_raise_exception_when_there_is_no_waiting_room_available_for_new_stocks(
     async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -139,6 +143,7 @@ async def test_raise_exception_when_waiting_room_with_provided_id_does_not_exist
 @pytest.mark.asyncio
 async def test_check_if_stocks_are_created_correctly_with_provided_waiting_room_id(
     async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -169,6 +174,7 @@ async def test_check_if_stocks_are_created_correctly_with_provided_waiting_room_
 @pytest.mark.asyncio
 async def test_raise_exception_when_waiting_room_with_provided_id_is_not_available_for_new_stocks(
     async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -198,6 +204,7 @@ async def test_raise_exception_when_waiting_room_with_provided_id_is_not_availab
 @pytest.mark.asyncio
 async def test_check_if_new_stock_will_be_correctly_added_to_available_waiting_room(
     async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
