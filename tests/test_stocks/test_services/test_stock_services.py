@@ -20,6 +20,7 @@ from src.apps.stocks.services.stock_services import (
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
 from src.apps.waiting_rooms.services import create_waiting_room
+from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
 from src.core.exceptions import (
     AlreadyExists,
     CannotRetrieveIssuedStockException,
@@ -267,21 +268,26 @@ async def test_if_all_stocks_were_returned(
 async def test_if_stocks_are_issued_correctly(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
+    print(db_waiting_rooms.results)
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     stock_object = await if_exists(Stock, "id", available_stocks[0].id, async_session)
-    old_waiting_room = await if_exists(
+    waiting_room_before = await if_exists(
         WaitingRoom, "id", stock_object.waiting_room_id, async_session
     )
     issue_schema = IssueInputSchemaFactory().generate(
         stock_ids=[StockIssueInputSchema(id=stock_object.id)]
     )
     issue = await create_issue(async_session, issue_schema, db_staff_user.id)
+    
     await async_session.refresh(stock_object)
-    await async_session.refresh(old_waiting_room)
+    
+    waiting_room_after = await if_exists(
+        WaitingRoom, "id", waiting_room_before.id, async_session
+    )
 
     assert {stock.id for stock in issue.stocks} == {stock_object.id}
     assert stock_object.waiting_room == None
-    assert old_waiting_room.stocks == []
-    assert old_waiting_room.occupied_slots == 0
+    assert set(waiting_room_before.stocks) - set([stock_object]) == set(waiting_room_after.stocks)

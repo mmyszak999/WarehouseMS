@@ -37,7 +37,7 @@ def set_waiting_room_stocks() -> int:
 
 
 def set_max_waiting_rooms() -> int:
-    return random.randint(3, 5)
+    return random.randint(5, 7)
 
 
 def set_max_sections() -> int:

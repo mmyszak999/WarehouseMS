@@ -61,8 +61,8 @@ async def db_stocks(
         await create_waiting_room(async_session, waiting_room, testing=True)
         for waiting_room in DB_WAITING_ROOMS_SCHEMAS
     ]
-
-    for product in db_products.results:
+    products = db_products.results + db_products.results
+    for product in products:
         reception_input = ReceptionInputSchemaFactory().generate(
             products_data=[
                 ReceptionProductInputSchemaFactory().generate(product_id=product.id)
@@ -72,10 +72,11 @@ async def db_stocks(
 
     stocks = await get_all_stocks(async_session, PageParams())
     issue_input = IssueInputSchemaFactory().generate(
-        stock_ids=[StockIssueInputSchema(id=stocks.results[2].id)]
+        stock_ids=[StockIssueInputSchema(id=stocks.results[-1].id)]
     )
     await create_issue(async_session, issue_input, db_staff_user.id)
     await async_session.flush()
+    [await async_session.refresh(waiting_room) for waiting_room in waiting_rooms]
 
     return await get_all_stocks(async_session, PageParams())
 

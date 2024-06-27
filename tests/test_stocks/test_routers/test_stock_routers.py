@@ -79,7 +79,6 @@ async def test_only_staff_user_can_get_all_stocks(
     db_stocks: PagedResponseSchema[StockOutputSchema],
 ):
     response = await async_client.get("stocks/all", headers=user_headers)
-
     assert response.status_code == status_code
     if status_code == status.HTTP_200_OK:
         assert db_stocks.total == response.json()["total"]
