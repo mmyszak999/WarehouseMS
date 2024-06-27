@@ -41,6 +41,7 @@ from src.core.factory.warehouse_factory import (
     WarehouseInputSchemaFactory,
     WarehouseUpdateSchemaFactory,
 )
+from src.apps.racks.schemas import RackOutputSchema
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
@@ -55,6 +56,7 @@ from tests.test_users.conftest import (
     staff_auth_headers,
 )
 from tests.test_warehouse.conftest import db_warehouse
+from tests.test_racks.conftest import db_racks
 
 
 @pytest.mark.asyncio
@@ -187,17 +189,7 @@ async def test_if_section_limits_are_correctly_managed_when_changing_max_weight_
     )
     
     assert updated_section.weight_to_reserve == section.weight_to_reserve
-    """section = await manage_section_state(
-        section, max_weight=new_max_weight, max_racks=new_max_racks
-    )
-
-    assert section.available_racks == db_sections.results[0].available_racks + (
-        new_max_racks - db_sections.results[0].max_racks
-    )
-
-    assert section.available_weight == db_sections.results[0].available_weight + (
-        new_max_weight - db_sections.results[0].max_weight
-    )"""
+    
 
 @pytest.mark.asyncio
 async def test_if_section_reserved_weight_limits_are_correctly_managed(
@@ -320,29 +312,18 @@ async def test_raise_exception_when_deleting_nonexistent_section(
         await delete_single_section(async_session, generate_uuid())
 
 
-"""
-comeback when rack fixtures are ready
 @pytest.mark.asyncio
 async def test_raise_when_deleting_section_with_occupied_racks(
     async_session: AsyncSession,
-    db_warehouse: PagedResponseSchema[WarehouseOutputSchema]
+    db_sections: PagedResponseSchema[SectionOutputSchema],
+    db_racks: PagedResponseSchema[RackOutputSchema]
 ):
-    section_input = SectionInputSchemaFactory().generate()
-    section = await create_section(async_session, section_input)
-    
-    section_object = await if_exists(
-        Section, "id", section.id, async_session
-    )
-    section_object.occupied_racks += 1
-    async_session.add(section_object)
-    
-    await async_session.commit()
-    
     with pytest.raises(SectionIsNotEmptyException):
         await delete_single_section(
             async_session,
-            section.id
-        )"""
+            db_sections.results[0].id
+        )
+
 
 @pytest.mark.asyncio
 async def test_raise_when_deleting_section_with_positive_occupied_or_reserved_weight(
