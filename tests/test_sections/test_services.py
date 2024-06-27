@@ -29,6 +29,7 @@ from src.core.exceptions import (
     TooLittleRacksAmountException,
     TooLittleWeightAmountException,
     WarehouseDoesNotExistException,
+    SectionIsNotEmptyException
 )
 from src.core.factory.section_factory import (
     SectionInputSchemaFactory,
@@ -167,13 +168,26 @@ async def test_if_section_limits_are_correctly_managed_when_changing_max_weight_
     db_sections: PagedResponseSchema[SectionOutputSchema],
 ):
     section_input = SectionInputSchemaFactory().generate()
-    section = await create_section(async_session, section_input)
+    section_output = await create_section(async_session, section_input)
 
-    section = await if_exists(Section, "id", section.id, async_session)
+    section = await if_exists(Section, "id", section_output.id, async_session)
     new_max_weight = 9999
     new_max_racks = 35
 
-    section = await manage_section_state(
+    updated_section = await manage_section_state(
+        section, max_weight=new_max_weight, max_racks=new_max_racks
+    )
+    
+    assert updated_section.available_racks == section_output.available_racks + (
+        new_max_racks - section_output.max_racks
+    )
+
+    assert updated_section.available_weight == section_output.available_weight + (
+        new_max_weight - section_output.max_weight
+    )
+    
+    assert updated_section.weight_to_reserve == section.weight_to_reserve
+    """section = await manage_section_state(
         section, max_weight=new_max_weight, max_racks=new_max_racks
     )
 
@@ -183,7 +197,45 @@ async def test_if_section_limits_are_correctly_managed_when_changing_max_weight_
 
     assert section.available_weight == db_sections.results[0].available_weight + (
         new_max_weight - db_sections.results[0].max_weight
+    )"""
+
+@pytest.mark.asyncio
+async def test_if_section_reserved_weight_limits_are_correctly_managed(
+    async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema]
+):
+    section_input = SectionInputSchemaFactory().generate()
+    section_output = await create_section(async_session, section_input)
+
+    section = await if_exists(Section, "id", section_output.id, async_session)
+    print(section.__dict__)
+    weight_difference = -10
+    updated_section = await manage_section_state(
+        section, reserved_weight_involved=True, stock_weight=weight_difference
     )
+    print(updated_section.__dict__)
+    
+    assert updated_section.reserved_weight == section_output.reserved_weight - weight_difference
+    assert updated_section.weight_to_reserve == section_output.weight_to_reserve + weight_difference
+
+#s
+@pytest.mark.asyncio
+async def test_if_section_reserved_weight_limits_are_correctly_managed_when_updating_max_rack_weight(
+    async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema]
+):
+    section_input = SectionInputSchemaFactory().generate()
+    section_output = await create_section(async_session, section_input)
+
+    section = await if_exists(Section, "id", section_output.id, async_session)
+    rack_weight_difference = 50
+    updated_section = await manage_section_state(
+        section, max_weight=section.max_weight, stock_weight=rack_weight_difference
+    )
+    
+    assert updated_section.available_weight == section.available_weight
+    assert updated_section.weight_to_reserve == section_output.weight_to_reserve - rack_weight_difference
+    assert updated_section.reserved_weight == section_output.reserved_weight + rack_weight_difference
 
 
 @pytest.mark.asyncio
@@ -208,6 +260,27 @@ async def test_raise_when_new_max_weight_smaller_than_occupied_weight_amount(
 
     section = await if_exists(Section, "id", section.id, async_session)
     section.occupied_weight = 3
+    async_session.add(section)
+    await async_session.commit()
+
+    section_input = SectionUpdateSchemaFactory().generate(max_weight=2)
+
+    with pytest.raises(TooLittleWeightAmountException):
+        await update_single_section(async_session, section_input, section.id)
+
+
+@pytest.mark.asyncio
+async def test_raise_when_new_max_weight_smaller_than_reserved_weight_amount(
+    async_session: AsyncSession,
+):
+    warehouse_input = WarehouseInputSchemaFactory().generate(max_sections=1)
+    warehouse = await create_warehouse(async_session, warehouse_input)
+
+    section_input = SectionInputSchemaFactory().generate()
+    section = await create_section(async_session, section_input)
+
+    section = await if_exists(Section, "id", section.id, async_session)
+    section.reserved_weight = 3
     async_session.add(section)
     await async_session.commit()
 
@@ -247,22 +320,48 @@ async def test_raise_exception_when_deleting_nonexistent_section(
         await delete_single_section(async_session, generate_uuid())
 
 
-"""@pytest.mark.asyncio
-    test for deleting with occupied racks - in the future
-async def test_raise_when_deleting_section_with_occupied_sections(
-    async_session: AsyncSession
+"""
+comeback when rack fixtures are ready
+@pytest.mark.asyncio
+async def test_raise_when_deleting_section_with_occupied_racks(
+    async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema]
 ):
     section_input = SectionInputSchemaFactory().generate()
     section = await create_section(async_session, section_input)
     
-    waiting_room_input_1 = WaitingRoomInputSchemaFactory().generate()
-    waiting_room_1 = await create_waiting_room(
-        async_session, waiting_room_input_1
+    section_object = await if_exists(
+        Section, "id", section.id, async_session
     )
+    section_object.occupied_racks += 1
+    async_session.add(section_object)
+    
+    await async_session.commit()
     
     with pytest.raises(SectionIsNotEmptyException):
         await delete_single_section(
             async_session,
             section.id
+        )"""
+
+@pytest.mark.asyncio
+async def test_raise_when_deleting_section_with_positive_occupied_or_reserved_weight(
+    async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema]
+):
+    section_input = SectionInputSchemaFactory().generate()
+    section = await create_section(async_session, section_input)
+    
+    section_object = await if_exists(
+        Section, "id", section.id, async_session
+    )
+    section_object.reserved_weight = 10
+    async_session.add(section_object)
+    
+    await async_session.commit()
+    
+    with pytest.raises(SectionIsNotEmptyException):
+        await delete_single_section(
+            async_session,
+            section_object.id
         )
-    """
