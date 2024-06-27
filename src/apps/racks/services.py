@@ -82,13 +82,16 @@ async def get_single_rack(
 
 
 async def get_all_racks(
-    session: AsyncSession, page_params: PageParams
-) -> PagedResponseSchema[RackBaseOutputSchema]:
+    session: AsyncSession, page_params: PageParams, output_schema: BaseModel=RackBaseOutputSchema
+) -> Union[
+    PagedResponseSchema[RackBaseOutputSchema],
+    PagedResponseSchema[RackOutputSchema],
+]:
     query = select(Rack)
 
     return await paginate(
         query=query,
-        response_schema=RackBaseOutputSchema,
+        response_schema=output_schema,
         table=Rack,
         page_params=page_params,
         session=session,

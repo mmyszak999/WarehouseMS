@@ -43,14 +43,20 @@ async def post_rack(
 
 @rack_router.get(
     "/",
-    response_model=PagedResponseSchema[RackBaseOutputSchema],
+    response_model=Union[
+    PagedResponseSchema[RackBaseOutputSchema],
+    PagedResponseSchema[RackOutputSchema],
+],
     status_code=status.HTTP_200_OK,
 )
 async def get_racks(
     session: AsyncSession = Depends(get_db),
     page_params: PageParams = Depends(),
     request_user: User = Depends(authenticate_user),
-) -> PagedResponseSchema[RackBaseOutputSchema]:
+) -> Union[
+    PagedResponseSchema[RackBaseOutputSchema],
+    PagedResponseSchema[RackOutputSchema],
+]:
     return await get_all_racks(session, page_params)
 
 
