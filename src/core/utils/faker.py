@@ -45,15 +45,15 @@ def set_max_sections() -> int:
 
 
 def set_max_section_weight() -> int:
-    return random.randint(3000, 10000)
+    return random.randint(5000, 15000)
 
 
 def set_max_racks() -> int:
-    return random.randint(4, 6)
+    return random.randint(4, 7)
 
 
 def set_rack_weight() -> int:
-    return random.randint(500, 1500)
+    return random.randint(400, 1000)
 
 
 def set_rack_levels() -> int:

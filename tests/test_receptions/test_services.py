@@ -28,15 +28,15 @@ from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.utils import generate_uuid
 from tests.test_products.conftest import db_products
 from tests.test_receptions.conftest import db_receptions
-from tests.test_stocks.conftest import db_stocks
 from tests.test_sections.conftest import db_sections
-from tests.test_warehouse.conftest import db_warehouse
+from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,
     db_staff_user,
     db_user,
     staff_auth_headers,
 )
+from tests.test_warehouse.conftest import db_warehouse
 
 
 @pytest.mark.asyncio

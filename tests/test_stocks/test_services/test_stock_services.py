@@ -5,7 +5,6 @@ from src.apps.issues.services import create_issue
 from src.apps.products.models import Product
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.stocks.models import Stock
-from src.apps.warehouse.schemas import WarehouseOutputSchema
 from src.apps.stocks.schemas.stock_schemas import (
     StockIssueInputSchema,
     StockOutputSchema,
@@ -19,8 +18,9 @@ from src.apps.stocks.services.stock_services import (
 )
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
-from src.apps.waiting_rooms.services import create_waiting_room
 from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
+from src.apps.waiting_rooms.services import create_waiting_room
+from src.apps.warehouse.schemas import WarehouseOutputSchema
 from src.core.exceptions import (
     AlreadyExists,
     CannotRetrieveIssuedStockException,
@@ -37,9 +37,8 @@ from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid
 from tests.test_products.conftest import db_products
-from tests.test_stocks.conftest import db_stocks
 from tests.test_sections.conftest import db_sections
-from tests.test_warehouse.conftest import db_warehouse
+from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,
     db_staff_user,
@@ -47,6 +46,7 @@ from tests.test_users.conftest import (
     staff_auth_headers,
 )
 from tests.test_waiting_rooms.conftest import db_waiting_rooms
+from tests.test_warehouse.conftest import db_warehouse
 
 
 @pytest.mark.asyncio
@@ -281,13 +281,15 @@ async def test_if_stocks_are_issued_correctly(
         stock_ids=[StockIssueInputSchema(id=stock_object.id)]
     )
     issue = await create_issue(async_session, issue_schema, db_staff_user.id)
-    
+
     await async_session.refresh(stock_object)
-    
+
     waiting_room_after = await if_exists(
         WaitingRoom, "id", waiting_room_before.id, async_session
     )
 
     assert {stock.id for stock in issue.stocks} == {stock_object.id}
     assert stock_object.waiting_room == None
-    assert set(waiting_room_before.stocks) - set([stock_object]) == set(waiting_room_after.stocks)
+    assert set(waiting_room_before.stocks) - set([stock_object]) == set(
+        waiting_room_after.stocks
+    )

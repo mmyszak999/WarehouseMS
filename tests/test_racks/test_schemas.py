@@ -3,14 +3,13 @@ from contextlib import nullcontext as does_not_raise
 import pytest
 from pydantic.error_wrappers import ValidationError
 
+from src.apps.sections.schemas import SectionOutputSchema
 from src.core.factory.rack_factory import (
     RackInputSchemaFactory,
     RackUpdateSchemaFactory,
 )
-from tests.test_sections.conftest import db_sections
-from src.apps.sections.schemas import SectionOutputSchema
 from src.core.pagination.schemas import PagedResponseSchema
-
+from tests.test_sections.conftest import db_sections
 
 
 @pytest.mark.asyncio
@@ -26,18 +25,21 @@ from src.core.pagination.schemas import PagedResponseSchema
             -1,
             pytest.raises(ValidationError),
             RackInputSchemaFactory(),
-        )
+        ),
     ],
 )
 async def test_rack_input_schema_raises_validation_error_when_params_are_not_positive(
-    rack_param_value, result, schema,
-    db_sections: PagedResponseSchema[SectionOutputSchema]
+    rack_param_value,
+    result,
+    schema,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
 ):
     with result:
         schema.generate(
             section_id=db_sections.results[0].id,
             max_weight=rack_param_value,
         )
+
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
@@ -56,10 +58,11 @@ async def test_rack_input_schema_raises_validation_error_when_params_are_not_pos
     ],
 )
 async def test_rack_update_schema_raises_validation_error_when_params_are_not_positive(
-    rack_param_value, result, schema,
+    rack_param_value,
+    result,
+    schema,
 ):
     with result:
         schema.generate(
             max_weight=rack_param_value,
         )
-

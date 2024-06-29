@@ -16,10 +16,8 @@ from src.core.factory.waiting_room_factory import (
 )
 from src.core.pagination.schemas import PagedResponseSchema
 from tests.test_products.conftest import db_categories, db_products
-from tests.test_stocks.conftest import db_stocks
 from tests.test_sections.conftest import db_sections
-from tests.test_warehouse.conftest import db_warehouse
-
+from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,
     db_staff_user,
@@ -27,6 +25,7 @@ from tests.test_users.conftest import (
     staff_auth_headers,
 )
 from tests.test_waiting_rooms.conftest import db_waiting_rooms
+from tests.test_warehouse.conftest import db_warehouse
 
 
 @pytest.mark.parametrize(
@@ -222,7 +221,7 @@ async def test_only_user_with_proper_permission_can_add_stock_to_waiting_room(
 ):
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     stock_data = StockWaitingRoomInputSchema(id=available_stocks[0].id)
-    
+
     available_waiting_rooms = [
         waiting_room
         for waiting_room in db_waiting_rooms.results

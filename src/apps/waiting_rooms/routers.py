@@ -48,7 +48,7 @@ async def post_waiting_room(
     "/",
     response_model=Union[
         PagedResponseSchema[WaitingRoomBasicOutputSchema],
-        PagedResponseSchema[WaitingRoomOutputSchema]
+        PagedResponseSchema[WaitingRoomOutputSchema],
     ],
     status_code=status.HTTP_200_OK,
 )
@@ -57,9 +57,9 @@ async def get_waiting_rooms(
     page_params: PageParams = Depends(),
     request_user: User = Depends(authenticate_user),
 ) -> Union[
-        PagedResponseSchema[WaitingRoomBasicOutputSchema],
-        PagedResponseSchema[WaitingRoomOutputSchema]
-    ]:
+    PagedResponseSchema[WaitingRoomBasicOutputSchema],
+    PagedResponseSchema[WaitingRoomOutputSchema],
+]:
     return await get_all_waiting_rooms(session, page_params)
 
 

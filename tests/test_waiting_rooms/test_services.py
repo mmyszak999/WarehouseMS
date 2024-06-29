@@ -51,7 +51,6 @@ from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid
 from tests.test_products.conftest import db_categories, db_products
 from tests.test_sections.conftest import db_sections
-from tests.test_warehouse.conftest import db_warehouse
 from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,
@@ -60,6 +59,7 @@ from tests.test_users.conftest import (
     staff_auth_headers,
 )
 from tests.test_waiting_rooms.conftest import db_waiting_rooms
+from tests.test_warehouse.conftest import db_warehouse
 
 
 @pytest.mark.asyncio

@@ -17,15 +17,15 @@ from src.core.factory.issue_factory import (
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from tests.test_issues.conftest import db_issues
-from tests.test_stocks.conftest import db_stocks
 from tests.test_sections.conftest import db_sections
-from tests.test_warehouse.conftest import db_warehouse
+from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,
     db_staff_user,
     db_user,
     staff_auth_headers,
 )
+from tests.test_warehouse.conftest import db_warehouse
 
 
 @pytest.mark.parametrize(

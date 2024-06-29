@@ -2,9 +2,9 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.apps.sections.schemas import SectionOutputSchema
-from src.apps.racks.services import create_rack, get_all_racks
 from src.apps.racks.schemas import RackOutputSchema
+from src.apps.racks.services import create_rack, get_all_racks
+from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.warehouse.schemas import WarehouseInputSchema, WarehouseOutputSchema
 from src.core.factory.rack_factory import RackInputSchemaFactory
@@ -32,5 +32,7 @@ async def db_racks(
             await create_rack(
                 async_session, RackInputSchemaFactory().generate(section_id=section.id)
             )
-            
-    return await get_all_racks(async_session, PageParams(), output_schema=RackOutputSchema)
+
+    return await get_all_racks(
+        async_session, PageParams(), output_schema=RackOutputSchema
+    )

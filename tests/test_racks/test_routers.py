@@ -4,20 +4,20 @@ from fastapi_jwt_auth import AuthJWT
 from httpx import AsyncClient, Response
 
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
+from src.apps.racks.schemas import RackOutputSchema
 from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.warehouse.schemas import WarehouseOutputSchema
-from src.apps.racks.schemas import RackOutputSchema
 from src.core.factory.rack_factory import (
     RackInputSchemaFactory,
     RackUpdateSchemaFactory,
 )
 from src.core.pagination.schemas import PagedResponseSchema
 from tests.test_products.conftest import db_categories, db_products
+from tests.test_racks.conftest import db_racks
 from tests.test_sections.conftest import db_sections
 from tests.test_stocks.conftest import db_stocks
-from tests.test_racks.conftest import db_racks
 from tests.test_users.conftest import (
     auth_headers,
     db_staff_user,
@@ -112,9 +112,7 @@ async def test_authenticated_user_can_get_all_racks(
     user_headers: dict[str, str],
     status_code: int,
 ):
-    response = await async_client.get(
-        "racks/", headers=user_headers
-    )
+    response = await async_client.get("racks/", headers=user_headers)
     assert response.status_code == status_code
 
 
@@ -143,10 +141,12 @@ async def test_only_staff_user_can_update_single_rack(
 ):
     update_data = RackUpdateSchemaFactory().generate(rack_name="wow")
     response = await async_client.patch(
-        f"racks/{db_racks.results[0].id}", headers=user_headers, content=update_data.json()
+        f"racks/{db_racks.results[0].id}",
+        headers=user_headers,
+        content=update_data.json(),
     )
     assert response.status_code == status_code
-    
+
     if status_code == status.HTTP_200_OK:
         assert response.json()["rack_name"] == update_data.rack_name
 

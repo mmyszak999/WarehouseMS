@@ -52,7 +52,7 @@ async def create_rack(
         rack_max_weight := rack_data.get("max_weight")
     ) > section_object.weight_to_reserve:
         raise NotEnoughSectionResourcesException(
-            resource="available section weight to reserve"
+            resource="available section weight to reserve", place="section"
         )
 
     new_rack = Rack(**rack_data)
@@ -82,7 +82,9 @@ async def get_single_rack(
 
 
 async def get_all_racks(
-    session: AsyncSession, page_params: PageParams, output_schema: BaseModel=RackBaseOutputSchema
+    session: AsyncSession,
+    page_params: PageParams,
+    output_schema: BaseModel = RackBaseOutputSchema,
 ) -> Union[
     PagedResponseSchema[RackBaseOutputSchema],
     PagedResponseSchema[RackOutputSchema],
@@ -161,10 +163,11 @@ async def update_single_rack(
 
         max_weight_difference = new_max_weight - rack_object.max_weight
         section_object = await manage_section_state(
-            rack_object.section,
-            max_weight=section_object.max_weight,
-            stock_weight=max_weight_difference,
+        rack_object.section,
+        max_weight=section_object.max_weight,
+        stock_weight=max_weight_difference
         )
+        session.add(section_object)
 
     if new_max_levels := rack_data.get("max_levels"):
         if new_max_levels < rack_object.occupied_levels:
@@ -196,7 +199,6 @@ async def delete_single_rack(session: AsyncSession, rack_id: str):
         raise RackIsNotEmptyException(resource="occupied weight")
 
     statement = delete(Rack).filter(Rack.id == rack_id)
-    result = await session.execute(statement)
 
     section = await if_exists(Section, "id", rack_object.section_id, session)
 
@@ -207,6 +209,7 @@ async def delete_single_rack(session: AsyncSession, rack_id: str):
         stock_weight=rack_object.max_weight,
     )
     session.add(section)
+    result = await session.execute(statement)
 
     await session.commit()
     return result

@@ -4,7 +4,7 @@ from typing import Optional
 
 from src.apps.racks.schemas import RackInputSchema, RackUpdateSchema
 from src.core.factory.core import SchemaFactory
-from src.core.utils.faker import set_rack_weight, set_rack_levels
+from src.core.utils.faker import set_rack_levels, set_rack_weight
 
 
 class RackInputSchemaFactory(SchemaFactory):
@@ -13,7 +13,7 @@ class RackInputSchemaFactory(SchemaFactory):
 
     def generate(
         self,
-        section_id: str, 
+        section_id: str,
         rack_name: str = None,
         max_weight: Decimal = None,
         max_levels: int = None,

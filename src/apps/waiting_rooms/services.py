@@ -91,10 +91,12 @@ async def get_single_waiting_room(
 
 
 async def get_all_waiting_rooms(
-    session: AsyncSession, page_params: PageParams, output_schema: BaseModel=WaitingRoomBasicOutputSchema
+    session: AsyncSession,
+    page_params: PageParams,
+    output_schema: BaseModel = WaitingRoomBasicOutputSchema,
 ) -> Union[
     PagedResponseSchema[WaitingRoomBasicOutputSchema],
-    PagedResponseSchema[WaitingRoomOutputSchema]
+    PagedResponseSchema[WaitingRoomOutputSchema],
 ]:
     query = select(WaitingRoom)
 
