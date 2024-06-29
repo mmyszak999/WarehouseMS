@@ -3,7 +3,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.racks.models import Rack
-from src.apps.sections.models import Section
 from src.apps.racks.schemas import RackInputSchema, RackOutputSchema, RackUpdateSchema
 from src.apps.racks.services import (
     create_rack,
@@ -13,6 +12,7 @@ from src.apps.racks.services import (
     manage_rack_state,
     update_single_rack,
 )
+from src.apps.sections.models import Section
 from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.sections.services import create_section, get_single_section
 from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
@@ -27,12 +27,11 @@ from src.core.exceptions import (
     NotEnoughWarehouseResourcesException,
     RackIsNotEmptyException,
     ServiceException,
+    TooLittleRackLevelsAmountException,
     TooLittleRacksAmountException,
     TooLittleWeightAmountException,
     WarehouseDoesNotExistException,
     WeightLimitExceededException,
-    TooLittleRackLevelsAmountException,
-    RackIsNotEmptyException
 )
 from src.core.factory.rack_factory import (
     RackInputSchemaFactory,
@@ -163,10 +162,8 @@ async def test_if_rack_weight_limits_are_correctly_managed(
     weight = 100
     rack = await manage_rack_state(rack, weight_involved=True, stock_weight=weight)
 
-    assert (
-        rack.available_weight
-        == db_racks.results[0].available_weight + weight
-    )
+    assert rack.available_weight == db_racks.results[0].available_weight + weight
+
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_weight_is_not_provided(
@@ -185,7 +182,7 @@ async def test_if_rack_limits_are_correctly_managed_when_changing_max_weight_and
 ):
     section_input = SectionInputSchemaFactory().generate()
     section_output = await create_section(async_session, section_input)
-    
+
     rack_input = RackInputSchemaFactory().generate(section_id=section_output.id)
     rack_output = await create_rack(async_session, rack_input)
 
@@ -207,7 +204,6 @@ async def test_if_rack_limits_are_correctly_managed_when_changing_max_weight_and
 
     # come here when rackLevel created with the updated logic for Rack
     # assert updated_rack.weight_to_reserve == rack.weight_to_reserve
-    
 
 
 """
@@ -261,9 +257,10 @@ async def test_if_section_reserved_weight_limits_are_correctly_managed_when_upda
         == section_output.reserved_weight + rack_weight_difference
     )"""
 
+
 @pytest.mark.asyncio
 async def test_raise_exception_when_updating_nonexistent_rack(
-    async_session: AsyncSession
+    async_session: AsyncSession,
 ):
     rack_input = RackUpdateSchemaFactory().generate()
     with pytest.raises(DoesNotExist):
@@ -273,15 +270,15 @@ async def test_raise_exception_when_updating_nonexistent_rack(
 @pytest.mark.asyncio
 async def test_raise_exception_when_new_max_weight_smaller_than_occupied_weight_amount_when_updating_rack(
     async_session: AsyncSession,
-    db_warehouse: PagedResponseSchema[WarehouseOutputSchema]
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
 ):
     section_input = SectionInputSchemaFactory().generate()
     section = await create_section(async_session, section_input)
-    
+
     rack_input = RackInputSchemaFactory().generate(section_id=section.id)
     rack_output = await create_rack(async_session, rack_input)
     rack_object = await if_exists(Rack, "id", rack_output.id, async_session)
-    
+
     rack_object.occupied_weight = 3
     async_session.add(rack_object)
     await async_session.commit()
@@ -318,16 +315,18 @@ async def test_raise_exception_when_new_max_weight_smaller_than_reserved_weight_
 @pytest.mark.asyncio
 async def test_raise_exception_while_updating_when_new_max_weight_bigger_than_max_weight_and_section_weight_to_reserve_combined(
     async_session: AsyncSession,
-    db_warehouse: PagedResponseSchema[WarehouseOutputSchema]
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
 ):
     section_input = SectionInputSchemaFactory().generate(max_weight=1000)
     section_output = await create_section(async_session, section_input)
     section_object = await if_exists(Section, "id", section_output.id, async_session)
-    
-    rack_input = RackInputSchemaFactory().generate(section_id=section_object.id, max_weight=500)
+
+    rack_input = RackInputSchemaFactory().generate(
+        section_id=section_object.id, max_weight=500
+    )
     rack_output = await create_rack(async_session, rack_input)
     rack_object = await if_exists(Rack, "id", rack_output.id, async_session)
-    
+
     rack_input = RackUpdateSchemaFactory().generate(max_weight=1100)
 
     with pytest.raises(WeightLimitExceededException):
@@ -337,16 +336,18 @@ async def test_raise_exception_while_updating_when_new_max_weight_bigger_than_ma
 @pytest.mark.asyncio
 async def test_check_if_section_state_managed_correctly_when_rack_max_weight_updated(
     async_session: AsyncSession,
-    db_warehouse: PagedResponseSchema[WarehouseOutputSchema]
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
 ):
     section_input = SectionInputSchemaFactory().generate(max_weight=1000)
     section_output = await create_section(async_session, section_input)
-    
-    rack_input_1 = RackInputSchemaFactory().generate(section_id=section_output.id, max_weight=500)
+
+    rack_input_1 = RackInputSchemaFactory().generate(
+        section_id=section_output.id, max_weight=500
+    )
     rack_output = await create_rack(async_session, rack_input_1)
     rack_object = await if_exists(Rack, "id", rack_output.id, async_session)
     section_before = await get_single_section(async_session, section_output.id)
-    
+
     rack_input_2 = RackUpdateSchemaFactory().generate(max_weight=400)
     rack_output = await update_single_rack(async_session, rack_input_2, rack_object.id)
     section_after = await get_single_section(async_session, section_output.id)
@@ -354,7 +355,7 @@ async def test_check_if_section_state_managed_correctly_when_rack_max_weight_upd
     assert section_before.reserved_weight == section_after.reserved_weight + (
         rack_input_1.max_weight - rack_input_2.max_weight
     )
-    
+
     assert section_before.weight_to_reserve == section_after.weight_to_reserve - (
         rack_input_1.max_weight - rack_input_2.max_weight
     )
@@ -364,76 +365,78 @@ async def test_check_if_section_state_managed_correctly_when_rack_max_weight_upd
 async def test_raise_exception_when_new_max_levels_lower_than_occupied_levels(
     async_session: AsyncSession,
     db_sections: PagedResponseSchema[SectionOutputSchema],
-):    
+):
     rack_input_1 = RackInputSchemaFactory().generate(
         section_id=db_sections.results[0].id, max_levels=5
     )
     rack_output = await create_rack(async_session, rack_input_1)
     rack_object = await if_exists(Rack, "id", rack_output.id, async_session)
-    
+
     rack_object.occupied_levels = 2
     async_session.add(rack_object)
     await async_session.commit()
 
-    
-    rack_input_2 = RackUpdateSchemaFactory().generate(
-        max_levels=1
-    )
+    rack_input_2 = RackUpdateSchemaFactory().generate(max_levels=1)
     with pytest.raises(TooLittleRackLevelsAmountException):
         await update_single_rack(async_session, rack_input_2, rack_object.id)
 
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_deleting_nonexistent_rack(
-    async_session: AsyncSession,
-    db_racks: PagedResponseSchema[RackOutputSchema]
+    async_session: AsyncSession, db_racks: PagedResponseSchema[RackOutputSchema]
 ):
     with pytest.raises(DoesNotExist):
         await delete_single_rack(async_session, generate_uuid())
+
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_deleting_rack_with_occupied_weight(
     async_session: AsyncSession,
     db_sections: PagedResponseSchema[SectionOutputSchema],
 ):
-    rack_input = RackInputSchemaFactory().generate(
-        section_id=db_sections.results[0].id
-    )
+    rack_input = RackInputSchemaFactory().generate(section_id=db_sections.results[0].id)
     rack_output = await create_rack(async_session, rack_input)
     rack_object = await if_exists(Rack, "id", rack_output.id, async_session)
-    
+
     rack_object.occupied_weight = 5
     async_session.add(rack_object)
     await async_session.commit()
-    
+
     with pytest.raises(RackIsNotEmptyException):
         await delete_single_rack(async_session, rack_object.id)
+
 
 @pytest.mark.asyncio
 async def test_check_if_section_state_managed_correctly_when_rack_deleted(
     async_session: AsyncSession,
-    db_warehouse: PagedResponseSchema[WarehouseOutputSchema]
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
 ):
     section_input = SectionInputSchemaFactory().generate(max_weight=1000)
     section_output = await create_section(async_session, section_input)
-    
-    rack_input = RackInputSchemaFactory().generate(section_id=section_output.id, max_weight=500)
+
+    rack_input = RackInputSchemaFactory().generate(
+        section_id=section_output.id, max_weight=500
+    )
     rack_output = await create_rack(async_session, rack_input)
-    
+
     section_object = await if_exists(Section, "id", section_output.id, async_session)
-    
+
     assert section_object.reserved_weight == (
         section_output.reserved_weight + rack_input.max_weight
     )
     assert section_object.weight_to_reserve == (
         section_output.weight_to_reserve - rack_input.max_weight
     )
-    
+
     await delete_single_rack(async_session, rack_output.id)
-    section_object_with_no_racks = await if_exists(Section, "id", section_output.id, async_session)
-    
-    assert section_object_with_no_racks.reserved_weight == section_output.reserved_weight 
-    assert section_object_with_no_racks.weight_to_reserve == section_output.weight_to_reserve
-    
-    
-    
+    section_object_with_no_racks = await if_exists(
+        Section, "id", section_output.id, async_session
+    )
+
+    assert (
+        section_object_with_no_racks.reserved_weight == section_output.reserved_weight
+    )
+    assert (
+        section_object_with_no_racks.weight_to_reserve
+        == section_output.weight_to_reserve
+    )

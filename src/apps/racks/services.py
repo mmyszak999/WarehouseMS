@@ -163,9 +163,9 @@ async def update_single_rack(
 
         max_weight_difference = new_max_weight - rack_object.max_weight
         section_object = await manage_section_state(
-        rack_object.section,
-        max_weight=section_object.max_weight,
-        stock_weight=max_weight_difference
+            rack_object.section,
+            max_weight=section_object.max_weight,
+            stock_weight=max_weight_difference,
         )
         session.add(section_object)
 

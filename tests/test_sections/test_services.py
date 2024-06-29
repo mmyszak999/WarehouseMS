@@ -205,7 +205,6 @@ async def test_if_section_reserved_weight_limits_are_correctly_managed(
         section, reserved_weight_involved=True, stock_weight=weight_difference
     )
 
-
     assert (
         updated_section.reserved_weight
         == section_output.reserved_weight - weight_difference
