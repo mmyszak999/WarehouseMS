@@ -18,7 +18,9 @@ from src.apps.stocks.services.stock_services import (
 )
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
+from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
 from src.apps.waiting_rooms.services import create_waiting_room
+from src.apps.warehouse.schemas import WarehouseOutputSchema
 from src.core.exceptions import (
     AlreadyExists,
     CannotRetrieveIssuedStockException,
@@ -35,6 +37,7 @@ from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid
 from tests.test_products.conftest import db_products
+from tests.test_sections.conftest import db_sections
 from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,
@@ -43,6 +46,7 @@ from tests.test_users.conftest import (
     staff_auth_headers,
 )
 from tests.test_waiting_rooms.conftest import db_waiting_rooms
+from tests.test_warehouse.conftest import db_warehouse
 
 
 @pytest.mark.asyncio
@@ -90,6 +94,7 @@ async def test_raise_exception_when_product_data_is_missing(
 @pytest.mark.asyncio
 async def test_raise_exception_when_there_is_no_waiting_room_available_for_new_stocks(
     async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -139,6 +144,7 @@ async def test_raise_exception_when_waiting_room_with_provided_id_does_not_exist
 @pytest.mark.asyncio
 async def test_check_if_stocks_are_created_correctly_with_provided_waiting_room_id(
     async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -169,6 +175,7 @@ async def test_check_if_stocks_are_created_correctly_with_provided_waiting_room_
 @pytest.mark.asyncio
 async def test_raise_exception_when_waiting_room_with_provided_id_is_not_available_for_new_stocks(
     async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -198,6 +205,7 @@ async def test_raise_exception_when_waiting_room_with_provided_id_is_not_availab
 @pytest.mark.asyncio
 async def test_check_if_new_stock_will_be_correctly_added_to_available_waiting_room(
     async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -260,21 +268,27 @@ async def test_if_all_stocks_were_returned(
 async def test_if_stocks_are_issued_correctly(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     stock_object = await if_exists(Stock, "id", available_stocks[0].id, async_session)
-    old_waiting_room = await if_exists(
+    waiting_room_before = await if_exists(
         WaitingRoom, "id", stock_object.waiting_room_id, async_session
     )
     issue_schema = IssueInputSchemaFactory().generate(
         stock_ids=[StockIssueInputSchema(id=stock_object.id)]
     )
     issue = await create_issue(async_session, issue_schema, db_staff_user.id)
+
     await async_session.refresh(stock_object)
-    await async_session.refresh(old_waiting_room)
+
+    waiting_room_after = await if_exists(
+        WaitingRoom, "id", waiting_room_before.id, async_session
+    )
 
     assert {stock.id for stock in issue.stocks} == {stock_object.id}
     assert stock_object.waiting_room == None
-    assert old_waiting_room.stocks == []
-    assert old_waiting_room.occupied_slots == 0
+    assert set(waiting_room_before.stocks) - set([stock_object]) == set(
+        waiting_room_after.stocks
+    )

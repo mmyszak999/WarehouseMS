@@ -46,13 +46,15 @@ async def create_rack(
         raise DoesNotExist(Section.__name__, "id", section_id)
 
     if not section_object.available_racks:
-        raise NotEnoughSectionResourcesException(resource="racks")
+        raise NotEnoughSectionResourcesException(
+            resource="racks", reason="no more available racks to use"
+        )
 
     if (
         rack_max_weight := rack_data.get("max_weight")
     ) > section_object.weight_to_reserve:
         raise NotEnoughSectionResourcesException(
-            resource="available section weight to reserve"
+            reason="available section weight to reserve exceeded", resource="racks"
         )
 
     new_rack = Rack(**rack_data)
@@ -82,13 +84,18 @@ async def get_single_rack(
 
 
 async def get_all_racks(
-    session: AsyncSession, page_params: PageParams
-) -> PagedResponseSchema[RackBaseOutputSchema]:
+    session: AsyncSession,
+    page_params: PageParams,
+    output_schema: BaseModel = RackBaseOutputSchema,
+) -> Union[
+    PagedResponseSchema[RackBaseOutputSchema],
+    PagedResponseSchema[RackOutputSchema],
+]:
     query = select(Rack)
 
     return await paginate(
         query=query,
-        response_schema=RackBaseOutputSchema,
+        response_schema=output_schema,
         table=Rack,
         page_params=page_params,
         session=session,
@@ -162,6 +169,7 @@ async def update_single_rack(
             max_weight=section_object.max_weight,
             stock_weight=max_weight_difference,
         )
+        session.add(section_object)
 
     if new_max_levels := rack_data.get("max_levels"):
         if new_max_levels < rack_object.occupied_levels:
@@ -193,7 +201,6 @@ async def delete_single_rack(session: AsyncSession, rack_id: str):
         raise RackIsNotEmptyException(resource="occupied weight")
 
     statement = delete(Rack).filter(Rack.id == rack_id)
-    result = await session.execute(statement)
 
     section = await if_exists(Section, "id", rack_object.section_id, session)
 
@@ -204,6 +211,7 @@ async def delete_single_rack(session: AsyncSession, rack_id: str):
         stock_weight=rack_object.max_weight,
     )
     session.add(section)
+    result = await session.execute(statement)
 
     await session.commit()
     return result

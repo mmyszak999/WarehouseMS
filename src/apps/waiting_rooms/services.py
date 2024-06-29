@@ -91,13 +91,18 @@ async def get_single_waiting_room(
 
 
 async def get_all_waiting_rooms(
-    session: AsyncSession, page_params: PageParams
-) -> PagedResponseSchema[WaitingRoomBasicOutputSchema]:
+    session: AsyncSession,
+    page_params: PageParams,
+    output_schema: BaseModel = WaitingRoomBasicOutputSchema,
+) -> Union[
+    PagedResponseSchema[WaitingRoomBasicOutputSchema],
+    PagedResponseSchema[WaitingRoomOutputSchema],
+]:
     query = select(WaitingRoom)
 
     return await paginate(
         query=query,
-        response_schema=WaitingRoomBasicOutputSchema,
+        response_schema=output_schema,
         table=WaitingRoom,
         page_params=page_params,
         session=session,

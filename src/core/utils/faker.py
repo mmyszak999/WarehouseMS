@@ -21,15 +21,15 @@ def initialize_faker():
 
 
 def set_product_weight() -> int:
-    return random.randint(1, 50)
+    return random.randint(1, 10)
 
 
 def set_product_count() -> int:
-    return random.randint(5, 30)
+    return random.randint(2, 10)
 
 
 def set_waiting_room_weight() -> int:
-    return random.randint(3000, 10000)
+    return random.randint(400, 5000)
 
 
 def set_waiting_room_stocks() -> int:
@@ -37,7 +37,7 @@ def set_waiting_room_stocks() -> int:
 
 
 def set_max_waiting_rooms() -> int:
-    return random.randint(4, 6)
+    return random.randint(5, 7)
 
 
 def set_max_sections() -> int:
@@ -45,8 +45,16 @@ def set_max_sections() -> int:
 
 
 def set_max_section_weight() -> int:
-    return random.randint(30000, 100000)
+    return random.randint(5000, 15000)
 
 
 def set_max_racks() -> int:
-    return random.randint(4, 6)
+    return random.randint(4, 7)
+
+
+def set_rack_weight() -> int:
+    return random.randint(400, 1000)
+
+
+def set_rack_levels() -> int:
+    return random.randint(3, 5)

@@ -24,4 +24,6 @@ from tests.test_users.conftest import (
 async def db_waiting_rooms(
     async_session: AsyncSession, db_stocks: PagedResponseSchema[StockOutputSchema]
 ) -> PagedResponseSchema[WaitingRoomOutputSchema]:
-    return await get_all_waiting_rooms(async_session, PageParams())
+    return await get_all_waiting_rooms(
+        async_session, PageParams(), output_schema=WaitingRoomOutputSchema
+    )

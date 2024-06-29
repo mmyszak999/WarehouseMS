@@ -12,6 +12,7 @@ from src.apps.users.schemas import UserOutputSchema
 from src.core.pagination.schemas import PagedResponseSchema
 from tests.test_issues.conftest import db_issues
 from tests.test_receptions.conftest import db_receptions
+from tests.test_sections.conftest import db_sections
 from tests.test_stocks.conftest import db_stocks, db_user_stocks
 from tests.test_users.conftest import (
     auth_headers,
@@ -19,6 +20,7 @@ from tests.test_users.conftest import (
     db_user,
     staff_auth_headers,
 )
+from tests.test_warehouse.conftest import db_warehouse
 
 
 @pytest.mark.parametrize(
