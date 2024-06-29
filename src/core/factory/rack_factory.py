@@ -17,7 +17,7 @@ class RackInputSchemaFactory(SchemaFactory):
         rack_name: str = None,
         max_weight: Decimal = None,
         max_levels: int = None,
-    ):
+    ) -> RackInputSchema:
         return self.schema_class(
             section_id=section_id,
             rack_name=rack_name or self.faker.ecommerce_name(),
@@ -35,7 +35,7 @@ class RackUpdateSchemaFactory(SchemaFactory):
         rack_name: Optional[str] = None,
         max_weight: Optional[Decimal] = None,
         max_levels: Optional[int] = None,
-    ):
+    ) -> RackUpdateSchema:
         return self.schema_class(
             rack_name=rack_name,
             max_weight=max_weight,

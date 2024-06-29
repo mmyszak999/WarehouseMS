@@ -76,6 +76,10 @@ async def db_stocks(
     )
     await create_issue(async_session, issue_input, db_staff_user.id)
     await async_session.flush()
+
+    waiting_room_with_no_stocks = await create_waiting_room(
+        async_session, WaitingRoomInputSchemaFactory().generate(), testing=True
+    )
     [await async_session.refresh(waiting_room) for waiting_room in waiting_rooms]
 
     return await get_all_stocks(async_session, PageParams())

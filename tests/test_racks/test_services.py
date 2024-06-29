@@ -166,7 +166,7 @@ async def test_if_rack_weight_limits_are_correctly_managed(
 
 
 @pytest.mark.asyncio
-async def test_raise_exception_when_weight_is_not_provided(
+async def test_raise_exception_when_weight_is_not_provided_while_managiing_weight_values(
     async_session: AsyncSession,
     db_racks: PagedResponseSchema[RackOutputSchema],
 ):

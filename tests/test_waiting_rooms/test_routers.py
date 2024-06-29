@@ -57,7 +57,6 @@ async def test_only_user_with_proper_permission_can_create_waiting_room(
     response = await async_client.post(
         "waiting_rooms/", headers=user_headers, content=waiting_room_data.json()
     )
-    print(response.json())
     assert response.status_code == status_code
     if status_code == status.HTTP_201_CREATED:
         assert response.json()["max_stocks"] == waiting_room_data.max_stocks

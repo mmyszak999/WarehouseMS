@@ -215,7 +215,6 @@ async def test_if_section_reserved_weight_limits_are_correctly_managed(
     )
 
 
-# s
 @pytest.mark.asyncio
 async def test_if_section_reserved_weight_limits_are_correctly_managed_when_updating_max_rack_weight(
     async_session: AsyncSession,

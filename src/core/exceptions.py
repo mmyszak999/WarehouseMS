@@ -247,8 +247,8 @@ class RackIsNotEmptyException(ServiceException):
 
 
 class NotEnoughSectionResourcesException(ServiceException):
-    def __init__(self, resource: str, place: str = "warehouse") -> None:
-        super().__init__(f"The {place} can have no more racks - {resource} exceeded !")
+    def __init__(self, resource: str, reason: str) -> None:
+        super().__init__(f"The section can have no more {resource} - {reason} !")
 
 
 class WeightLimitExceededException(ServiceException):

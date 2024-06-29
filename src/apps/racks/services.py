@@ -46,13 +46,15 @@ async def create_rack(
         raise DoesNotExist(Section.__name__, "id", section_id)
 
     if not section_object.available_racks:
-        raise NotEnoughSectionResourcesException(resource="racks")
+        raise NotEnoughSectionResourcesException(
+            resource="racks", reason="no more available racks to use"
+        )
 
     if (
         rack_max_weight := rack_data.get("max_weight")
     ) > section_object.weight_to_reserve:
         raise NotEnoughSectionResourcesException(
-            resource="available section weight to reserve", place="section"
+            reason="available section weight to reserve exceeded", resource="racks"
         )
 
     new_rack = Rack(**rack_data)

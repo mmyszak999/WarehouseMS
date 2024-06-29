@@ -271,7 +271,6 @@ async def test_if_stocks_are_issued_correctly(
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
-    print(db_waiting_rooms.results)
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     stock_object = await if_exists(Stock, "id", available_stocks[0].id, async_session)
     waiting_room_before = await if_exists(
