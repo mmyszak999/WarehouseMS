@@ -4,6 +4,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, validator
 
+from src.apps.rack_levels.schemas import RackLevelBaseOutputSchema
+
 
 class RackBaseSchema(BaseModel):
     rack_name: str = Field(max_length=400)
@@ -60,7 +62,7 @@ class RackBaseOutputSchema(RackBaseSchema):
 
 
 class RackOutputSchema(RackBaseOutputSchema):
-    pass
+    rack_levels: list[RackLevelBaseOutputSchema]
 
     class Config:
         orm_mode = True

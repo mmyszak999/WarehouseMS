@@ -32,7 +32,7 @@ class RackLevel(Base):
         default=generate_uuid,
     )
     rack_level_number = Column(Integer, nullable=False)
-    rack_level_description = Column(String(length=400), nullable=True)
+    description = Column(String(length=400), nullable=True)
     
     max_weight = Column(DECIMAL, nullable=False)
     available_weight = Column(
