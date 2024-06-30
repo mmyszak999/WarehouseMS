@@ -263,12 +263,14 @@ class WeightLimitExceededException(ServiceException):
             f"this operation at this moment ({value2}) !"
         )
 
+
 class TooLittleRackLevelSlotsAmountException(ServiceException):
     def __init__(self, value1: int, value2: int) -> None:
         super().__init__(
             f"The requested rack level max slots amount ({value1}) is lower than the amount of "
             f"the slots in the rack level ({value2}) !"
         )
+
 
 class RackLevelIsNotEmptyException(ServiceException):
     def __init__(self, resource: str) -> None:

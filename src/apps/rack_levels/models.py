@@ -33,19 +33,19 @@ class RackLevel(Base):
     )
     rack_level_number = Column(Integer, nullable=False)
     description = Column(String(length=400), nullable=True)
-    
+
     max_weight = Column(DECIMAL, nullable=False)
     available_weight = Column(
         DECIMAL, nullable=False, default=default_available_rack_level_weight
     )
     occupied_weight = Column(Integer, nullable=False, default=0)
-    
+
     max_slots = Column(Integer, nullable=False)
     available_slots = Column(
         DECIMAL, nullable=False, default=default_available_rack_level_slots
     )
     occupied_slots = Column(Integer, nullable=False, default=0)
-    
+
     rack_id = Column(
         String,
         ForeignKey("rack.id", onupdate="SET NULL"),

@@ -32,24 +32,24 @@ class Rack(Base):
         default=generate_uuid,
     )
     rack_name = Column(String(length=400), nullable=False)
-    
+
     max_weight = Column(DECIMAL, nullable=False)
     available_weight = Column(
         DECIMAL, nullable=False, default=default_available_rack_weight
     )
     occupied_weight = Column(Integer, nullable=False, default=0)
-    
+
     max_levels = Column(Integer, nullable=False)
     available_levels = Column(
         DECIMAL, nullable=False, default=default_available_rack_levels
     )
     occupied_levels = Column(Integer, nullable=False, default=0)
-    
+
     reserved_weight = Column(DECIMAL, nullable=False, default=0)
     weight_to_reserve = Column(
         DECIMAL, nullable=False, default=default_available_rack_weight
     )
-    
+
     section_id = Column(
         String,
         ForeignKey("section.id", onupdate="SET NULL"),

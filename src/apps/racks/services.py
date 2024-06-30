@@ -113,19 +113,19 @@ async def manage_rack_state(
         raise ServiceException("Rack object was not provided! ")
 
     multiplier = -1 if adding_resources_to_rack else 1
-    
+
     if weight_involved:
         if stock_weight is None:
             raise ServiceException("Stock weight was not provided! ")
         rack_object.available_weight -= multiplier * stock_weight
         rack_object.occupied_weight += multiplier * stock_weight
-        
+
     if reserved_weight_involved:
         if stock_weight is None:
             raise ServiceException("Stock weight was not provided! ")
         rack_object.weight_to_reserve -= multiplier * stock_weight
         rack_object.reserved_weight += multiplier * stock_weight
-    
+
     if levels_involved:
         rack_object.available_levels -= multiplier
         rack_object.occupied_levels += multiplier
@@ -133,7 +133,7 @@ async def manage_rack_state(
     if max_weight is not None:
         new_available_weight = max_weight - rack_object.occupied_weight
         rack_object.available_weight = new_available_weight
-        
+
         if stock_weight is not None:
             rack_object.weight_to_reserve += stock_weight * multiplier
             rack_object.reserved_weight -= stock_weight * multiplier

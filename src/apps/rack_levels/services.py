@@ -5,6 +5,13 @@ from pydantic import BaseModel
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.apps.rack_levels.models import RackLevel
+from src.apps.rack_levels.schemas import (
+    RackLevelBaseOutputSchema,
+    RackLevelInputSchema,
+    RackLevelOutputSchema,
+    RackLevelUpdateSchema,
+)
 from src.apps.racks.models import Rack
 from src.apps.racks.schemas import (
     RackBaseOutputSchema,
@@ -14,23 +21,16 @@ from src.apps.racks.schemas import (
 )
 from src.apps.racks.services import manage_rack_state
 from src.apps.sections.models import Section
-from src.apps.rack_levels.models import RackLevel
-from src.apps.rack_levels.schemas import (
-    RackLevelBaseOutputSchema,
-    RackLevelInputSchema,
-    RackLevelOutputSchema,
-    RackLevelUpdateSchema
-)
 from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
     IsOccupied,
-    ServiceException,
     NotEnoughRackResourcesException,
+    RackLevelIsNotEmptyException,
+    ServiceException,
+    TooLittleRackLevelSlotsAmountException,
     TooLittleWeightAmountException,
     WeightLimitExceededException,
-    TooLittleRackLevelSlotsAmountException,
-    RackLevelIsNotEmptyException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -55,10 +55,11 @@ async def create_rack_level(
         rack_level_max_weight := rack_level_data.get("max_weight")
     ) > rack_object.weight_to_reserve:
         raise NotEnoughRackResourcesException(
-            reason="amount of available rack weight to reserve exceeded", resource="rack levels"
+            reason="amount of available rack weight to reserve exceeded",
+            resource="rack levels",
         )
 
-    #there probably will be created rack level slots (the same amount as max slots)
+    # there probably will be created rack level slots (the same amount as max slots)
     new_rack_level = RackLevel(**rack_level_data)
     session.add(new_rack_level)
     rack = await manage_rack_state(
@@ -70,7 +71,7 @@ async def create_rack_level(
     )
     session.add(rack)
     await session.commit()
-    
+
     return RackLevelOutputSchema.from_orm(new_rack_level)
 
 
@@ -79,7 +80,9 @@ async def get_single_rack_level(
     rack_level_id: str,
     output_schema: BaseModel = RackLevelOutputSchema,
 ) -> Union[RackLevelOutputSchema, RackLevelBaseOutputSchema]:
-    if not (rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)):
+    if not (
+        rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)
+    ):
         raise DoesNotExist(RackLevel.__name__, "id", rack_level_id)
 
     return output_schema.from_orm(rack_level_object)
@@ -117,13 +120,13 @@ async def manage_rack_level_state(
         raise ServiceException("Rack level object was not provided! ")
 
     multiplier = -1 if adding_resources_to_rack_level else 1
-    
+
     if weight_involved:
         if stock_weight is None:
             raise ServiceException("Stock weight was not provided! ")
         rack_level_object.available_weight -= multiplier * stock_weight
         rack_level_object.occupied_weight += multiplier * stock_weight
-        
+
     if slots_involved:
         rack_level_object.available_slots -= multiplier
         rack_level_object.occupied_slots += multiplier
@@ -142,13 +145,13 @@ async def manage_rack_level_state(
 async def update_single_rack_level(
     session: AsyncSession, rack_level_input: RackLevelUpdateSchema, rack_level_id: str
 ) -> RackOutputSchema:
-    if not (rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)):
+    if not (
+        rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)
+    ):
         raise DoesNotExist(RackLevel.__name__, "id", rack_level_id)
 
     if not (
-        rack_object := await if_exists(
-            Rack, "id", rack_level_object.rack_id, session
-        )
+        rack_object := await if_exists(Rack, "id", rack_level_object.rack_id, session)
     ):
         raise DoesNotExist(Rack.__name__, "id", rack_object.rack_id)
 
@@ -180,7 +183,11 @@ async def update_single_rack_level(
     session.add(rack_level_object)
 
     if rack_level_data:
-        statement = update(RackLevel).filter(RackLevel.id == rack_level_id).values(**rack_level_data)
+        statement = (
+            update(RackLevel)
+            .filter(RackLevel.id == rack_level_id)
+            .values(**rack_level_data)
+        )
 
         await session.execute(statement)
         await session.commit()
@@ -190,7 +197,9 @@ async def update_single_rack_level(
 
 
 async def delete_single_rack_level(session: AsyncSession, rack_level_id: str):
-    if not (rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)):
+    if not (
+        rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)
+    ):
         raise DoesNotExist(RackLevel.__name__, "id", rack_level_id)
 
     if rack_level_object.occupied_weight:
