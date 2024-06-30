@@ -21,8 +21,8 @@ from src.core.utils.utils import generate_uuid
 from src.database.db_connection import Base
 
 
-class Rack(Base):
-    __tablename__ = "rack"
+class RackLevel(Base):
+    __tablename__ = "rack_level"
     id = Column(
         String,
         primary_key=True,
@@ -31,29 +31,24 @@ class Rack(Base):
         index=True,
         default=generate_uuid,
     )
-    rack_name = Column(String(length=400), nullable=False)
+    rack_level_number = Column(Integer, nullable=False)
+    rack_level_description = Column(String(length=400), nullable=True)
     
     max_weight = Column(DECIMAL, nullable=False)
     available_weight = Column(
-        DECIMAL, nullable=False, default=default_available_rack_weight
+        DECIMAL, nullable=False, default=default_available_rack_level_weight
     )
     occupied_weight = Column(Integer, nullable=False, default=0)
     
-    max_levels = Column(Integer, nullable=False)
-    available_levels = Column(
-        DECIMAL, nullable=False, default=default_available_rack_levels
+    max_slots = Column(Integer, nullable=False)
+    available_slots = Column(
+        DECIMAL, nullable=False, default=default_available_rack_level_slots
     )
-    occupied_levels = Column(Integer, nullable=False, default=0)
+    occupied_slots = Column(Integer, nullable=False, default=0)
     
-    reserved_weight = Column(DECIMAL, nullable=False, default=0)
-    weight_to_reserve = Column(
-        DECIMAL, nullable=False, default=default_available_rack_weight
-    )
-    
-    section_id = Column(
+    rack_id = Column(
         String,
-        ForeignKey("section.id", onupdate="SET NULL"),
+        ForeignKey("rack.id", onupdate="SET NULL"),
         nullable=False,
     )
-    section = relationship("Section", back_populates="racks", lazy="joined")
-    rack_levels = relationship("RackLevel", back_populates="rack", lazy="joined")
+    rack = relationship("Rack", back_populates="rack_levels", lazy="joined")
