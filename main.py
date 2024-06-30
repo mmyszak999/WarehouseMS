@@ -55,6 +55,9 @@ from src.core.exceptions import (
     WarehouseDoesNotExistException,
     WarehouseIsNotEmptyException,
     WeightLimitExceededException,
+    NotEnoughRackResourcesException,
+    TooLittleRackLevelSlotsAmountException,
+    RackLevelIsNotEmptyException
 )
 
 app = FastAPI(
@@ -441,6 +444,33 @@ async def not_enough_section_resources_exception(
 @app.exception_handler(WeightLimitExceededException)
 async def weight_limit_exceeded_exception(
     request: Request, exception: WeightLimitExceededException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(NotEnoughRackResourcesException)
+async def not_enough_rack_resources_exception(
+    request: Request, exception: NotEnoughRackResourcesException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(TooLittleRackLevelSlotsAmountException)
+async def too_little_rack_level_slots_amount_exception(
+    request: Request, exception: TooLittleRackLevelSlotsAmountException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(RackLevelIsNotEmptyException)
+async def rack_level_is_not_empty_exception(
+    request: Request, exception: RackLevelIsNotEmptyException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}

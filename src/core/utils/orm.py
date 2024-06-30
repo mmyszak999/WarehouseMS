@@ -41,3 +41,12 @@ def default_available_rack_weight(context):
 
 def default_available_rack_levels(context):
     return context.get_current_parameters()["max_levels"]
+
+
+def default_available_rack_level_weight(context):
+    return context.get_current_parameters()["max_weight"]
+
+
+def default_available_rack_level_slots(context):
+    return context.get_current_parameters()["max_levels"]
+
