@@ -31,4 +31,4 @@ async def db_sections(
         await create_section(async_session, section_input)
         for section_input in section_inputs
     ]
-    return await get_all_sections(async_session, PageParams())
+    return await get_all_sections(async_session, PageParams(), output_schema=SectionOutputSchema)

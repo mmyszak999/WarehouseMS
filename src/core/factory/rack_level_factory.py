@@ -23,8 +23,8 @@ class RackLevelInputSchemaFactory(SchemaFactory):
             rack_id=rack_id,
             rack_level_number=rack_level_number,
             description=description or self.faker.ecommerce_name(),
-            max_weight=max_weight or set_rack_weight(),
-            max_slots=max_slots or set_rack_levels(),
+            max_weight=max_weight or set_rack_level_weight(),
+            max_slots=max_slots or set_rack_level_slots(),
         )
 
 

@@ -202,8 +202,7 @@ async def test_if_rack_limits_are_correctly_managed_when_changing_max_weight_and
         new_max_weight - rack_output.max_weight
     )
 
-    # come here when rackLevel created with the updated logic for Rack
-    # assert updated_rack.weight_to_reserve == rack.weight_to_reserve
+    assert updated_rack.weight_to_reserve == rack.weight_to_reserve
 
 
 """
