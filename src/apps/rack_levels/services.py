@@ -59,7 +59,7 @@ async def create_rack_level(
             reason="amount of available rack weight to reserve exceeded",
             resource="rack weight",
         )
-    
+
     if (
         rack_level_number := rack_level_data.get("rack_level_number")
     ) > rack_object.max_levels:
@@ -67,23 +67,20 @@ async def create_rack_level(
             reason="max rack level number exceeded - pick number from the available levels",
             resource="rack levels",
         )
-    
-    rack_level_with_the_same_level_and_rack_check = (
-        select(RackLevel).filter(
-            RackLevel.rack_id == rack_id,
-            RackLevel.rack_level_number == rack_level_number
-        )
+
+    rack_level_with_the_same_level_and_rack_check = select(RackLevel).filter(
+        RackLevel.rack_id == rack_id, RackLevel.rack_level_number == rack_level_number
     )
-    
+
     if existing_rack_level := (
         await session.scalar(rack_level_with_the_same_level_and_rack_check)
     ):
         raise AlreadyExists(
-            RackLevel.__name__, "rack_level_number",
+            RackLevel.__name__,
+            "rack_level_number",
             existing_rack_level.rack_level_number,
-            comment=("(in the requested rack)")
+            comment=("(in the requested rack)"),
         )
-        
 
     # there probably will be created rack level slots (the same amount as max slots)
     new_rack_level = RackLevel(**rack_level_data)
@@ -188,8 +185,10 @@ async def update_single_rack_level(
             raise TooLittleWeightAmountException(
                 new_max_weight, rack_level_object.occupied_weight, RackLevel.__name__
             )
-    
-        if new_max_weight > (rack_object.weight_to_reserve + rack_level_object.max_weight):
+
+        if new_max_weight > (
+            rack_object.weight_to_reserve + rack_level_object.max_weight
+        ):
             raise WeightLimitExceededException(
                 new_max_weight,
                 (rack_object.weight_to_reserve + rack_level_object.max_weight),

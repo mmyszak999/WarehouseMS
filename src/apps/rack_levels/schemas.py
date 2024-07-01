@@ -10,7 +10,7 @@ class RackLevelBaseSchema(BaseModel):
     description: Optional[str] = Field(max_length=400)
     max_weight: Decimal
     max_slots: int
-    
+
     @validator("rack_level_number")
     def validate_rack_level_number(cls, rack_level_number: int) -> int:
         if rack_level_number is not None and rack_level_number <= 0:
