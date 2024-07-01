@@ -14,8 +14,6 @@ from src.apps.racks.schemas import (
 )
 from src.apps.sections.models import Section
 from src.apps.sections.services import manage_section_state
-from src.apps.warehouse.models import Warehouse
-from src.apps.warehouse.services import get_all_warehouses, manage_warehouse_state
 from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
@@ -69,7 +67,7 @@ async def create_rack(
     session.add(section)
 
     await session.commit()
-    return RackOutputSchema.from_orm(new_rack)
+    return RackBaseOutputSchema.from_orm(new_rack)
 
 
 async def get_single_rack(
@@ -109,15 +107,13 @@ async def manage_rack_state(
     adding_resources_to_rack: bool = True,
     levels_involved: bool = None,
     weight_involved: bool = None,
+    reserved_weight_involved: bool = None,
     stock_weight: Decimal = None,
 ) -> Rack:
-    if rack_object is None:
+    if not (isinstance(rack_object, Rack)):
         raise ServiceException("Rack object was not provided! ")
 
     multiplier = -1 if adding_resources_to_rack else 1
-    if levels_involved:
-        rack_object.available_levels -= multiplier
-        rack_object.occupied_levels += multiplier
 
     if weight_involved:
         if stock_weight is None:
@@ -125,9 +121,26 @@ async def manage_rack_state(
         rack_object.available_weight -= multiplier * stock_weight
         rack_object.occupied_weight += multiplier * stock_weight
 
+    if reserved_weight_involved:
+        if stock_weight is None:
+            raise ServiceException("Stock weight was not provided! ")
+        rack_object.weight_to_reserve -= multiplier * stock_weight
+        rack_object.reserved_weight += multiplier * stock_weight
+
+    if levels_involved:
+        rack_object.available_levels -= multiplier
+        rack_object.occupied_levels += multiplier
+
     if max_weight is not None:
         new_available_weight = max_weight - rack_object.occupied_weight
         rack_object.available_weight = new_available_weight
+
+        if stock_weight is not None:
+            rack_object.weight_to_reserve += stock_weight * multiplier
+            rack_object.reserved_weight -= stock_weight * multiplier
+        else:
+            new_weight_to_reserve = max_weight - rack_object.reserved_weight
+            rack_object.weight_to_reserve = new_weight_to_reserve
 
     if max_levels is not None:
         new_available_levels = max_levels - rack_object.occupied_levels
@@ -194,8 +207,8 @@ async def delete_single_rack(session: AsyncSession, rack_id: str):
     if not (rack_object := await if_exists(Rack, "id", rack_id, session)):
         raise DoesNotExist(Rack.__name__, "id", rack_id)
 
-    """if rack_object.rack_levels:
-        raise RackIsNotEmptyException(resource="rack levels")"""
+    if rack_object.rack_levels:
+        raise RackIsNotEmptyException(resource="rack levels")
 
     if rack_object.occupied_weight:
         raise RackIsNotEmptyException(resource="occupied weight")

@@ -12,8 +12,10 @@ class DoesNotExist(ServiceException):
 
 
 class AlreadyExists(ServiceException):
-    def __init__(self, class_name: str, field: str, value: Any) -> None:
-        super().__init__(f"{class_name} with {field}={value} already exists")
+    def __init__(
+        self, class_name: str, field: str, value: Any, comment: str = ""
+    ) -> None:
+        super().__init__(f"{class_name} with {field}={value} already exists {comment}")
 
 
 class IsOccupied(ServiceException):
@@ -251,9 +253,29 @@ class NotEnoughSectionResourcesException(ServiceException):
         super().__init__(f"The section can have no more {resource} - {reason} !")
 
 
+class NotEnoughRackResourcesException(ServiceException):
+    def __init__(self, resource: str, reason: str) -> None:
+        super().__init__(f"The rack can have no more {resource} - {reason} !")
+
+
 class WeightLimitExceededException(ServiceException):
     def __init__(self, value1: Decimal, value2: Decimal) -> None:
         super().__init__(
             f"The requested weight amount ({value1}) is higher than the available weight for "
             f"this operation at this moment ({value2}) !"
+        )
+
+
+class TooLittleRackLevelSlotsAmountException(ServiceException):
+    def __init__(self, value1: int, value2: int) -> None:
+        super().__init__(
+            f"The requested rack level max slots amount ({value1}) is lower than the amount of "
+            f"the slots in the rack level ({value2}) !"
+        )
+
+
+class RackLevelIsNotEmptyException(ServiceException):
+    def __init__(self, resource: str) -> None:
+        super().__init__(
+            f"The rack level cannot be deleted because it is not empty! Reason: positive amount of {resource} "
         )
