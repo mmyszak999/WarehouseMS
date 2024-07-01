@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
+from src.apps.rack_levels.schemas import RackLevelOutputSchema
 from src.apps.racks.models import Rack
 from src.apps.racks.schemas import RackInputSchema, RackOutputSchema, RackUpdateSchema
 from src.apps.racks.services import (
@@ -31,7 +32,7 @@ from src.core.exceptions import (
     TooLittleRacksAmountException,
     TooLittleWeightAmountException,
     WarehouseDoesNotExistException,
-    WeightLimitExceededException
+    WeightLimitExceededException,
 )
 from src.core.factory.rack_factory import (
     RackInputSchemaFactory,
@@ -49,11 +50,10 @@ from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid
 from tests.test_products.conftest import db_categories, db_products
+from tests.test_rack_levels.conftest import db_rack_levels
 from tests.test_racks.conftest import db_racks
 from tests.test_sections.conftest import db_sections
 from tests.test_stocks.conftest import db_stocks
-from tests.test_rack_levels.conftest import db_rack_levels
-from src.apps.rack_levels.schemas import RackLevelOutputSchema
 from tests.test_users.conftest import (
     auth_headers,
     db_staff_user,
@@ -207,7 +207,6 @@ async def test_if_rack_limits_are_correctly_managed_when_changing_max_weight_and
     assert updated_rack.weight_to_reserve == rack.weight_to_reserve
 
 
-
 @pytest.mark.asyncio
 async def test_if_rack_reserved_weight_limits_are_correctly_managed(
     async_session: AsyncSession,
@@ -220,15 +219,14 @@ async def test_if_rack_reserved_weight_limits_are_correctly_managed(
     rack_output = await create_rack(async_session, rack_input)
 
     rack = await if_exists(Rack, "id", rack_output.id, async_session)
-    
+
     weight_difference = 10
     updated_rack = await manage_rack_state(
         rack, reserved_weight_involved=True, stock_weight=weight_difference
     )
 
     assert (
-        updated_rack.reserved_weight
-        == rack_output.reserved_weight - weight_difference
+        updated_rack.reserved_weight == rack_output.reserved_weight - weight_difference
     )
     assert (
         updated_rack.weight_to_reserve
@@ -248,7 +246,7 @@ async def test_if_rack_reserved_weight_limits_are_correctly_managed_when_updatin
     rack_output = await create_rack(async_session, rack_input)
 
     rack = await if_exists(Rack, "id", rack_output.id, async_session)
-    
+
     rack_level_weight_difference = 50
     updated_rack = await manage_rack_state(
         rack, max_weight=rack.max_weight, stock_weight=rack_level_weight_difference
@@ -299,7 +297,7 @@ async def test_raise_exception_when_new_max_weight_smaller_than_occupied_weight_
 @pytest.mark.asyncio
 async def test_raise_exception_when_new_max_weight_smaller_than_reserved_weight_amount(
     async_session: AsyncSession,
-    db_warehouse: PagedResponseSchema[WarehouseOutputSchema]
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
 ):
     section_input = SectionInputSchemaFactory().generate()
     section = await create_section(async_session, section_input)
@@ -307,7 +305,7 @@ async def test_raise_exception_when_new_max_weight_smaller_than_reserved_weight_
     rack_input = RackInputSchemaFactory().generate(section_id=section.id)
     rack_output = await create_rack(async_session, rack_input)
     rack_object = await if_exists(Rack, "id", rack_output.id, async_session)
-    
+
     rack_object.reserved_weight = 3
     async_session.add(rack_object)
     await async_session.commit()

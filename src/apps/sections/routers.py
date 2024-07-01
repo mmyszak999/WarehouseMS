@@ -44,9 +44,9 @@ async def post_section(
 @section_router.get(
     "/",
     response_model=Union[
-    PagedResponseSchema[SectionBaseOutputSchema],
-    PagedResponseSchema[SectionOutputSchema]
-],
+        PagedResponseSchema[SectionBaseOutputSchema],
+        PagedResponseSchema[SectionOutputSchema],
+    ],
     status_code=status.HTTP_200_OK,
 )
 async def get_sections(
@@ -55,7 +55,7 @@ async def get_sections(
     request_user: User = Depends(authenticate_user),
 ) -> Union[
     PagedResponseSchema[SectionOutputSchema],
-    PagedResponseSchema[SectionBaseOutputSchema]
+    PagedResponseSchema[SectionBaseOutputSchema],
 ]:
     return await get_all_sections(session, page_params)
 

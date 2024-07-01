@@ -4,8 +4,8 @@ from fastapi_jwt_auth import AuthJWT
 from httpx import AsyncClient, Response
 
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
-from src.apps.racks.schemas import RackOutputSchema
 from src.apps.rack_levels.schemas import RackLevelOutputSchema
+from src.apps.racks.schemas import RackOutputSchema
 from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.users.schemas import UserOutputSchema
 from src.core.factory.rack_level_factory import (
@@ -14,8 +14,8 @@ from src.core.factory.rack_level_factory import (
 )
 from src.core.pagination.schemas import PagedResponseSchema
 from tests.test_products.conftest import db_categories, db_products
-from tests.test_racks.conftest import db_racks
 from tests.test_rack_levels.conftest import db_rack_levels
+from tests.test_racks.conftest import db_racks
 from tests.test_sections.conftest import db_sections
 from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
@@ -51,8 +51,7 @@ async def test_only_staff_can_create_rack(
     status_code: int,
 ):
     rack_level_input = RackLevelInputSchemaFactory().generate(
-        rack_id=db_racks.results[0].id,
-        rack_level_number=db_racks.results[0].max_levels
+        rack_id=db_racks.results[0].id, rack_level_number=db_racks.results[0].max_levels
     )
     response = await async_client.post(
         "rack_levels/", headers=user_headers, content=rack_level_input.json()
@@ -60,7 +59,9 @@ async def test_only_staff_can_create_rack(
     assert response.status_code == status_code
 
     if status_code == status.HTTP_201_CREATED:
-        assert response.json()["rack_level_number"] == rack_level_input.rack_level_number
+        assert (
+            response.json()["rack_level_number"] == rack_level_input.rack_level_number
+        )
 
 
 @pytest.mark.parametrize(
@@ -116,9 +117,7 @@ async def test_authenticated_user_can_get_all_rack_levels(
     user_headers: dict[str, str],
     status_code: int,
 ):
-    response = await async_client.get(
-        f"rack_levels/", headers=user_headers
-    )
+    response = await async_client.get(f"rack_levels/", headers=user_headers)
     assert response.status_code == status_code
     assert response.json()["total"] == db_rack_levels.total
 
@@ -149,11 +148,11 @@ async def test_only_staff_can_update_single_rack_level(
     rack_level_input = RackLevelUpdateSchemaFactory().generate(max_weight=2)
     response = await async_client.patch(
         f"rack_levels/{db_rack_levels.results[0].id}",
-        headers=user_headers, content=rack_level_input.json()
+        headers=user_headers,
+        content=rack_level_input.json(),
     )
     assert response.status_code == status_code
 
-    
     if status_code == status.HTTP_200_OK:
         assert response.json()["max_weight"] == rack_level_input.max_weight
 

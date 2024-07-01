@@ -73,10 +73,12 @@ async def get_single_section(
 
 
 async def get_all_sections(
-    session: AsyncSession, page_params: PageParams, output_schema: BaseModel = SectionBaseOutputSchema
+    session: AsyncSession,
+    page_params: PageParams,
+    output_schema: BaseModel = SectionBaseOutputSchema,
 ) -> Union[
     PagedResponseSchema[SectionOutputSchema],
-    PagedResponseSchema[SectionBaseOutputSchema]
+    PagedResponseSchema[SectionBaseOutputSchema],
 ]:
     query = select(Section)
 
