@@ -38,11 +38,11 @@ class RackLevel(Base):
     available_weight = Column(
         DECIMAL, nullable=False, default=default_available_rack_level_weight
     )
-    occupied_weight = Column(Integer, nullable=False, default=0)
+    occupied_weight = Column(DECIMAL, nullable=False, default=0)
 
     max_slots = Column(Integer, nullable=False)
     available_slots = Column(
-        DECIMAL, nullable=False, default=default_available_rack_level_slots
+        Integer, nullable=False, default=default_available_rack_level_slots
     )
     occupied_slots = Column(Integer, nullable=False, default=0)
 

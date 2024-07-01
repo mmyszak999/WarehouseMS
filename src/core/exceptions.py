@@ -12,8 +12,8 @@ class DoesNotExist(ServiceException):
 
 
 class AlreadyExists(ServiceException):
-    def __init__(self, class_name: str, field: str, value: Any) -> None:
-        super().__init__(f"{class_name} with {field}={value} already exists")
+    def __init__(self, class_name: str, field: str, value: Any, comment: str = "") -> None:
+        super().__init__(f"{class_name} with {field}={value} already exists {comment}")
 
 
 class IsOccupied(ServiceException):

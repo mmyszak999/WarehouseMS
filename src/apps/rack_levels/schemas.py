@@ -10,6 +10,12 @@ class RackLevelBaseSchema(BaseModel):
     description: Optional[str] = Field(max_length=400)
     max_weight: Decimal
     max_slots: int
+    
+    @validator("rack_level_number")
+    def validate_rack_level_number(cls, rack_level_number: int) -> int:
+        if rack_level_number is not None and rack_level_number <= 0:
+            raise ValueError("Rack level number must be positive!")
+        return rack_level_number
 
     @validator("max_weight")
     def validate_max_weight(cls, max_weight: Decimal) -> Decimal:

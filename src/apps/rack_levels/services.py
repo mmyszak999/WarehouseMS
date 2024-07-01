@@ -26,6 +26,7 @@ from src.core.exceptions import (
     DoesNotExist,
     IsOccupied,
     NotEnoughRackResourcesException,
+    NotEnoughSectionResourcesException,
     RackLevelIsNotEmptyException,
     ServiceException,
     TooLittleRackLevelSlotsAmountException,
@@ -46,9 +47,9 @@ async def create_rack_level(
     if not (rack_object := await if_exists(Rack, "id", rack_id, session)):
         raise DoesNotExist(Rack.__name__, "id", rack_id)
 
-    if not rack_object.available_racks:
+    if not rack_object.available_levels:
         raise NotEnoughRackResourcesException(
-            resource="rack levels", reason="no more available rack levels to use"
+            resource="levels", reason="no more available rack levels to use"
         )
 
     if (
@@ -56,15 +57,40 @@ async def create_rack_level(
     ) > rack_object.weight_to_reserve:
         raise NotEnoughRackResourcesException(
             reason="amount of available rack weight to reserve exceeded",
+            resource="rack weight",
+        )
+    
+    if (
+        rack_level_number := rack_level_data.get("rack_level_number")
+    ) > rack_object.max_levels:
+        raise NotEnoughRackResourcesException(
+            reason="max rack level number exceeded - pick number from the available levels",
             resource="rack levels",
         )
+    
+    rack_level_with_the_same_level_and_rack_check = (
+        select(RackLevel).filter(
+            RackLevel.rack_id == rack_id,
+            RackLevel.rack_level_number == rack_level_number
+        )
+    )
+    
+    if existing_rack_level := (
+        await session.scalar(rack_level_with_the_same_level_and_rack_check)
+    ):
+        raise AlreadyExists(
+            RackLevel.__name__, "rack_level_number",
+            existing_rack_level.rack_level_number,
+            comment=("(in the requested rack)")
+        )
+        
 
     # there probably will be created rack level slots (the same amount as max slots)
     new_rack_level = RackLevel(**rack_level_data)
     session.add(new_rack_level)
     rack = await manage_rack_state(
         rack_object,
-        adding_resources_to_section=False,
+        adding_resources_to_rack=False,
         levels_involved=True,
         reserved_weight_involved=True,
         stock_weight=rack_level_max_weight,
@@ -162,11 +188,17 @@ async def update_single_rack_level(
             raise TooLittleWeightAmountException(
                 new_max_weight, rack_level_object.occupied_weight, RackLevel.__name__
             )
+    
+        if new_max_weight > (rack_object.weight_to_reserve + rack_level_object.max_weight):
+            raise WeightLimitExceededException(
+                new_max_weight,
+                (rack_object.weight_to_reserve + rack_level_object.max_weight),
+            )
 
         max_weight_difference = new_max_weight - rack_level_object.max_weight
         rack_object = await manage_rack_state(
             rack_level_object.rack,
-            max_weight=rack_level_object.max_weight,
+            max_weight=rack_object.max_weight,
             stock_weight=max_weight_difference,
         )
         session.add(rack_object)
@@ -178,7 +210,7 @@ async def update_single_rack_level(
             )
 
     rack_level_object = await manage_rack_level_state(
-        rack_level_object, new_max_weight, new_max_levels
+        rack_level_object, new_max_weight, new_max_slots
     )
     session.add(rack_level_object)
 
@@ -208,14 +240,14 @@ async def delete_single_rack_level(session: AsyncSession, rack_level_id: str):
     if rack_level_object.occupied_slots:
         raise RackLevelIsNotEmptyException(resource="occupied slots")
 
-    statement = delete(Rack).filter(Rack.id == rack_id)
+    statement = delete(RackLevel).filter(RackLevel.id == rack_level_id)
 
     if not (rack := await if_exists(Rack, "id", rack_level_object.rack_id, session)):
         raise DoesNotExist(Rack.__name__, "id", rack_level_object.rack_id)
 
     rack = await manage_rack_state(
         rack,
-        slots_involved=True,
+        levels_involved=True,
         reserved_weight_involved=True,
         stock_weight=rack_level_object.max_weight,
     )

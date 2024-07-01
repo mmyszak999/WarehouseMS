@@ -29,14 +29,14 @@ rack_router = APIRouter(prefix="/racks", tags=["rack"])
 
 @rack_router.post(
     "/",
-    response_model=RackOutputSchema,
+    response_model=RackBaseOutputSchema,
     status_code=status.HTTP_201_CREATED,
 )
 async def post_rack(
     rack: RackInputSchema,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
-) -> RackOutputSchema:
+) -> RackBaseOutputSchema:
     await check_if_staff(request_user)
     return await create_rack(session, rack)
 
@@ -62,7 +62,7 @@ async def get_racks(
 
 @rack_router.get(
     "/{rack_id}",
-    response_model=Union[RackBaseOutputSchema, RackOutputSchema],
+    response_model=Union[RackOutputSchema, RackBaseOutputSchema],
     status_code=status.HTTP_200_OK,
 )
 async def get_rack(

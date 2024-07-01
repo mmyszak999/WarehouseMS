@@ -67,7 +67,7 @@ async def create_rack(
     session.add(section)
 
     await session.commit()
-    return RackOutputSchema.from_orm(new_rack)
+    return RackBaseOutputSchema.from_orm(new_rack)
 
 
 async def get_single_rack(
@@ -107,6 +107,7 @@ async def manage_rack_state(
     adding_resources_to_rack: bool = True,
     levels_involved: bool = None,
     weight_involved: bool = None,
+    reserved_weight_involved: bool = None,
     stock_weight: Decimal = None,
 ) -> Rack:
     if not (isinstance(rack_object, Rack)):
