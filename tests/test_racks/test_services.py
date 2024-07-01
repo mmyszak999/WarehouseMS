@@ -31,7 +31,7 @@ from src.core.exceptions import (
     TooLittleRacksAmountException,
     TooLittleWeightAmountException,
     WarehouseDoesNotExistException,
-    WeightLimitExceededException,
+    WeightLimitExceededException
 )
 from src.core.factory.rack_factory import (
     RackInputSchemaFactory,
@@ -168,7 +168,7 @@ async def test_if_rack_weight_limits_are_correctly_managed(
 
 
 @pytest.mark.asyncio
-async def test_raise_exception_when_weight_is_not_provided_while_managiing_weight_values(
+async def test_raise_exception_when_weight_is_not_provided_while_managing_weight_values(
     async_session: AsyncSession,
     db_racks: PagedResponseSchema[RackOutputSchema],
 ):
