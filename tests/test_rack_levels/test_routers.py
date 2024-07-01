@@ -153,6 +153,7 @@ async def test_only_staff_can_update_single_rack_level(
     )
     assert response.status_code == status_code
 
+    
     if status_code == status.HTTP_200_OK:
         assert response.json()["max_weight"] == rack_level_input.max_weight
 
