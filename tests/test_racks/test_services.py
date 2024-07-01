@@ -52,6 +52,8 @@ from tests.test_products.conftest import db_categories, db_products
 from tests.test_racks.conftest import db_racks
 from tests.test_sections.conftest import db_sections
 from tests.test_stocks.conftest import db_stocks
+from tests.test_rack_levels.conftest import db_rack_levels
+from src.apps.rack_levels.schemas import RackLevelOutputSchema
 from tests.test_users.conftest import (
     auth_headers,
     db_staff_user,
@@ -205,56 +207,62 @@ async def test_if_rack_limits_are_correctly_managed_when_changing_max_weight_and
     assert updated_rack.weight_to_reserve == rack.weight_to_reserve
 
 
-"""
-come here when rackLevel created with the updated logic for Rack
+
 @pytest.mark.asyncio
-async def test_if_section_reserved_weight_limits_are_correctly_managed(
+async def test_if_rack_reserved_weight_limits_are_correctly_managed(
     async_session: AsyncSession,
     db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
 ):
     section_input = SectionInputSchemaFactory().generate()
     section_output = await create_section(async_session, section_input)
 
-    section = await if_exists(Section, "id", section_output.id, async_session)
-    weight_difference = -10
-    updated_section = await manage_section_state(
-        section, reserved_weight_involved=True, stock_weight=weight_difference
+    rack_input = RackInputSchemaFactory().generate(section_id=section_output.id)
+    rack_output = await create_rack(async_session, rack_input)
+
+    rack = await if_exists(Rack, "id", rack_output.id, async_session)
+    
+    weight_difference = 10
+    updated_rack = await manage_rack_state(
+        rack, reserved_weight_involved=True, stock_weight=weight_difference
     )
 
-
     assert (
-        updated_section.reserved_weight
-        == section_output.reserved_weight - weight_difference
+        updated_rack.reserved_weight
+        == rack_output.reserved_weight - weight_difference
     )
     assert (
-        updated_section.weight_to_reserve
-        == section_output.weight_to_reserve + weight_difference
+        updated_rack.weight_to_reserve
+        == rack_output.weight_to_reserve + weight_difference
     )
 
 
 @pytest.mark.asyncio
-async def test_if_section_reserved_weight_limits_are_correctly_managed_when_updating_max_rack_weight(
+async def test_if_rack_reserved_weight_limits_are_correctly_managed_when_updating_max_rack_level_weight(
     async_session: AsyncSession,
     db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
 ):
     section_input = SectionInputSchemaFactory().generate()
     section_output = await create_section(async_session, section_input)
 
-    section = await if_exists(Section, "id", section_output.id, async_session)
-    rack_weight_difference = 50
-    updated_section = await manage_section_state(
-        section, max_weight=section.max_weight, stock_weight=rack_weight_difference
+    rack_input = RackInputSchemaFactory().generate(section_id=section_output.id)
+    rack_output = await create_rack(async_session, rack_input)
+
+    rack = await if_exists(Rack, "id", rack_output.id, async_session)
+    
+    rack_level_weight_difference = 50
+    updated_rack = await manage_rack_state(
+        rack, max_weight=rack.max_weight, stock_weight=rack_level_weight_difference
     )
 
-    assert updated_section.available_weight == section.available_weight
+    assert updated_rack.available_weight == rack.available_weight
     assert (
-        updated_section.weight_to_reserve
-        == section_output.weight_to_reserve - rack_weight_difference
+        updated_rack.weight_to_reserve
+        == rack_output.weight_to_reserve - rack_level_weight_difference
     )
     assert (
-        updated_section.reserved_weight
-        == section_output.reserved_weight + rack_weight_difference
-    )"""
+        updated_rack.reserved_weight
+        == rack_output.reserved_weight + rack_level_weight_difference
+    )
 
 
 @pytest.mark.asyncio
@@ -288,27 +296,26 @@ async def test_raise_exception_when_new_max_weight_smaller_than_occupied_weight_
         await update_single_rack(async_session, rack_input, rack_object.id)
 
 
-"""
-come here when rackLevel created with the updated logic for Rack
 @pytest.mark.asyncio
 async def test_raise_exception_when_new_max_weight_smaller_than_reserved_weight_amount(
     async_session: AsyncSession,
+    db_warehouse: PagedResponseSchema[WarehouseOutputSchema]
 ):
-    warehouse_input = WarehouseInputSchemaFactory().generate(max_sections=1)
-    warehouse = await create_warehouse(async_session, warehouse_input)
-
     section_input = SectionInputSchemaFactory().generate()
     section = await create_section(async_session, section_input)
 
-    section = await if_exists(Section, "id", section.id, async_session)
-    section.reserved_weight = 3
-    async_session.add(section)
+    rack_input = RackInputSchemaFactory().generate(section_id=section.id)
+    rack_output = await create_rack(async_session, rack_input)
+    rack_object = await if_exists(Rack, "id", rack_output.id, async_session)
+    
+    rack_object.reserved_weight = 3
+    async_session.add(rack_object)
     await async_session.commit()
 
-    section_input = SectionUpdateSchemaFactory().generate(max_weight=2)
+    rack_input = RackUpdateSchemaFactory().generate(max_weight=2)
 
     with pytest.raises(TooLittleWeightAmountException):
-        await update_single_section(async_session, section_input, section.id)"""
+        await update_single_rack(async_session, rack_input, rack_object.id)
 
 
 @pytest.mark.asyncio

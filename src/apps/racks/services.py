@@ -169,6 +169,11 @@ async def update_single_rack(
             raise TooLittleWeightAmountException(
                 new_max_weight, rack_object.occupied_weight, Rack.__name__
             )
+        
+        if new_max_weight < rack_object.reserved_weight:
+            raise TooLittleWeightAmountException(
+                new_max_weight, rack_object.reserved_weight, Rack.__name__
+            )
 
         if new_max_weight > (section_object.weight_to_reserve + rack_object.max_weight):
             raise WeightLimitExceededException(
