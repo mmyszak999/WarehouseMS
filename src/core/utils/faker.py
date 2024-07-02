@@ -57,4 +57,12 @@ def set_rack_weight() -> int:
 
 
 def set_rack_levels() -> int:
-    return random.randint(3, 5)
+    return random.randint(2, 4)
+
+
+def set_rack_level_slots() -> int:
+    return random.randint(2, 4)
+
+
+def set_rack_level_weight() -> int:
+    return random.randint(70, 150)

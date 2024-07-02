@@ -41,7 +41,7 @@ from src.core.utils.orm import if_exists
 
 async def create_rack_level(
     session: AsyncSession, rack_level_input: RackLevelInputSchema
-) -> RackOutputSchema:
+) -> RackLevelOutputSchema:
     rack_level_data = rack_level_input.dict()
     rack_id = rack_level_data.get("rack_id")
     if not (rack_object := await if_exists(Rack, "id", rack_id, session)):
@@ -94,6 +94,7 @@ async def create_rack_level(
     )
     session.add(rack)
     await session.commit()
+    await session.refresh(rack)
 
     return RackLevelOutputSchema.from_orm(new_rack_level)
 
@@ -167,7 +168,7 @@ async def manage_rack_level_state(
 
 async def update_single_rack_level(
     session: AsyncSession, rack_level_input: RackLevelUpdateSchema, rack_level_id: str
-) -> RackOutputSchema:
+) -> RackLevelOutputSchema:
     if not (
         rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)
     ):

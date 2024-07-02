@@ -73,13 +73,18 @@ async def get_single_section(
 
 
 async def get_all_sections(
-    session: AsyncSession, page_params: PageParams
-) -> PagedResponseSchema[SectionBaseOutputSchema]:
+    session: AsyncSession,
+    page_params: PageParams,
+    output_schema: BaseModel = SectionBaseOutputSchema,
+) -> Union[
+    PagedResponseSchema[SectionOutputSchema],
+    PagedResponseSchema[SectionBaseOutputSchema],
+]:
     query = select(Section)
 
     return await paginate(
         query=query,
-        response_schema=SectionBaseOutputSchema,
+        response_schema=output_schema,
         table=Section,
         page_params=page_params,
         session=session,
