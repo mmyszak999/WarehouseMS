@@ -395,7 +395,7 @@ async def test_raise_exception_when_deleting_nonexistent_rack_level(
 
 
 @pytest.mark.asyncio
-async def test_raise_exception_when_deleting_rack_level_with_occupied_weight(
+async def test_raise_exception_when_deleting_rack_level_with_occupied_weight_or_slots(
     async_session: AsyncSession,
     db_racks: PagedResponseSchema[RackOutputSchema],
 ):

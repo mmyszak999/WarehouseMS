@@ -117,7 +117,7 @@ async def test_authenticated_user_can_get_all_rack_levels(
     user_headers: dict[str, str],
     status_code: int,
 ):
-    response = await async_client.get(f"rack_levels/", headers=user_headers)
+    response = await async_client.get("rack_levels/", headers=user_headers)
     assert response.status_code == status_code
     assert response.json()["total"] == db_rack_levels.total
 
