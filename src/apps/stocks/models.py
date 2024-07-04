@@ -62,6 +62,16 @@ class UserStock(Base):
         String, ForeignKey("issue.id", ondelete="SET NULL"), nullable=True
     )
     issue = relationship("Issue", foreign_keys=[issue_id], lazy="joined")
+    
+    to_rack_level_slot_id = Column(
+        String, ForeignKey("rack_level_slot.id", ondelete="SET NULL"), nullable=True
+    )
+    to_rack_level_slot = relationship("RackLevelSlot", foreign_keys=[to_rack_level_slot_id], lazy="joined")
+    
+    from_rack_level_slot_id = Column(
+        String, ForeignKey("rack_level_slot.id", ondelete="SET NULL"), nullable=True
+    )
+    from_rack_level_slot = relationship("RackLevelSlot", foreign_keys=[from_rack_level_slot_id], lazy="joined")
 
 
 class Stock(Base):
@@ -102,4 +112,7 @@ class Stock(Base):
         back_populates="stock",
         foreign_keys="UserStock.stock_id",
         lazy="joined",
+    )
+    rack_level_slot = relationship(
+        "RackLevelSlot", uselist=False, back_populates="stock"
     )
