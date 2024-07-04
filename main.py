@@ -59,6 +59,7 @@ from src.core.exceptions import (
     WarehouseDoesNotExistException,
     WarehouseIsNotEmptyException,
     WeightLimitExceededException,
+    NotEnoughRackLevelResourcesException
 )
 
 app = FastAPI(
@@ -473,6 +474,15 @@ async def too_little_rack_level_slots_amount_exception(
 @app.exception_handler(RackLevelIsNotEmptyException)
 async def rack_level_is_not_empty_exception(
     request: Request, exception: RackLevelIsNotEmptyException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(NotEnoughRackLevelResourcesException)
+async def not_enough_rack_level_resources_exception(
+    request: Request, exception: NotEnoughRackLevelResourcesException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}

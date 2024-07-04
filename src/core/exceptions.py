@@ -279,3 +279,8 @@ class RackLevelIsNotEmptyException(ServiceException):
         super().__init__(
             f"The rack level cannot be deleted because it is not empty! Reason: positive amount of {resource} "
         )
+
+
+class NotEnoughRackLevelResourcesException(ServiceException):
+    def __init__(self, resource: str, reason: str) -> None:
+        super().__init__(f"The rack level an have no more {resource} - {reason} !")
