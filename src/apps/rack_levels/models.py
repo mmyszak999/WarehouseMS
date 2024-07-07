@@ -46,6 +46,7 @@ class RackLevel(Base):
     )
     occupied_slots = Column(Integer, nullable=False, default=0)
     active_slots = Column(Integer, nullable=False, default=default_available_rack_level_slots)
+    inactive_slots = Column(Integer, nullable=False, default=0)
 
     rack_id = Column(
         String,

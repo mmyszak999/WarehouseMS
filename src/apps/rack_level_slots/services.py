@@ -25,8 +25,11 @@ from src.core.exceptions import (
     DoesNotExist,
     IsOccupied,
     NotEnoughRackLevelResourcesException,
-    ServiceException
-)
+    ServiceException,
+    RackLevelSlotIsNotEmptyException,
+    CantActivateRackLevelSlotException,
+    CantDeactivateRackLevelSlotException
+    )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
@@ -137,3 +140,46 @@ async def update_single_rack_level_slot(
     return await get_single_rack_level_slot(
         session, rack_level_slot_id=rack_level_slot_id
     )
+
+
+async def manage_single_rack_level_slot_state(
+    session: AsyncSession, rack_level_slot_id: str, activate_slot: bool=True
+) -> dict[str, str]:
+    if not (
+        rack_level_slot_object := await if_exists(
+            RackLevelSlot, "id", rack_level_slot_id, session
+        )
+    ):
+        raise DoesNotExist(RackLevelSlot.__name__, "id", rack_level_slot_id)
+
+    if rack_level_slot_object.stock:
+        pass
+        #raise RackLevelSlotIsNotEmptyException(resource="occupied slot")
+
+    if not (rack_level_object := await if_exists(
+        RackLevel, "id", rack_level_slot_object.rack_level_id, session)
+    ):
+        raise DoesNotExist(RackLevel.__name__, "id", rack_level_slot_object.rack_level_id)
+    
+    if (not rack_level_object.available_slots) and (not activate_slot):
+        raise CantDeactivateRackLevelSlotException(
+            reason="all available slots are occupied! "
+        )
+    
+    if (rack_level_object.active_slots == rack_level_object.max_slots) and activate_slot:
+        raise CantActivateRackLevelSlotException(
+            reason="reached max amount of activate slots in the rack level! "
+        )
+
+    rack_level_object = await manage_rack_level_state(
+        rack_level_object,
+        manage_active_slots=True,
+        adding_resources_to_rack_level=activate_slot
+    )
+    
+    session.add(rack_level_slot_object)
+    session.add(rack_level_object)
+
+    await session.commit()
+    slot_action = "activated" if activate_slot else "deactivated"
+    return {"message": f"The requested rack level slot was {slot_action} successfully! "}

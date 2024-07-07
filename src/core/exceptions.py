@@ -283,4 +283,14 @@ class RackLevelIsNotEmptyException(ServiceException):
 
 class NotEnoughRackLevelResourcesException(ServiceException):
     def __init__(self, resource: str, reason: str) -> None:
-        super().__init__(f"The rack level an have no more {resource} - {reason} !")
+        super().__init__(f"The rack level can have no more {resource} - {reason} !")
+
+
+class CantDeactivateRackLevelSlotException(ServiceException):
+    def __init__(self, reason: str) -> None:
+        super().__init__(f"The rack level slot cannot be  deactivated - {reason} !")
+
+
+class CantActivateRackLevelSlotException(ServiceException):
+    def __init__(self, reason: str) -> None:
+        super().__init__(f"The rack level slot cannot be activated - {reason} !")

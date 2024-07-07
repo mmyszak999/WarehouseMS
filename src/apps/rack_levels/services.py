@@ -139,6 +139,7 @@ async def manage_rack_level_state(
     weight_involved: bool = None,
     slots_involved: bool = None,
     stock_weight: Decimal = None,
+    manage_active_slots: bool = None
 ) -> Rack:
     if not (isinstance(rack_level_object, RackLevel)):
         raise ServiceException("Rack level object was not provided! ")
@@ -154,6 +155,11 @@ async def manage_rack_level_state(
     if slots_involved:
         rack_level_object.available_slots -= multiplier
         rack_level_object.occupied_slots += multiplier
+    
+    if manage_active_slots:
+        rack_level_object.active_slots -= multiplier
+        rack_level_object.inactive_slots += multiplier
+        rack_level_object.available_slots -= multiplier
 
     if max_weight is not None:
         new_available_weight = max_weight - rack_level_object.occupied_weight
@@ -162,6 +168,7 @@ async def manage_rack_level_state(
     if max_slots is not None:
         new_available_slots = max_slots - rack_level_object.occupied_slots
         rack_level_object.available_slots = new_available_slots
+        rack_level_object.active_slots = new_available_slots + rack_level_object.occupied_slots
 
     return rack_level_object
 
