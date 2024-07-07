@@ -15,6 +15,7 @@ from src.apps.stocks.routers.user_stock_routers import user_stock_router
 from src.apps.users.routers import user_router
 from src.apps.waiting_rooms.routers import waiting_room_router
 from src.apps.warehouse.routers import warehouse_router
+from src.apps.rack_level_slots.routers import rack_level_slot_router
 from src.core.exceptions import (
     AccountAlreadyActivatedException,
     AccountAlreadyDeactivatedException,
@@ -61,7 +62,8 @@ from src.core.exceptions import (
     WeightLimitExceededException,
     NotEnoughRackLevelResourcesException,
     CantActivateRackLevelSlotException,
-    CantDeactivateRackLevelSlotException
+    CantDeactivateRackLevelSlotException,
+    RackLevelSlotIsNotEmptyException
 )
 
 app = FastAPI(
@@ -84,6 +86,7 @@ root_router.include_router(waiting_room_router)
 root_router.include_router(warehouse_router)
 root_router.include_router(section_router)
 root_router.include_router(rack_level_router)
+root_router.include_router(rack_level_slot_router)
 
 app.include_router(root_router)
 
@@ -505,3 +508,13 @@ async def cant_deactivate_rack_level_slot_exception(
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
+
+
+@app.exception_handler(RackLevelSlotIsNotEmptyException)
+async def rack_level_slot_is_not_empty_exception(
+    request: Request, exception: RackLevelSlotIsNotEmptyException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+

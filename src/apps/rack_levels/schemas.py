@@ -61,6 +61,8 @@ class RackLevelBaseOutputSchema(RackLevelBaseSchema):
     occupied_weight: Decimal
     available_slots: int
     occupied_slots: int
+    active_slots: int
+    inactive_slots: int
 
     class Config:
         orm_mode = True

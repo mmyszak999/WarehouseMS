@@ -21,7 +21,7 @@ from src.core.utils.utils import generate_uuid
 from src.database.db_connection import Base
 
 
-class RackLevel(Base):
+class RackLevelSlot(Base):
     __tablename__ = "rack_level_slot"
     id = Column(
         String,
@@ -48,10 +48,4 @@ class RackLevel(Base):
         String,
         ForeignKey("stock.id", onupdate="SET NULL", ondelete="SET NULL"),
         nullable=True,
-    )
-    stock_user_history = relationship(
-        "UserStock",
-        back_populates="rack_level_slot",
-        foreign_keys="UserStock.rack_level_slot_id",
-        lazy="joined",
     )

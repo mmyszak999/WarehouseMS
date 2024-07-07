@@ -42,6 +42,9 @@ from src.core.utils.orm import if_exists
 async def create_rack_level(
     session: AsyncSession, rack_level_input: RackLevelInputSchema
 ) -> RackLevelOutputSchema:
+    from src.apps.rack_level_slots.services import create_rack_level_slot
+    from src.apps.rack_level_slots.schemas import RackLevelSlotInputSchema
+    
     rack_level_data = rack_level_input.dict()
     rack_id = rack_level_data.get("rack_id")
     if not (rack_object := await if_exists(Rack, "id", rack_id, session)):
@@ -82,7 +85,6 @@ async def create_rack_level(
             comment=("(in the requested rack)"),
         )
 
-    # there probably will be created rack level slots (the same amount as max slots)
     new_rack_level = RackLevel(**rack_level_data)
     session.add(new_rack_level)
     rack = await manage_rack_state(
@@ -93,6 +95,16 @@ async def create_rack_level(
         stock_weight=rack_level_max_weight,
     )
     session.add(rack)
+    await session.flush()
+    
+    for slot_number in range(1, rack_level_data.get("max_slots")+1):
+        input_schema = RackLevelSlotInputSchema(
+            rack_level_slot_number=slot_number,
+            description=f"slot #{slot_number}",
+            rack_level_id=new_rack_level.id
+        )
+        await create_rack_level_slot(session, rack_level_slot_input=input_schema)
+        
     await session.commit()
     await session.refresh(rack)
 

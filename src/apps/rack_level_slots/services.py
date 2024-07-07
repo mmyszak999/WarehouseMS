@@ -28,7 +28,8 @@ from src.core.exceptions import (
     ServiceException,
     RackLevelSlotIsNotEmptyException,
     CantActivateRackLevelSlotException,
-    CantDeactivateRackLevelSlotException
+    CantDeactivateRackLevelSlotException,
+    RackLevelSlotIsNotEmptyException
     )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -62,7 +63,7 @@ async def create_rack_level_slot(
     )
 
     if existing_rack_level_slot := (
-        await session.scalar(rack_level_slot_with_the_same_level_and_rack_check)
+        await session.scalar(rack_level_slot_with_the_same_rack_level_and_number_check)
     ):
         raise AlreadyExists(
             RackLevelSlot.__name__,
@@ -79,10 +80,10 @@ async def create_rack_level_slot(
         slots_involved=True
     )
     session.add(rack_level)
-    await session.commit()
-    await session.refresh(rack_level)
+    await session.flush()
 
-    return
+    return new_rack_level_slot
+
 
 async def get_single_rack_level_slot(
     session: AsyncSession,
@@ -153,8 +154,7 @@ async def manage_single_rack_level_slot_state(
         raise DoesNotExist(RackLevelSlot.__name__, "id", rack_level_slot_id)
 
     if rack_level_slot_object.stock:
-        pass
-        #raise RackLevelSlotIsNotEmptyException(resource="occupied slot")
+        raise RackLevelSlotIsNotEmptyException(resource="Slot contains a stock! ")
 
     if not (rack_level_object := await if_exists(
         RackLevel, "id", rack_level_slot_object.rack_level_id, session)
@@ -183,3 +183,18 @@ async def manage_single_rack_level_slot_state(
     await session.commit()
     slot_action = "activated" if activate_slot else "deactivated"
     return {"message": f"The requested rack level slot was {slot_action} successfully! "}
+
+
+async def deactivate_single_rack_level_slot(
+    session: AsyncSession, rack_level_slot_id: str
+) -> dict[str, str]:
+    return await manage_single_rack_level_slot_state(
+        session, rack_level_slot_id, activate_slot=False
+    )
+
+async def activate_single_rack_level_slot(
+    session: AsyncSession, rack_level_slot_id: str
+) -> dict[str, str]:
+    return await manage_single_rack_level_slot_state(
+        session, rack_level_slot_id, activate_slot=True
+    )
