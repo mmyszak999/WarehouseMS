@@ -27,6 +27,7 @@ from src.core.exceptions import (
     IsOccupied,
     NotEnoughRackResourcesException,
     NotEnoughSectionResourcesException,
+    NotEnoughRackLevelResourcesException,
     RackLevelIsNotEmptyException,
     ServiceException,
     TooLittleRackLevelSlotsAmountException,
@@ -178,9 +179,12 @@ async def manage_rack_level_state(
         rack_level_object.available_weight = new_available_weight
 
     if max_slots is not None:
-        new_available_slots = max_slots - rack_level_object.occupied_slots
+        print(max_slots-rack_level_object.max_slots)
+        new_available_slots = max_slots - rack_level_object.occupied_slots - rack_level_object.inactive_slots
         rack_level_object.available_slots = new_available_slots
-        rack_level_object.active_slots = new_available_slots + rack_level_object.occupied_slots
+        rack_level_object.active_slots = (
+            new_available_slots + rack_level_object.occupied_slots
+        )
 
     return rack_level_object
 
@@ -226,6 +230,14 @@ async def update_single_rack_level(
         if new_max_slots < rack_level_object.occupied_slots:
             raise TooLittleRackLevelSlotsAmountException(
                 new_max_slots, rack_level_object.occupied_slots
+            )
+        
+        max_slot_difference = (rack_level_object.max_slots - new_max_slots)
+        if (new_max_slots < rack_level_object.max_slots) and (
+            (rack_level_object.available_slots - max_slot_difference) < 0
+        ):
+            raise NotEnoughRackLevelResourcesException(
+                resource="slots", reason="new max slots amount too small in relation to the available slots amount"
             )
 
     rack_level_object = await manage_rack_level_state(

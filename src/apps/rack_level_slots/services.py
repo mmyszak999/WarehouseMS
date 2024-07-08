@@ -151,10 +151,14 @@ async def manage_single_rack_level_slot_state(
         raise RackLevelSlotIsNotEmptyException(resource="Slot contains a stock! ")
     
     if rack_level_slot_object.is_active and activate_slot:
-        raise ServiceException("Slot already activated! ")
+        raise CantActivateRackLevelSlotException(
+            reason="Slot already activated! "
+        )
     
     if not(rack_level_slot_object.is_active) and not(activate_slot):
-        raise ServiceException("Slot already deactivated! ")
+        raise CantDeactivateRackLevelSlotException(
+            reason="Slot already deactivated! "
+        )
 
     if not (rack_level_object := await if_exists(
         RackLevel, "id", rack_level_slot_object.rack_level_id, session)
@@ -163,12 +167,12 @@ async def manage_single_rack_level_slot_state(
     
     if (not rack_level_object.available_slots) and (not activate_slot):
         raise CantDeactivateRackLevelSlotException(
-            reason="all available slots are occupied! "
+            reason="All available slots are occupied! "
         )
     
     if (rack_level_object.active_slots == rack_level_object.max_slots) and activate_slot:
         raise CantActivateRackLevelSlotException(
-            reason="reached max amount of activate slots in the rack level! "
+            reason="Reached max amount of activated slots in the rack level! "
         )
         
     rack_level_slot_object.is_active=activate_slot
