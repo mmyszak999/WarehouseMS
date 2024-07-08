@@ -37,7 +37,7 @@ class RackLevelSlot(Base):
 
     rack_level_id = Column(
         String,
-        ForeignKey("rack_level.id", onupdate="SET NULL", ondelete="SET NULL"),
+        ForeignKey("rack_level.id", onupdate="SET NULL", ondelete="CASCADE"),
         nullable=False,
     )
     rack_level = relationship("RackLevel", back_populates="rack_level_slots", lazy="joined")

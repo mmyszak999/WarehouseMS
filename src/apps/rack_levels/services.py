@@ -41,7 +41,7 @@ from src.core.utils.orm import if_exists
 
 async def create_rack_level(
     session: AsyncSession, rack_level_input: RackLevelInputSchema
-) -> RackLevelOutputSchema:
+) -> RackLevelBaseOutputSchema:
     from src.apps.rack_level_slots.services import create_rack_level_slot
     from src.apps.rack_level_slots.schemas import RackLevelSlotInputSchema
     
@@ -107,20 +107,20 @@ async def create_rack_level(
         
     await session.commit()
     await session.refresh(rack)
+    await session.refresh(new_rack_level)
 
-    return RackLevelOutputSchema.from_orm(new_rack_level)
+    return RackLevelBaseOutputSchema.from_orm(new_rack_level)
 
 
 async def get_single_rack_level(
     session: AsyncSession,
     rack_level_id: str,
-    output_schema: BaseModel = RackLevelOutputSchema,
-) -> Union[RackLevelOutputSchema, RackLevelBaseOutputSchema]:
+    output_schema: BaseModel=RackLevelOutputSchema
+) -> Union[RackLevelBaseOutputSchema, RackLevelOutputSchema]:
     if not (
         rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)
     ):
         raise DoesNotExist(RackLevel.__name__, "id", rack_level_id)
-
     return output_schema.from_orm(rack_level_object)
 
 
@@ -256,8 +256,8 @@ async def delete_single_rack_level(session: AsyncSession, rack_level_id: str):
     if rack_level_object.occupied_weight:
         raise RackLevelIsNotEmptyException(resource="occupied weight")
 
-    if rack_level_object.occupied_slots:
-        raise RackLevelIsNotEmptyException(resource="occupied slots")
+    """if rack_level_object.occupied_slots:
+        raise RackLevelIsNotEmptyException(resource="occupied slots")"""
 
     statement = delete(RackLevel).filter(RackLevel.id == rack_level_id)
 

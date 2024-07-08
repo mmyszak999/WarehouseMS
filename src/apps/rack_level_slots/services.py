@@ -74,12 +74,6 @@ async def create_rack_level_slot(
 
     new_rack_level_slot = RackLevelSlot(**rack_level_slot_data)
     session.add(new_rack_level_slot)
-    rack_level = await manage_rack_level_state(
-        rack_level_object,
-        adding_resources_to_rack_level=False,
-        slots_involved=True
-    )
-    session.add(rack_level)
     await session.flush()
 
     return new_rack_level_slot
@@ -125,7 +119,7 @@ async def update_single_rack_level_slot(
     ):
         raise DoesNotExist(RackLevelSlot.__name__, "id", rack_level_slot_id)
     
-    rack_level_slot_data = rack_level_input.dict(exclude_unset=True, exclude_none=True)
+    rack_level_slot_data = rack_level_slot_input.dict(exclude_unset=True, exclude_none=True)
     
     if rack_level_slot_data:
         statement = (
@@ -155,6 +149,12 @@ async def manage_single_rack_level_slot_state(
 
     if rack_level_slot_object.stock:
         raise RackLevelSlotIsNotEmptyException(resource="Slot contains a stock! ")
+    
+    if rack_level_slot_object.is_active and activate_slot:
+        raise ServiceException("Slot already activated! ")
+    
+    if not(rack_level_slot_object.is_active) and not(activate_slot):
+        raise ServiceException("Slot already deactivated! ")
 
     if not (rack_level_object := await if_exists(
         RackLevel, "id", rack_level_slot_object.rack_level_id, session)
@@ -170,14 +170,15 @@ async def manage_single_rack_level_slot_state(
         raise CantActivateRackLevelSlotException(
             reason="reached max amount of activate slots in the rack level! "
         )
-
+        
+    rack_level_slot_object.is_active=activate_slot
+    session.add(rack_level_slot_object)
+    
     rack_level_object = await manage_rack_level_state(
         rack_level_object,
         manage_active_slots=True,
         adding_resources_to_rack_level=activate_slot
     )
-    
-    session.add(rack_level_slot_object)
     session.add(rack_level_object)
 
     await session.commit()

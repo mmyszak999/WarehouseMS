@@ -29,14 +29,14 @@ rack_level_router = APIRouter(prefix="/rack_levels", tags=["rack_level"])
 
 @rack_level_router.post(
     "/",
-    response_model=RackLevelOutputSchema,
+    response_model=RackLevelBaseOutputSchema,
     status_code=status.HTTP_201_CREATED,
 )
 async def post_rack_level(
     rack_level: RackLevelInputSchema,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
-) -> RackLevelOutputSchema:
+) -> RackLevelBaseOutputSchema:
     await check_if_staff(request_user)
     return await create_rack_level(session, rack_level)
 
@@ -62,14 +62,14 @@ async def get_rack_levels(
 
 @rack_level_router.get(
     "/{rack_level_id}",
-    response_model=Union[RackLevelBaseOutputSchema, RackLevelOutputSchema],
+    response_model=Union[RackLevelOutputSchema, RackLevelBaseOutputSchema],
     status_code=status.HTTP_200_OK,
 )
 async def get_rack_level(
     rack_level_id: str,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
-) -> Union[RackLevelBaseOutputSchema, RackLevelOutputSchema]:
+) -> Union[RackLevelOutputSchema, RackLevelBaseOutputSchema]:
     if request_user.is_staff or request_user.can_move_stocks:
         return await get_single_rack_level(session, rack_level_id)
     return await get_single_rack_level(

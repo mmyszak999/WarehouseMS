@@ -4,6 +4,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, validator
 
+from src.apps.rack_level_slots.schemas import RackLevelSlotBaseOutputSchema
+
 
 class RackLevelBaseSchema(BaseModel):
     rack_level_number: int
@@ -69,7 +71,7 @@ class RackLevelBaseOutputSchema(RackLevelBaseSchema):
 
 
 class RackLevelOutputSchema(RackLevelBaseOutputSchema):
-    pass
+    rack_level_slots: list[RackLevelSlotBaseOutputSchema]
 
     class Config:
         orm_mode = True
