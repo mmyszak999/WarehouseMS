@@ -29,7 +29,6 @@ from src.core.exceptions import (
     RackLevelSlotIsNotEmptyException,
     CantActivateRackLevelSlotException,
     CantDeactivateRackLevelSlotException,
-    RackLevelSlotIsNotEmptyException
     )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -203,3 +202,40 @@ async def activate_single_rack_level_slot(
     return await manage_single_rack_level_slot_state(
         session, rack_level_slot_id, activate_slot=True
     )
+
+
+async def manage_rack_level_slots_when_changing_rack_level_max_slots(
+    session: AsyncSession, rack_level: RackLevel,
+    max_slots_difference: int, creating_slots: bool
+) -> None:
+    if max_slots_difference == 0:
+        return
+    
+    rack_level_slots = rack_level.rack_level_slots
+    max_slot_number = max([slot.rack_level_slot_number for slot in rack_level_slots])
+    
+    if creating_slots:
+        for slot_number in range(max_slot_number + 1, (max_slot_number + max_slots_difference + 1)):
+            input_schema = RackLevelSlotInputSchema(
+                rack_level_slot_number=slot_number,
+                description=f"slot #{slot_number}",
+                rack_level_id=rack_level.id
+            )
+            await create_rack_level_slot(session, rack_level_slot_input=input_schema)
+        return
+    
+    else:
+        slots_ids = [slot.id for slot in rack_level_slots]
+        inactive_slots = await session.scalars(select(RackLevelSlot).where(
+            RackLevelSlot.is_active==False, RackLevelSlot.id.in_(slots_ids)
+        ).order_by(
+            RackLevelSlot.rack_level_slot_number.desc()
+            )
+        )
+        inactive_slots = inactive_slots.unique().all()
+        max_slots_difference *= -1
+        if len(inactive_slots) < (max_slots_difference):
+            #raise exception, else make every slot inactive (the ones with stocks, not the inactive ones)
+            print(len(inactive_slots), (max_slots_difference))
+        raise Exception
+        return

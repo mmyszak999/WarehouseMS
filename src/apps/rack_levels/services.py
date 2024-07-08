@@ -153,7 +153,7 @@ async def manage_rack_level_state(
     slots_involved: bool = None,
     stock_weight: Decimal = None,
     manage_active_slots: bool = None
-) -> Rack:
+) -> RackLevel:
     if not (isinstance(rack_level_object, RackLevel)):
         raise ServiceException("Rack level object was not provided! ")
 
@@ -179,7 +179,6 @@ async def manage_rack_level_state(
         rack_level_object.available_weight = new_available_weight
 
     if max_slots is not None:
-        print(max_slots-rack_level_object.max_slots)
         new_available_slots = max_slots - rack_level_object.occupied_slots - rack_level_object.inactive_slots
         rack_level_object.available_slots = new_available_slots
         rack_level_object.active_slots = (
@@ -192,6 +191,8 @@ async def manage_rack_level_state(
 async def update_single_rack_level(
     session: AsyncSession, rack_level_input: RackLevelUpdateSchema, rack_level_id: str
 ) -> RackLevelOutputSchema:
+    from src.apps.rack_level_slots.services import manage_rack_level_slots_when_changing_rack_level_max_slots
+    
     if not (
         rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)
     ):
@@ -232,13 +233,24 @@ async def update_single_rack_level(
                 new_max_slots, rack_level_object.occupied_slots
             )
         
-        max_slot_difference = (rack_level_object.max_slots - new_max_slots)
+        max_slots_difference = new_max_slots - rack_level_object.max_slots
         if (new_max_slots < rack_level_object.max_slots) and (
-            (rack_level_object.available_slots - max_slot_difference) < 0
+            (rack_level_object.available_slots - max_slots_difference) < 0
         ):
             raise NotEnoughRackLevelResourcesException(
                 resource="slots", reason="new max slots amount too small in relation to the available slots amount"
             )
+        
+        rack_level_object.max_slots = new_max_slots
+        await session.flush()
+        
+        creating_slots = False if max_slots_difference <= 0 else True
+        await manage_rack_level_slots_when_changing_rack_level_max_slots(
+            session,
+            rack_level_object,
+            max_slots_difference,
+            creating_slots=creating_slots
+        )
 
     rack_level_object = await manage_rack_level_state(
         rack_level_object, new_max_weight, new_max_slots

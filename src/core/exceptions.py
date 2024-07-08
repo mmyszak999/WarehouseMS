@@ -299,5 +299,5 @@ class CantActivateRackLevelSlotException(ServiceException):
 class RackLevelSlotIsNotEmptyException(ServiceException):
     def __init__(self, resource: str) -> None:
         super().__init__(
-            f"The rack level slot cannot be deleted because it is not empty! Reason:  {resource} "
+            f"The rack level slot cannot be deleted because it is not empty! Reason: {resource} "
         )
