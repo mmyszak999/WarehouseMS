@@ -301,3 +301,18 @@ class RackLevelSlotIsNotEmptyException(ServiceException):
         super().__init__(
             f"The rack level slot cannot be deleted because it is not empty! Reason: {resource} "
         )
+        
+        
+class TooSmallInactiveSlotsQuantityException(ServiceException):
+    def __init__(self, inactive_slots: int) -> None:
+        super().__init__(
+            f"Cannot reduce the amount of the rack level slots - too small amount of inactive slots ({inactive_slots}) !"
+        )
+
+class ExistingGapBetweenInactiveSlotsToDeleteException(ServiceException):
+    def __init__(self, slots_amount: int) -> None:
+        super().__init__(
+            f"Requested to reduce the rack level slots amount by {slots_amount}. "
+            f"There is a gap between these {slots_amount} slots being removed. "
+            f"Make the last {slots_amount} empty and try again!"
+        )

@@ -63,7 +63,9 @@ from src.core.exceptions import (
     NotEnoughRackLevelResourcesException,
     CantActivateRackLevelSlotException,
     CantDeactivateRackLevelSlotException,
-    RackLevelSlotIsNotEmptyException
+    RackLevelSlotIsNotEmptyException,
+    TooSmallInactiveSlotsQuantityException,
+    ExistingGapBetweenInactiveSlotsToDeleteException
 )
 
 app = FastAPI(
@@ -518,3 +520,19 @@ async def rack_level_slot_is_not_empty_exception(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
 
+
+@app.exception_handler(TooSmallInactiveSlotsQuantityException)
+async def too_small_inactive_slots_quantity_exception(
+    request: Request, exception: TooSmallInactiveSlotsQuantityException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+@app.exception_handler(ExistingGapBetweenInactiveSlotsToDeleteException)
+async def existing_gap_between_inactive_slots_to_delete_exception(
+    request: Request, exception: ExistingGapBetweenInactiveSlotsToDeleteException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )

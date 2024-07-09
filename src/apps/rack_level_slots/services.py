@@ -4,6 +4,7 @@ from typing import Union
 from pydantic import BaseModel
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import make_transient
 
 from src.apps.rack_level_slots.models import RackLevelSlot
 from src.apps.rack_level_slots.schemas import (
@@ -29,6 +30,8 @@ from src.core.exceptions import (
     RackLevelSlotIsNotEmptyException,
     CantActivateRackLevelSlotException,
     CantDeactivateRackLevelSlotException,
+    TooSmallInactiveSlotsQuantityException,
+    ExistingGapBetweenInactiveSlotsToDeleteException
     )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -37,21 +40,21 @@ from src.core.utils.orm import if_exists
 
 
 async def create_rack_level_slot(
-    session: AsyncSession, rack_level_slot_input: RackLevelSlotInputSchema
+    session: AsyncSession, rack_level_slot_input: RackLevelSlotInputSchema, creating_rack_level: bool
 ) -> None:
     rack_level_slot_data = rack_level_slot_input.dict()
     rack_level_id = rack_level_slot_data.get("rack_level_id")
     if not (rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)):
         raise DoesNotExist(RackLevel.__name__, "id", rack_level_id)
 
-    if not rack_level_object.available_slots:
+    if (not rack_level_object.available_slots) and creating_rack_level:
         raise NotEnoughRackLevelResourcesException(
             resource="slots", reason="no more available rack level slots to use"
         )
 
-    if (
+    if ((
         rack_level_slot_number := rack_level_slot_data.get("rack_level_slot_number")
-    ) > rack_level_object.max_slots:
+    ) > rack_level_object.max_slots) and creating_rack_level:
         raise NotEnoughRackLevelResourcesException(
             reason="max rack level slot number exceeded - pick number from the available slots",
             resource="slots",
@@ -212,7 +215,10 @@ async def manage_rack_level_slots_when_changing_rack_level_max_slots(
         return
     
     rack_level_slots = rack_level.rack_level_slots
-    max_slot_number = max([slot.rack_level_slot_number for slot in rack_level_slots])
+    rack_level_slot_numbers = [slot.rack_level_slot_number for slot in rack_level_slots]
+    rack_level_slot_numbers.sort(reverse=True)
+        
+    max_slot_number = max(rack_level_slot_numbers)
     
     if creating_slots:
         for slot_number in range(max_slot_number + 1, (max_slot_number + max_slots_difference + 1)):
@@ -221,21 +227,34 @@ async def manage_rack_level_slots_when_changing_rack_level_max_slots(
                 description=f"slot #{slot_number}",
                 rack_level_id=rack_level.id
             )
-            await create_rack_level_slot(session, rack_level_slot_input=input_schema)
+            await create_rack_level_slot(
+                session, rack_level_slot_input=input_schema, creating_rack_level=False
+                )
         return
     
     else:
+        max_slots_difference *= -1
         slots_ids = [slot.id for slot in rack_level_slots]
         inactive_slots = await session.scalars(select(RackLevelSlot).where(
             RackLevelSlot.is_active==False, RackLevelSlot.id.in_(slots_ids)
         ).order_by(
             RackLevelSlot.rack_level_slot_number.desc()
-            )
+            ).limit(max_slots_difference)
         )
         inactive_slots = inactive_slots.unique().all()
-        max_slots_difference *= -1
-        if len(inactive_slots) < (max_slots_difference):
-            #raise exception, else make every slot inactive (the ones with stocks, not the inactive ones)
-            print(len(inactive_slots), (max_slots_difference))
-        raise Exception
+        if len(inactive_slots) < max_slots_difference:
+            raise TooSmallInactiveSlotsQuantityException(inactive_slots=len(inactive_slots))
+        
+        if rack_level_slot_numbers[:max_slots_difference] != [
+            slot.rack_level_slot_number for slot in inactive_slots
+        ]:
+            raise ExistingGapBetweenInactiveSlotsToDeleteException(slots_amount=max_slots_difference)
+        
+        
+        rack_level.inactive_slots -= max_slots_difference
+        session.add(rack_level)
+        for slot in inactive_slots:
+            await session.execute(
+                delete(RackLevelSlot).filter(RackLevelSlot.id == slot.id)
+            )
         return

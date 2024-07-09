@@ -104,7 +104,10 @@ async def create_rack_level(
             description=f"slot #{slot_number}",
             rack_level_id=new_rack_level.id
         )
-        await create_rack_level_slot(session, rack_level_slot_input=input_schema)
+        await create_rack_level_slot(
+            session, rack_level_slot_input=input_schema,
+            creating_rack_level=True
+            )
         
     await session.commit()
     await session.refresh(rack)
@@ -180,11 +183,11 @@ async def manage_rack_level_state(
 
     if max_slots is not None:
         new_available_slots = max_slots - rack_level_object.occupied_slots - rack_level_object.inactive_slots
+        print(new_available_slots, max_slots, rack_level_object.occupied_slots, rack_level_object.inactive_slots)
         rack_level_object.available_slots = new_available_slots
         rack_level_object.active_slots = (
             new_available_slots + rack_level_object.occupied_slots
         )
-
     return rack_level_object
 
 
@@ -241,9 +244,6 @@ async def update_single_rack_level(
                 resource="slots", reason="new max slots amount too small in relation to the available slots amount"
             )
         
-        rack_level_object.max_slots = new_max_slots
-        await session.flush()
-        
         creating_slots = False if max_slots_difference <= 0 else True
         await manage_rack_level_slots_when_changing_rack_level_max_slots(
             session,
@@ -252,10 +252,11 @@ async def update_single_rack_level(
             creating_slots=creating_slots
         )
 
+    
     rack_level_object = await manage_rack_level_state(
         rack_level_object, new_max_weight, new_max_slots
     )
-    session.add(rack_level_object)
+    await session.flush()
 
     if rack_level_data:
         statement = (
@@ -263,7 +264,6 @@ async def update_single_rack_level(
             .filter(RackLevel.id == rack_level_id)
             .values(**rack_level_data)
         )
-
         await session.execute(statement)
         await session.commit()
         await session.refresh(rack_level_object)
