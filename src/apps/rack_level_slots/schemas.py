@@ -33,14 +33,14 @@ class RackLevelSlotBaseOutputSchema(RackLevelSlotBaseSchema):
     id: str
     is_active: bool
     rack_level_id: str
-    stock_id: Optional[str]
+    stock: Optional[StockWithoutRackLevelSlotOutputSchema]
 
     class Config:
         orm_mode = True
 
 
 class RackLevelSlotOutputSchema(RackLevelSlotBaseOutputSchema):
-    stock: Optional[StockWithoutRackLevelSlotOutputSchema]
+    pass
 
     class Config:
         orm_mode = True

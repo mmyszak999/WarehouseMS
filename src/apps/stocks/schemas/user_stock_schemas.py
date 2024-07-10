@@ -6,6 +6,7 @@ from src.apps.issues.schemas import IssueBasicOutputSchema
 from src.apps.stocks.schemas.stock_schemas import StockBasicOutputSchema
 from src.apps.users.schemas import UserInfoOutputSchema
 from src.apps.waiting_rooms.schemas import WaitingRoomBasicOutputSchema
+from src.apps.rack_level_slots.schemas import RackLevelSlotBaseOutputSchema
 
 
 class UserStockInputSchema(BaseModel):
@@ -13,6 +14,8 @@ class UserStockInputSchema(BaseModel):
     stock_id: str
     from_waiting_room_id: Optional[str]
     to_waiting_room_id: Optional[str]
+    from_rack_level_slot_id: Optional[str]
+    to_rack_level_slot_id: Optional[str]
     issue_id: Optional[str]
 
 
@@ -22,6 +25,8 @@ class UserStockOutputSchema(BaseModel):
     stock: StockBasicOutputSchema
     from_waiting_room: Optional[WaitingRoomBasicOutputSchema]
     to_waiting_room: Optional[WaitingRoomBasicOutputSchema]
+    from_rack_level_slot: Optional[RackLevelSlotBaseOutputSchema]
+    to_rack_level_slot: Optional[RackLevelSlotBaseOutputSchema]
     issue: Optional[IssueBasicOutputSchema]
 
     class Config:

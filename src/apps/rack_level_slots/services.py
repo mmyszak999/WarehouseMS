@@ -90,6 +90,7 @@ async def get_single_rack_level_slot(
         rack_level_slot_object := await if_exists(RackLevelSlot, "id", rack_level_slot_id, session)
     ):
         raise DoesNotExist(RackLevelSlot.__name__, "id", rack_level_slot_id)
+    print(rack_level_slot_object.__dict__)
 
     return output_schema.from_orm(rack_level_slot_object)
 

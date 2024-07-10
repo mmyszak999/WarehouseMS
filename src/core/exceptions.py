@@ -326,3 +326,10 @@ class NoAvailableRackLevelSlotException(ServiceException):
             "for the new stock (due to lack of space/weight limit)! "
             f"Stock data: product_name: {product_name}, count: {product_count}, weight: {stock_weight} "
         )
+
+class AmbiguousStockStoragePlaceDuringReceptionException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            "Stock cannot be placed on the waiting room and the rack level slot simultaneously! "
+            "Please pick only one! "
+        )

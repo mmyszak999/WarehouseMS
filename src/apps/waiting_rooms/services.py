@@ -115,16 +115,16 @@ async def manage_waiting_room_state(
     max_stocks: int = None,
     stocks_involved: bool = False,
     adding_stock_to_waiting_room: bool = True,
-    stock_object: Stock = None,
+    stock_weight: Decimal = None,
 ) -> WaitingRoom:
     multiplier = 1 if adding_stock_to_waiting_room else -1
     if stocks_involved:
-        if stock_object is None:
-            raise ServiceException("Stock object was not provided! ")
+        if stock_weight is None:
+            raise ServiceException("Stock weight was not provided! ")
         waiting_room_object.available_slots -= multiplier
         waiting_room_object.occupied_slots += multiplier
-        waiting_room_object.current_stock_weight += multiplier * stock_object.weight
-        waiting_room_object.available_stock_weight -= multiplier * stock_object.weight
+        waiting_room_object.current_stock_weight += multiplier * stock_weight
+        waiting_room_object.available_stock_weight -= multiplier * stock_weight
     else:
         if max_weight is not None:
             new_available_weight = max_weight - waiting_room_object.current_stock_weight

@@ -58,4 +58,4 @@ class Section(Base):
         nullable=False,
     )
     warehouse = relationship("Warehouse", back_populates="sections", lazy="joined")
-    racks = relationship("Rack", back_populates="section", lazy="joined")
+    racks = relationship("Rack", back_populates="section", lazy="selectin")

@@ -42,10 +42,5 @@ class RackLevelSlot(Base):
     )
     rack_level = relationship("RackLevel", back_populates="rack_level_slots", lazy="joined")
     stock = relationship(
-        "Stock", uselist=False, back_populates="rack_level_slot"
-    )
-    stock_id = Column(
-        String,
-        ForeignKey("stock.id", onupdate="SET NULL", ondelete="SET NULL"),
-        nullable=True,
+        "Stock", uselist=False, back_populates="rack_level_slot", lazy="selectin"
     )

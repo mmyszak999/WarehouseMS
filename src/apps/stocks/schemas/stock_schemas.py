@@ -34,7 +34,6 @@ class StockInputSchema(StockBaseSchema):
     reception_id: Optional[str]
     waiting_room_id: Optional[str]
     rack_level_slot_id: Optional[str]
-    rack_level_id: Optional[str]
 
     class Config:
         orm_mode = True

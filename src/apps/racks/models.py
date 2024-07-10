@@ -56,4 +56,4 @@ class Rack(Base):
         nullable=False,
     )
     section = relationship("Section", back_populates="racks", lazy="joined")
-    rack_levels = relationship("RackLevel", back_populates="rack", lazy="joined")
+    rack_levels = relationship("RackLevel", back_populates="rack", lazy="selectin")

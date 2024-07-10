@@ -38,7 +38,7 @@ class WaitingRoom(Base):
     available_stock_weight = Column(
         DECIMAL, nullable=False, default=default_available_stock_weight
     )
-    stocks = relationship("Stock", back_populates="waiting_room", lazy="joined")
+    stocks = relationship("Stock", back_populates="waiting_room", lazy="selectin")
     warehouse_id = Column(
         String,
         ForeignKey("warehouse.id", ondelete="SET NULL", onupdate="cascade"),

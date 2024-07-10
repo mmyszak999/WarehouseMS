@@ -30,4 +30,4 @@ class Reception(Base):
         nullable=True,
     )
     user = relationship("User", back_populates="receptions", lazy="joined")
-    stocks = relationship("Stock", back_populates="reception", lazy="joined")
+    stocks = relationship("Stock", back_populates="reception", lazy="selectin")

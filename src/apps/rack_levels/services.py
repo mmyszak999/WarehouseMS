@@ -276,8 +276,8 @@ async def delete_single_rack_level(session: AsyncSession, rack_level_id: str):
     ):
         raise DoesNotExist(RackLevel.__name__, "id", rack_level_id)
 
-    if rack_level_object.occupied_weight:
-        raise RackLevelIsNotEmptyException(resource="occupied weight")
+    """if rack_level_object.occupied_weight:
+        raise RackLevelIsNotEmptyException(resource="occupied weight")"""
 
     """if rack_level_object.occupied_slots:
         raise RackLevelIsNotEmptyException(resource="occupied slots")"""
