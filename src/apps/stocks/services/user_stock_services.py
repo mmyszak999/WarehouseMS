@@ -13,6 +13,7 @@ from src.apps.stocks.schemas.user_stock_schemas import (
 )
 from src.apps.users.models import User
 from src.apps.waiting_rooms.models import WaitingRoom
+from src.apps.rack_level_slots.models import RackLevelSlot
 from src.apps.waiting_rooms.services import manage_waiting_room_state
 from src.core.exceptions import (
     AlreadyExists,
@@ -36,6 +37,8 @@ async def create_user_stock_object(
     user_id: str,
     from_waiting_room_id: str = None,
     to_waiting_room_id: str = None,
+    from_rack_level_slot_id: str = None,
+    to_rack_level_slot_id: str = None,
     issue_id: str = None,
 ) -> UserStockOutputSchema:
     if not (stock_object := await if_exists(Stock, "id", stock_id, session)):
@@ -60,6 +63,22 @@ async def create_user_stock_object(
         ):
             raise DoesNotExist(WaitingRoom.__name__, "id", to_waiting_room_id)
 
+    if from_rack_level_slot_id is not None:
+        if not (
+            from_rack_level_slot_object := await if_exists(
+                RackLevelSlot, "id", from_rack_level_slot_id, session
+            )
+        ):
+            raise DoesNotExist(RackLevelSlot.__name__, "id", from_rack_level_slot_id)
+
+    if to_rack_level_slot_id is not None:
+        if not (
+            to_rack_level_slot_object := await if_exists(
+                RackLevelSlot, "id", to_rack_level_slot_id, session
+            )
+        ):
+            raise DoesNotExist(RackLevelSlot.__name__, "id", to_rack_level_slot_id)
+    
     if issue_id is not None:
         if not (issue_object := await if_exists(Issue, "id", issue_id, session)):
             raise DoesNotExist(Issue.__name__, "id", issue_id)
@@ -69,6 +88,8 @@ async def create_user_stock_object(
         stock_id=stock_id,
         to_waiting_room_id=to_waiting_room_id,
         from_waiting_room_id=from_waiting_room_id,
+        to_rack_level_slot_id=to_rack_level_slot_id,
+        from_rack_level_slot_id=from_rack_level_slot_id,
         issue_id=issue_id,
     )
 

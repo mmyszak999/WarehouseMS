@@ -148,7 +148,7 @@ async def get_all_rack_levels(
 
 
 async def manage_rack_level_state(
-    rack_level_object: Rack = None,
+    rack_level_object: RackLevel = None,
     max_weight: Decimal = None,
     max_slots: int = None,
     adding_resources_to_rack_level: bool = True,
@@ -183,7 +183,6 @@ async def manage_rack_level_state(
 
     if max_slots is not None:
         new_available_slots = max_slots - rack_level_object.occupied_slots - rack_level_object.inactive_slots
-        print(new_available_slots, max_slots, rack_level_object.occupied_slots, rack_level_object.inactive_slots)
         rack_level_object.available_slots = new_available_slots
         rack_level_object.active_slots = (
             new_available_slots + rack_level_object.occupied_slots

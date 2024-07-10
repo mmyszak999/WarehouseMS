@@ -116,3 +116,8 @@ class Stock(Base):
     rack_level_slot = relationship(
         "RackLevelSlot", uselist=False, back_populates="stock"
     )
+    rack_level_slot_id = Column(
+        String,
+        ForeignKey("rack_level_slot.id", ondelete="SET NULL", onupdate="cascade"),
+        nullable=True,
+    )

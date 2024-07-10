@@ -316,3 +316,13 @@ class ExistingGapBetweenInactiveSlotsToDeleteException(ServiceException):
             f"There is a gap between these {slots_amount} slots being removed. "
             f"Make the last {slots_amount} empty and try again!"
         )
+
+class NoAvailableRackLevelSlotException(ServiceException):
+    def __init__(
+        self, product_name: Decimal, product_count: int, stock_weight: Decimal
+    ) -> None:
+        super().__init__(
+            "The stock can't be recepted because there is no available rack level slot in the requested rack level "
+            "for the new stock (due to lack of space/weight limit)! "
+            f"Stock data: product_name: {product_name}, count: {product_count}, weight: {stock_weight} "
+        )
