@@ -1,3 +1,5 @@
+import datetime as dt
+
 from sqlalchemy import (
     DECIMAL,
     Boolean,
@@ -59,3 +61,4 @@ class Section(Base):
     )
     warehouse = relationship("Warehouse", back_populates="sections", lazy="joined")
     racks = relationship("Rack", back_populates="section", lazy="selectin")
+    created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

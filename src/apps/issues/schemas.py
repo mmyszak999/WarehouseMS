@@ -32,6 +32,7 @@ class IssueBasicOutputSchema(BaseModel):
     user: UserInfoOutputSchema
     issue_date: datetime
     description: Optional[str]
+    created_at: Optional[datetime]
 
     class Config:
         orm_mode = True

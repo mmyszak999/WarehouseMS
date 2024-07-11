@@ -1,5 +1,8 @@
+import datetime as dt
+
 from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.sql.sqltypes import DateTime
 from sqlalchemy.orm import relationship
 
 from src.apps.issues.models import Issue
@@ -38,3 +41,4 @@ class User(Base):
         foreign_keys="UserStock.user_id",
         lazy="selectin",
     )
+    created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

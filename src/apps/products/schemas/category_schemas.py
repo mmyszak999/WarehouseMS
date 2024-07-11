@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from pydantic import BaseModel, Field
@@ -26,6 +27,7 @@ class CategoryUpdateSchema(BaseModel):
 
 class CategoryOutputSchema(CategoryBaseSchema):
     id: str
+    created_at: Optional[datetime.datetime]
 
     class Config:
         orm_mode = True

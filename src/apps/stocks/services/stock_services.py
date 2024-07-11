@@ -265,12 +265,34 @@ async def issue_stocks(
                 from_waiting_room_id=stock_waiting_room.id,
                 issue_id=issue_id,
             )
-            stock.issue_id = issue_id
-            stock.is_issued = True
-            stock.updated_at = get_current_time()
             stock.waiting_room_id = None
             stock.waiting_room = None
-            session.add(stock)
+            
+        if stock.rack_level_slot:
+            rack_level_slot = await if_exists(
+                RackLevelSlot, "id", stock.rack_level_slot_id, session
+            )
+            await manage_resources_state_when_managing_stocks(
+                session,
+                rack_level_slot,
+                stock.weight,
+            )
+            user_stock_object = await create_user_stock_object(
+                session,
+                stock.id,
+                user_id,
+                from_rack_level_slot_id=rack_level_slot.id,
+                issue_id=issue_id,
+            )
+            stock.rack_level_slot_id = None
+            stock.rack_level_slot = None
+            print("w0w", rack_level_slot.__dict__)
+        
+        stock.issue_id = issue_id
+        stock.is_issued = True
+        stock.updated_at = get_current_time()
+        session.add(stock)
+    await session.flush()
     return stocks
 
 

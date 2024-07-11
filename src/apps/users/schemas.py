@@ -89,6 +89,7 @@ class UserOutputSchema(UserInputSchema):
     is_superuser: bool
     is_staff: bool
     has_password_set: bool
+    created_at: Optional[datetime.datetime]
 
     class Config:
         orm_mode = True

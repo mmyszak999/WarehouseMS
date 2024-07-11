@@ -58,6 +58,7 @@ class SectionBaseOutputSchema(SectionBaseSchema):
     weight_to_reserve: Decimal
     available_racks: int
     occupied_racks: int
+    created_at: Optional[datetime]
 
     class Config:
         orm_mode = True

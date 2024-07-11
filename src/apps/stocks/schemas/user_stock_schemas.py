@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -28,6 +29,7 @@ class UserStockOutputSchema(BaseModel):
     from_rack_level_slot: Optional[RackLevelSlotBaseOutputSchema]
     to_rack_level_slot: Optional[RackLevelSlotBaseOutputSchema]
     issue: Optional[IssueBasicOutputSchema]
+    moved_at: datetime
 
     class Config:
         orm_mode = True

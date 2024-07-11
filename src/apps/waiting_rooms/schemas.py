@@ -68,6 +68,7 @@ class WaitingRoomBasicOutputSchema(WaitingRoomBaseSchema):
     current_stock_weight: Decimal
     available_slots: int
     available_stock_weight: Decimal
+    created_at: Optional[datetime]
 
     class Config:
         orm_mode = True

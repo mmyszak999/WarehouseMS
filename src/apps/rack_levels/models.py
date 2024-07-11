@@ -1,3 +1,5 @@
+import datetime as dt
+
 from sqlalchemy import (
     DECIMAL,
     Boolean,
@@ -55,3 +57,4 @@ class RackLevel(Base):
     )
     rack = relationship("Rack", back_populates="rack_levels", lazy="joined")
     rack_level_slots = relationship("RackLevelSlot", back_populates="rack_level", lazy="selectin")
+    created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

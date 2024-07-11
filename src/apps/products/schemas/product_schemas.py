@@ -1,3 +1,4 @@
+import datetime
 from decimal import Decimal
 from typing import Optional
 
@@ -39,6 +40,7 @@ class ProductUpdateSchema(BaseModel):
 class ProductBasicOutputSchema(ProductBaseSchema):
     id: str
     categories: list[CategoryOutputSchema]
+    created_at: Optional[datetime.datetime]
 
     class Config:
         orm_mode = True

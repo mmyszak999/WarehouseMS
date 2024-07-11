@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime as dt
 
 from sqlalchemy import (
     DECIMAL,
@@ -10,9 +10,10 @@ from sqlalchemy import (
     String,
     Table,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import DateTime
+from sqlalchemy.sql import func
 
 from src.core.utils.time import get_current_time
 from src.core.utils.utils import generate_uuid
@@ -42,7 +43,7 @@ class UserStock(Base):
         lazy="joined",
     )
 
-    moved_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    moved_at = Column(DateTime, default=dt.datetime.now, onupdate=dt.datetime.now)
 
     from_waiting_room_id = Column(
         String, ForeignKey("waiting_room.id", ondelete="SET NULL"), nullable=True
@@ -121,3 +122,4 @@ class Stock(Base):
         ForeignKey("rack_level_slot.id", ondelete="SET NULL", onupdate="cascade"),
         nullable=True,
     )
+    created_at = Column(DateTime, default=dt.datetime.now, nullable=True)
