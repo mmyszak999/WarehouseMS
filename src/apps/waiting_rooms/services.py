@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.apps.rack_level_slots.services import manage_old_rack_level_slot_state
 from src.apps.stocks.models import Stock
 from src.apps.stocks.schemas.stock_schemas import StockWaitingRoomInputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
@@ -204,6 +205,22 @@ async def delete_single_waiting_room(session: AsyncSession, waiting_room_id: str
 
     return result
 
+async def manage_old_waiting_room_state(
+    session: AsyncSession,
+    stock_object: Stock,
+    old_waiting_room_object: WaitingRoom,
+    old_waiting_room_id: str
+) -> None:
+    old_waiting_room_object = await manage_waiting_room_state(
+            old_waiting_room_object,
+            stocks_involved=True,
+            adding_stock_to_waiting_room=False,
+            stock_weight=stock_object.weight,
+        )
+    session.add(old_waiting_room_object)
+    old_waiting_room_id = old_waiting_room_object.id
+    stock_object.waiting_room_id = None
+
 
 async def add_single_stock_to_waiting_room(
     session: AsyncSession,
@@ -241,26 +258,16 @@ async def add_single_stock_to_waiting_room(
     _old_rack_level_slot_id = None 
     
     if old_waiting_room_object := stock_object.waiting_room:
-        old_waiting_room_object = await manage_waiting_room_state(
-            old_waiting_room_object,
-            stocks_involved=True,
-            adding_stock_to_waiting_room=False,
-            stock_object=stock_object.weight,
+        await manage_old_waiting_room_state(
+            session, stock_object, old_waiting_room_object,
+            old_waiting_room_id=_old_waiting_room_id
         )
-        session.add(old_waiting_room_object)
-        _old_waiting_room_id = old_waiting_room_object.id
-        stock_object.waiting_room_id = None
         
     if old_rack_level_slot_object := stock_object.rack_level_slot:
-        old_rack_level_slot_object = await manage_resources_state_when_managing_stocks(
-            session,
-            old_rack_level_slot_object,
-            adding_resources=True,
-            stock_weight=stock_object.weight
+        await manage_old_rack_level_slot_state(
+            session, stock_object, old_rack_level_slot_object,
+            old_rack_level_slot_id=_old_rack_level_slot_id
         )
-        
-        _old_rack_level_slot_id = old_rack_level_slot_object.id
-        stock_object.rack_level_slot_id = None
         
     await create_user_stock_object(
             session,

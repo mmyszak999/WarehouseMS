@@ -20,7 +20,7 @@ from src.apps.rack_levels.schemas import (
     RackLevelOutputSchema,
     RackLevelUpdateSchema,
 )
-from src.apps.rack_levels.services import manage_rack_level_state
+from src.apps.stocks.models import Stock
 from src.core.exceptions import (
     AlreadyExists,
     CantActivateRackLevelSlotException,
@@ -159,6 +159,7 @@ async def update_single_rack_level_slot(
 async def manage_single_rack_level_slot_state(
     session: AsyncSession, rack_level_slot_id: str, activate_slot: bool = True
 ) -> dict[str, str]:
+    from src.apps.rack_levels.services import manage_rack_level_state
     if not (
         rack_level_slot_object := await if_exists(
             RackLevelSlot, "id", rack_level_slot_id, session
@@ -287,3 +288,20 @@ async def manage_rack_level_slots_when_changing_rack_level_max_slots(
                 delete(RackLevelSlot).filter(RackLevelSlot.id == slot.id)
             )
         return
+
+async def manage_old_rack_level_slot_state(
+    session: AsyncSession,
+    stock_object: Stock,
+    old_rack_level_slot_object: RackLevelSlot,
+    old_rack_level_slot_id: str
+) -> None:
+    from src.apps.stocks.services.stock_services import manage_resources_state_when_managing_stocks
+    old_rack_level_slot_object = await manage_resources_state_when_managing_stocks(
+            session,
+            old_rack_level_slot_object,
+            adding_resources=True,
+            stock_weight=stock_object.weight
+        )
+        
+    old_rack_level_slot_id = old_rack_level_slot_object.id
+    stock_object.rack_level_slot_id = None

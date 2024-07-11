@@ -103,3 +103,17 @@ class StockWaitingRoomInputSchema(StockIssueInputSchema):
 
     class Config:
         orm_mode = True
+
+
+class StockRackLevelInputSchema(StockIssueInputSchema):
+    pass
+
+    class Config:
+        orm_mode = True
+
+
+class StockRackLevelSlotInputSchema(StockIssueInputSchema):
+    pass
+
+    class Config:
+        orm_mode = True

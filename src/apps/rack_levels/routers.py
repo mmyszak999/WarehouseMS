@@ -2,6 +2,7 @@ from typing import Union
 
 from fastapi import Depends, Request, Response, status
 from fastapi.routing import APIRouter
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.rack_levels.schemas import (
@@ -10,17 +11,19 @@ from src.apps.rack_levels.schemas import (
     RackLevelOutputSchema,
     RackLevelUpdateSchema,
 )
+from src.apps.stocks.schemas.stock_schemas import StockRackLevelInputSchema
 from src.apps.rack_levels.services import (
     create_rack_level,
     delete_single_rack_level,
     get_all_rack_levels,
     get_single_rack_level,
     update_single_rack_level,
+    add_single_stock_to_rack_level
 )
 from src.apps.users.models import User
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
-from src.core.permissions import check_if_staff
+from src.core.permissions import check_if_staff, check_if_staff_or_has_permission
 from src.dependencies.get_db import get_db
 from src.dependencies.user import authenticate_user
 
@@ -104,3 +107,20 @@ async def delete_rack_level(
     await check_if_staff(request_user)
     await delete_single_rack_level(session, rack_level_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@rack_level_router.patch(
+    "/{rack_level_id}/add-stock",
+    status_code=status.HTTP_200_OK,
+)
+async def add_stock_to_rack_level(
+    rack_level_id: str,
+    stock_schema: StockRackLevelInputSchema,
+    session: AsyncSession = Depends(get_db),
+    request_user: User = Depends(authenticate_user),
+) -> JSONResponse:
+    await check_if_staff_or_has_permission(request_user, "can_move_stocks")
+    result = await add_single_stock_to_rack_level(
+        session, rack_level_id, stock_schema, request_user.id
+    )
+    return JSONResponse(result)

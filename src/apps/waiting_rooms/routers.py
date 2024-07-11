@@ -113,7 +113,7 @@ async def delete_waiting_room(
 
 @waiting_room_router.patch(
     "/{waiting_room_id}/add-stock",
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_200_OK,
 )
 async def add_stock_to_waiting_room(
     waiting_room_id: str,
