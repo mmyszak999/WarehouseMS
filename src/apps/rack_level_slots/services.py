@@ -4,7 +4,6 @@ from typing import Union
 from pydantic import BaseModel
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import make_transient
 
 from src.apps.rack_level_slots.models import RackLevelSlot
 from src.apps.rack_level_slots.schemas import (
@@ -20,6 +19,7 @@ from src.apps.rack_levels.schemas import (
     RackLevelOutputSchema,
     RackLevelUpdateSchema,
 )
+from src.apps.stocks.schemas.stock_schemas import StockRackLevelSlotInputSchema
 from src.apps.stocks.models import Stock
 from src.core.exceptions import (
     AlreadyExists,
@@ -305,3 +305,79 @@ async def manage_old_rack_level_slot_state(
         
     old_rack_level_slot_id = old_rack_level_slot_object.id
     stock_object.rack_level_slot_id = None
+
+async def add_single_stock_to_rack_level_slot(
+    session: AsyncSession,
+    rack_level_slot_id: str,
+    stock_schema: StockRackLevelSlotInputSchema,
+    user_id: str,
+) -> dict[str, str]:
+    from src.apps.stocks.services.user_stock_services import create_user_stock_object
+    from src.apps.stocks.services.stock_services import manage_resources_state_when_managing_stocks
+    from src.apps.waiting_rooms.services import manage_old_waiting_room_state
+
+    if not (
+        rack_level_slot_object := await if_exists(
+            RackLevelSlot, "id", rack_level_slot_id, session
+        )
+    ):
+        raise DoesNotExist(RackLevelSlot.__name__, "id", rack_level_slot_id)
+
+    stock_id = stock_schema.id
+    if not (stock_object := await if_exists(Stock, "id", stock_id, session)):
+        raise DoesNotExist(Stock.__name__, "id", stock_id)
+
+    if stock_object.is_issued:
+        raise CannotMoveIssuedStockException
+
+    if stock_object.rack_level_slot:
+        if stock_object.rack_level_slot.rack_level_id == rack_level_slot_id:
+            raise StockAlreadyInWaitingRoomException
+
+    if not rack_level_slot_object.rack_level.available_slots:
+        raise NoAvailableSlotsInWaitingRoomException
+
+    if rack_level_slot_object.rack_level.available_weight < stock_object.weight:
+        raise NoAvailableWeightInWaitingRoomException
+    
+    _old_waiting_room_id = None
+    _old_rack_level_slot_id = None 
+    _new_rack_level_slot_object = None
+    
+    if old_waiting_room_object := stock_object.waiting_room:
+        await manage_old_waiting_room_state(
+            session,
+            stock_object,
+            old_waiting_room_object,
+            old_waiting_room_id=_old_waiting_room_id
+        )
+        
+    if old_rack_level_slot_object := stock_object.rack_level_slot:
+        await manage_old_rack_level_slot_state(
+            session,
+            stock_object,
+            old_rack_level_slot_object,
+            old_rack_level_slot_id=_old_rack_level_slot_id
+        )
+        
+    _new_rack_level_slot_object = rack_level_slot_object
+    await create_user_stock_object(
+            session,
+            stock_object.id,
+            user_id,
+            from_waiting_room_id=_old_waiting_room_id,
+            to_rack_level_slot_id=_new_rack_level_slot_object.id,
+            from_rack_level_slot_id=_old_rack_level_slot_id
+        )
+    
+    rack_level_slot = await manage_resources_state_when_managing_stocks(
+        session, _new_rack_level_slot_object, stock_object.weight, adding_resources=False
+    )
+    session.add(rack_level_slot)
+    
+    stock_object.rack_level_slot_id = rack_level_slot.id
+    session.add(stock_object)
+    print(stock_object.__dict__)
+    await session.commit()
+
+    return {"message": "Stock was successfully added to the rack level slot! "}

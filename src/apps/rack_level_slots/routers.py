@@ -18,11 +18,13 @@ from src.apps.rack_level_slots.services import (
     get_all_rack_level_slots,
     get_single_rack_level_slot,
     update_single_rack_level_slot,
+    add_single_stock_to_rack_level_slot
 )
+from src.apps.stocks.schemas.stock_schemas import StockRackLevelSlotInputSchema
 from src.apps.users.models import User
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
-from src.core.permissions import check_if_staff
+from src.core.permissions import check_if_staff, check_if_staff_or_has_permission
 from src.dependencies.get_db import get_db
 from src.dependencies.user import authenticate_user
 
@@ -121,4 +123,21 @@ async def deactivate_rack_level_slot(
 ) -> JSONResponse:
     await check_if_staff(request_user)
     result = await deactivate_single_rack_level_slot(session, rack_level_slot_id)
+    return JSONResponse(status_code=status.HTTP_200_OK, content=result)
+
+
+@rack_level_slot_router.patch(
+    "/{rack_level_slot_id}/add-stock",
+    status_code=status.HTTP_200_OK,
+)
+async def add_stock_to_rack_level_slot(
+    rack_level_slot_id: str,
+    stock_schema: StockRackLevelSlotInputSchema,
+    session: AsyncSession = Depends(get_db),
+    request_user: User = Depends(authenticate_user),
+) -> JSONResponse:
+    await check_if_staff_or_has_permission(request_user, "can_move_stocks")
+    result = await add_single_stock_to_rack_level_slot(
+        session, rack_level_slot_id, stock_schema, request_user.id
+    )
     return JSONResponse(status_code=status.HTTP_200_OK, content=result)
