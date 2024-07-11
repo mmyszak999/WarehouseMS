@@ -331,7 +331,7 @@ async def manage_resources_state_when_managing_stocks(
     rack_level_slot_object: RackLevelSlot,
     stock_weight: Decimal,
     adding_resources: bool = True,
-) -> None:
+) -> RackLevelSlot:
     rack_level_object = await manage_rack_level_state(
         rack_level_slot_object.rack_level,
         adding_resources_to_rack_level=adding_resources,
@@ -360,3 +360,5 @@ async def manage_resources_state_when_managing_stocks(
     session.add(section_object)
     print(section_object.__dict__)
     session.add(rack_level_slot_object)
+    
+    return rack_level_slot_object
