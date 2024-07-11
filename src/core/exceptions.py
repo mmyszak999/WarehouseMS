@@ -301,13 +301,14 @@ class RackLevelSlotIsNotEmptyException(ServiceException):
         super().__init__(
             f"The rack level slot cannot be deleted because it is not empty! Reason: {resource} "
         )
-        
-        
+
+
 class TooSmallInactiveSlotsQuantityException(ServiceException):
     def __init__(self, inactive_slots: int) -> None:
         super().__init__(
             f"Cannot reduce the amount of the rack level slots - too small amount of inactive slots ({inactive_slots}) !"
         )
+
 
 class ExistingGapBetweenInactiveSlotsToDeleteException(ServiceException):
     def __init__(self, slots_amount: int) -> None:
@@ -316,6 +317,7 @@ class ExistingGapBetweenInactiveSlotsToDeleteException(ServiceException):
             f"There is a gap between these {slots_amount} slots being removed. "
             f"Make the last {slots_amount} empty and try again!"
         )
+
 
 class NoAvailableRackLevelSlotException(ServiceException):
     def __init__(
@@ -326,6 +328,7 @@ class NoAvailableRackLevelSlotException(ServiceException):
             "for the new stock (due to lack of space/weight limit)! "
             f"Stock data: product_name: {product_name}, count: {product_count}, weight: {stock_weight} "
         )
+
 
 class AmbiguousStockStoragePlaceDuringReceptionException(ServiceException):
     def __init__(self) -> None:

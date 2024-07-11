@@ -1,9 +1,8 @@
 from typing import Union
 
 from fastapi import Depends, Request, Response, status
-from fastapi.routing import APIRouter
 from fastapi.responses import JSONResponse
-
+from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.rack_level_slots.schemas import (
@@ -13,9 +12,9 @@ from src.apps.rack_level_slots.schemas import (
     RackLevelSlotUpdateSchema,
 )
 from src.apps.rack_level_slots.services import (
+    activate_single_rack_level_slot,
     create_rack_level_slot,
     deactivate_single_rack_level_slot,
-    activate_single_rack_level_slot,
     get_all_rack_level_slots,
     get_single_rack_level_slot,
     update_single_rack_level_slot,
@@ -92,7 +91,9 @@ async def update_rack_level_slot(
     request_user: User = Depends(authenticate_user),
 ) -> RackLevelSlotOutputSchema:
     await check_if_staff(request_user)
-    return await update_single_rack_level_slot(session, rack_level_slot_input, rack_level_slot_id)
+    return await update_single_rack_level_slot(
+        session, rack_level_slot_input, rack_level_slot_id
+    )
 
 
 @rack_level_slot_router.patch(
@@ -106,10 +107,7 @@ async def activate_rack_level_slot(
 ) -> JSONResponse:
     await check_if_staff(request_user)
     result = await activate_single_rack_level_slot(session, rack_level_slot_id)
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=result
-    )
+    return JSONResponse(status_code=status.HTTP_200_OK, content=result)
 
 
 @rack_level_slot_router.patch(
@@ -123,8 +121,4 @@ async def deactivate_rack_level_slot(
 ) -> JSONResponse:
     await check_if_staff(request_user)
     result = await deactivate_single_rack_level_slot(session, rack_level_slot_id)
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content=result
-    )
-    
+    return JSONResponse(status_code=status.HTTP_200_OK, content=result)

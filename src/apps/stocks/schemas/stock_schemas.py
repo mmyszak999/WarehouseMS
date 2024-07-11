@@ -46,8 +46,8 @@ class StockWaitingRoomBasicOutputSchema(BaseModel):
 
     class Config:
         orm_mode = True
-        
-        
+
+
 class StockRackLevelSlotBasicOutputSchema(BaseModel):
     rack_level_slot_number: int
     description: Optional[str]
@@ -65,6 +65,7 @@ class StockWithoutWaitingRoomOutputSchema(StockBaseSchema):
     class Config:
         orm_mode = True
 
+
 class StockWithoutRackLevelSlotOutputSchema(StockWithoutWaitingRoomOutputSchema):
     pass
 
@@ -74,7 +75,7 @@ class StockWithoutRackLevelSlotOutputSchema(StockWithoutWaitingRoomOutputSchema)
 
 class StockBasicOutputSchema(StockWithoutWaitingRoomOutputSchema):
     waiting_room: Optional[StockWaitingRoomBasicOutputSchema]
-    rack_level_slot: Optional[StockRackLevelSlotBasicOutputSchema] 
+    rack_level_slot: Optional[StockRackLevelSlotBasicOutputSchema]
     created_at: Optional[datetime]
 
     class Config:

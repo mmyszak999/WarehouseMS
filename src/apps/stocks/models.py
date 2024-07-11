@@ -10,10 +10,10 @@ from sqlalchemy import (
     String,
     Table,
 )
-from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
+from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql.sqltypes import DateTime
 from sqlalchemy.sql import func
+from sqlalchemy.sql.sqltypes import DateTime
 
 from src.core.utils.time import get_current_time
 from src.core.utils.utils import generate_uuid
@@ -63,16 +63,20 @@ class UserStock(Base):
         String, ForeignKey("issue.id", ondelete="SET NULL"), nullable=True
     )
     issue = relationship("Issue", foreign_keys=[issue_id], lazy="joined")
-    
+
     to_rack_level_slot_id = Column(
         String, ForeignKey("rack_level_slot.id", ondelete="SET NULL"), nullable=True
     )
-    to_rack_level_slot = relationship("RackLevelSlot", foreign_keys=[to_rack_level_slot_id], lazy="joined")
-    
+    to_rack_level_slot = relationship(
+        "RackLevelSlot", foreign_keys=[to_rack_level_slot_id], lazy="joined"
+    )
+
     from_rack_level_slot_id = Column(
         String, ForeignKey("rack_level_slot.id", ondelete="SET NULL"), nullable=True
     )
-    from_rack_level_slot = relationship("RackLevelSlot", foreign_keys=[from_rack_level_slot_id], lazy="joined")
+    from_rack_level_slot = relationship(
+        "RackLevelSlot", foreign_keys=[from_rack_level_slot_id], lazy="joined"
+    )
 
 
 class Stock(Base):

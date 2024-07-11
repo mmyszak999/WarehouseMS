@@ -25,9 +25,9 @@ from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
     IsOccupied,
+    NotEnoughRackLevelResourcesException,
     NotEnoughRackResourcesException,
     NotEnoughSectionResourcesException,
-    NotEnoughRackLevelResourcesException,
     RackLevelIsNotEmptyException,
     ServiceException,
     TooLittleRackLevelSlotsAmountException,
@@ -43,9 +43,9 @@ from src.core.utils.orm import if_exists
 async def create_rack_level(
     session: AsyncSession, rack_level_input: RackLevelInputSchema
 ) -> RackLevelBaseOutputSchema:
-    from src.apps.rack_level_slots.services import create_rack_level_slot
     from src.apps.rack_level_slots.schemas import RackLevelSlotInputSchema
-    
+    from src.apps.rack_level_slots.services import create_rack_level_slot
+
     rack_level_data = rack_level_input.dict()
     rack_id = rack_level_data.get("rack_id")
     if not (rack_object := await if_exists(Rack, "id", rack_id, session)):
@@ -97,18 +97,17 @@ async def create_rack_level(
     )
     session.add(rack)
     await session.flush()
-    
-    for slot_number in range(1, rack_level_data.get("max_slots")+1):
+
+    for slot_number in range(1, rack_level_data.get("max_slots") + 1):
         input_schema = RackLevelSlotInputSchema(
             rack_level_slot_number=slot_number,
             description=f"slot #{slot_number}",
-            rack_level_id=new_rack_level.id
+            rack_level_id=new_rack_level.id,
         )
         await create_rack_level_slot(
-            session, rack_level_slot_input=input_schema,
-            creating_rack_level=True
-            )
-        
+            session, rack_level_slot_input=input_schema, creating_rack_level=True
+        )
+
     await session.commit()
     await session.refresh(rack)
     await session.refresh(new_rack_level)
@@ -119,7 +118,7 @@ async def create_rack_level(
 async def get_single_rack_level(
     session: AsyncSession,
     rack_level_id: str,
-    output_schema: BaseModel=RackLevelOutputSchema
+    output_schema: BaseModel = RackLevelOutputSchema,
 ) -> Union[RackLevelBaseOutputSchema, RackLevelOutputSchema]:
     if not (
         rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)
@@ -155,7 +154,7 @@ async def manage_rack_level_state(
     weight_involved: bool = None,
     slots_involved: bool = None,
     stock_weight: Decimal = None,
-    manage_active_slots: bool = None
+    manage_active_slots: bool = None,
 ) -> RackLevel:
     if not (isinstance(rack_level_object, RackLevel)):
         raise ServiceException("Rack level object was not provided! ")
@@ -171,7 +170,7 @@ async def manage_rack_level_state(
     if slots_involved:
         rack_level_object.available_slots -= multiplier
         rack_level_object.occupied_slots += multiplier
-    
+
     if manage_active_slots:
         rack_level_object.active_slots -= multiplier
         rack_level_object.inactive_slots += multiplier
@@ -182,7 +181,11 @@ async def manage_rack_level_state(
         rack_level_object.available_weight = new_available_weight
 
     if max_slots is not None:
-        new_available_slots = max_slots - rack_level_object.occupied_slots - rack_level_object.inactive_slots
+        new_available_slots = (
+            max_slots
+            - rack_level_object.occupied_slots
+            - rack_level_object.inactive_slots
+        )
         rack_level_object.available_slots = new_available_slots
         rack_level_object.active_slots = (
             new_available_slots + rack_level_object.occupied_slots
@@ -193,8 +196,10 @@ async def manage_rack_level_state(
 async def update_single_rack_level(
     session: AsyncSession, rack_level_input: RackLevelUpdateSchema, rack_level_id: str
 ) -> RackLevelOutputSchema:
-    from src.apps.rack_level_slots.services import manage_rack_level_slots_when_changing_rack_level_max_slots
-    
+    from src.apps.rack_level_slots.services import (
+        manage_rack_level_slots_when_changing_rack_level_max_slots,
+    )
+
     if not (
         rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)
     ):
@@ -234,24 +239,24 @@ async def update_single_rack_level(
             raise TooLittleRackLevelSlotsAmountException(
                 new_max_slots, rack_level_object.occupied_slots
             )
-        
+
         max_slots_difference = new_max_slots - rack_level_object.max_slots
         if (new_max_slots < rack_level_object.max_slots) and (
             (rack_level_object.available_slots - max_slots_difference) < 0
         ):
             raise NotEnoughRackLevelResourcesException(
-                resource="slots", reason="new max slots amount too small in relation to the available slots amount"
+                resource="slots",
+                reason="new max slots amount too small in relation to the available slots amount",
             )
-        
+
         creating_slots = False if max_slots_difference <= 0 else True
         await manage_rack_level_slots_when_changing_rack_level_max_slots(
             session,
             rack_level_object,
             max_slots_difference,
-            creating_slots=creating_slots
+            creating_slots=creating_slots,
         )
 
-    
     rack_level_object = await manage_rack_level_state(
         rack_level_object, new_max_weight, new_max_slots
     )

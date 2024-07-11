@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.issues.models import Issue
 from src.apps.products.models import Product
+from src.apps.rack_level_slots.models import RackLevelSlot
 from src.apps.stocks.models import Stock, UserStock
 from src.apps.stocks.schemas.user_stock_schemas import (
     UserStockInputSchema,
@@ -13,7 +14,6 @@ from src.apps.stocks.schemas.user_stock_schemas import (
 )
 from src.apps.users.models import User
 from src.apps.waiting_rooms.models import WaitingRoom
-from src.apps.rack_level_slots.models import RackLevelSlot
 from src.apps.waiting_rooms.services import manage_waiting_room_state
 from src.core.exceptions import (
     AlreadyExists,
@@ -78,7 +78,7 @@ async def create_user_stock_object(
             )
         ):
             raise DoesNotExist(RackLevelSlot.__name__, "id", to_rack_level_slot_id)
-    
+
     if issue_id is not None:
         if not (issue_object := await if_exists(Issue, "id", issue_id, session)):
             raise DoesNotExist(Issue.__name__, "id", issue_id)

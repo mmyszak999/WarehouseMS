@@ -6,6 +6,7 @@ from src.apps.emails.routers import email_router
 from src.apps.issues.routers import issue_router
 from src.apps.products.routers.category_routers import category_router
 from src.apps.products.routers.product_routers import product_router
+from src.apps.rack_level_slots.routers import rack_level_slot_router
 from src.apps.rack_levels.routers import rack_level_router
 from src.apps.racks.routers import rack_router
 from src.apps.receptions.routers import reception_router
@@ -15,17 +16,20 @@ from src.apps.stocks.routers.user_stock_routers import user_stock_router
 from src.apps.users.routers import user_router
 from src.apps.waiting_rooms.routers import waiting_room_router
 from src.apps.warehouse.routers import warehouse_router
-from src.apps.rack_level_slots.routers import rack_level_slot_router
 from src.core.exceptions import (
     AccountAlreadyActivatedException,
     AccountAlreadyDeactivatedException,
     AccountNotActivatedException,
     AlreadyExists,
+    AmbiguousStockStoragePlaceDuringReceptionException,
     AuthenticationException,
     AuthorizationException,
     CannotMoveIssuedStockException,
     CannotRetrieveIssuedStockException,
+    CantActivateRackLevelSlotException,
+    CantDeactivateRackLevelSlotException,
     DoesNotExist,
+    ExistingGapBetweenInactiveSlotsToDeleteException,
     IsOccupied,
     LegacyProductException,
     MissingIssueDataException,
@@ -34,6 +38,7 @@ from src.core.exceptions import (
     NoAvailableSlotsInWaitingRoomException,
     NoAvailableWaitingRoomsException,
     NoAvailableWeightInWaitingRoomException,
+    NotEnoughRackLevelResourcesException,
     NotEnoughRackResourcesException,
     NotEnoughSectionResourcesException,
     NotEnoughWarehouseResourcesException,
@@ -42,6 +47,7 @@ from src.core.exceptions import (
     ProductIsAlreadyLegacyException,
     RackIsNotEmptyException,
     RackLevelIsNotEmptyException,
+    RackLevelSlotIsNotEmptyException,
     SectionIsNotEmptyException,
     ServiceException,
     StockAlreadyInWaitingRoomException,
@@ -53,6 +59,7 @@ from src.core.exceptions import (
     TooLittleWaitingRoomSpaceException,
     TooLittleWaitingRoomWeightException,
     TooLittleWeightAmountException,
+    TooSmallInactiveSlotsQuantityException,
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
     WaitingRoomIsNotEmptyException,
@@ -60,13 +67,6 @@ from src.core.exceptions import (
     WarehouseDoesNotExistException,
     WarehouseIsNotEmptyException,
     WeightLimitExceededException,
-    NotEnoughRackLevelResourcesException,
-    CantActivateRackLevelSlotException,
-    CantDeactivateRackLevelSlotException,
-    RackLevelSlotIsNotEmptyException,
-    TooSmallInactiveSlotsQuantityException,
-    ExistingGapBetweenInactiveSlotsToDeleteException,
-    AmbiguousStockStoragePlaceDuringReceptionException
 )
 
 app = FastAPI(
@@ -496,6 +496,7 @@ async def not_enough_rack_level_resources_exception(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
 
+
 @app.exception_handler(CantActivateRackLevelSlotException)
 async def cant_activate_rack_level_slot_exception(
     request: Request, exception: CantActivateRackLevelSlotException
@@ -503,6 +504,7 @@ async def cant_activate_rack_level_slot_exception(
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
+
 
 @app.exception_handler(CantDeactivateRackLevelSlotException)
 async def cant_deactivate_rack_level_slot_exception(
@@ -529,6 +531,7 @@ async def too_small_inactive_slots_quantity_exception(
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
+
 
 @app.exception_handler(ExistingGapBetweenInactiveSlotsToDeleteException)
 async def existing_gap_between_inactive_slots_to_delete_exception(

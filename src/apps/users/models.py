@@ -2,8 +2,8 @@ import datetime as dt
 
 from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.sql.sqltypes import DateTime
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.sqltypes import DateTime
 
 from src.apps.issues.models import Issue
 from src.core.utils.utils import generate_uuid

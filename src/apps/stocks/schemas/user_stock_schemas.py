@@ -1,13 +1,13 @@
-from typing import Optional
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel
 
 from src.apps.issues.schemas import IssueBasicOutputSchema
+from src.apps.rack_level_slots.schemas import RackLevelSlotBaseOutputSchema
 from src.apps.stocks.schemas.stock_schemas import StockBasicOutputSchema
 from src.apps.users.schemas import UserInfoOutputSchema
 from src.apps.waiting_rooms.schemas import WaitingRoomBasicOutputSchema
-from src.apps.rack_level_slots.schemas import RackLevelSlotBaseOutputSchema
 
 
 class UserStockInputSchema(BaseModel):
