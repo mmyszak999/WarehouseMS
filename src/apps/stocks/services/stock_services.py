@@ -186,7 +186,8 @@ async def create_stocks(
                 .filter(
                     RackLevelSlot.stock == None,
                     RackLevelSlot.is_active == True,
-                    RackLevelSlot.rack_level_id == rack_level_id)
+                    RackLevelSlot.rack_level_id == rack_level_id,
+                )
                 .order_by(RackLevelSlot.rack_level_slot_number.asc())
                 .limit(1)
             )
@@ -356,5 +357,5 @@ async def manage_resources_state_when_managing_stocks(
     )
     session.add(section_object)
     session.add(rack_level_slot_object)
-    
+
     return rack_level_slot_object

@@ -35,8 +35,10 @@ from src.core.exceptions import (
     MissingIssueDataException,
     MissingProductDataException,
     MissingReceptionDataException,
+    NoAvailableSlotsInRackLevelException,
     NoAvailableSlotsInWaitingRoomException,
     NoAvailableWaitingRoomsException,
+    NoAvailableWeightInRackLevelException,
     NoAvailableWeightInWaitingRoomException,
     NotEnoughRackLevelResourcesException,
     NotEnoughRackResourcesException,
@@ -50,6 +52,7 @@ from src.core.exceptions import (
     RackLevelSlotIsNotEmptyException,
     SectionIsNotEmptyException,
     ServiceException,
+    StockAlreadyInRackLevelException,
     StockAlreadyInWaitingRoomException,
     TooLittleRackLevelsAmountException,
     TooLittleRackLevelSlotsAmountException,
@@ -67,9 +70,6 @@ from src.core.exceptions import (
     WarehouseDoesNotExistException,
     WarehouseIsNotEmptyException,
     WeightLimitExceededException,
-    StockAlreadyInRackLevelException,
-    NoAvailableSlotsInRackLevelException,
-    NoAvailableWeightInRackLevelException
 )
 
 app = FastAPI(
@@ -552,6 +552,7 @@ async def ambiguous_stock_storage_place_during_reception_exception(
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
+
 
 @app.exception_handler(StockAlreadyInRackLevelException)
 async def stock_already_in_rack_level_exception(

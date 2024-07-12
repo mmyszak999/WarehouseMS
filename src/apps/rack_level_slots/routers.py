@@ -13,12 +13,12 @@ from src.apps.rack_level_slots.schemas import (
 )
 from src.apps.rack_level_slots.services import (
     activate_single_rack_level_slot,
+    add_single_stock_to_rack_level_slot,
     create_rack_level_slot,
     deactivate_single_rack_level_slot,
     get_all_rack_level_slots,
     get_single_rack_level_slot,
     update_single_rack_level_slot,
-    add_single_stock_to_rack_level_slot
 )
 from src.apps.stocks.schemas.stock_schemas import StockRackLevelSlotInputSchema
 from src.apps.users.models import User

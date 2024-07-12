@@ -1,8 +1,8 @@
 from typing import Union
 
 from fastapi import Depends, Request, Response, status
-from fastapi.routing import APIRouter
 from fastapi.responses import JSONResponse
+from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.rack_levels.schemas import (
@@ -11,15 +11,15 @@ from src.apps.rack_levels.schemas import (
     RackLevelOutputSchema,
     RackLevelUpdateSchema,
 )
-from src.apps.stocks.schemas.stock_schemas import StockRackLevelInputSchema
 from src.apps.rack_levels.services import (
+    add_single_stock_to_rack_level,
     create_rack_level,
     delete_single_rack_level,
     get_all_rack_levels,
     get_single_rack_level,
     update_single_rack_level,
-    add_single_stock_to_rack_level
 )
+from src.apps.stocks.schemas.stock_schemas import StockRackLevelInputSchema
 from src.apps.users.models import User
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema

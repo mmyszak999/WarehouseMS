@@ -337,6 +337,7 @@ class AmbiguousStockStoragePlaceDuringReceptionException(ServiceException):
             "Please pick only one! "
         )
 
+
 class StockAlreadyInRackLevelException(ServiceException):
     def __init__(self) -> None:
         super().__init__(f"The requested stock was already placed in this rack level! ")

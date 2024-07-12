@@ -5,9 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.apps.stocks.schemas.stock_schemas import StockRackLevelInputSchema
-from src.apps.stocks.models import Stock
-from src.apps.waiting_rooms.services import manage_old_waiting_room_state
+from src.apps.rack_level_slots.models import RackLevelSlot
 from src.apps.rack_level_slots.services import manage_old_rack_level_slot_state
 from src.apps.rack_levels.models import RackLevel
 from src.apps.rack_levels.schemas import (
@@ -25,23 +23,25 @@ from src.apps.racks.schemas import (
 )
 from src.apps.racks.services import manage_rack_state
 from src.apps.sections.models import Section
-from src.apps.rack_level_slots.models import RackLevelSlot
+from src.apps.stocks.models import Stock
+from src.apps.stocks.schemas.stock_schemas import StockRackLevelInputSchema
+from src.apps.waiting_rooms.services import manage_old_waiting_room_state
 from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
     IsOccupied,
+    NoAvailableRackLevelSlotException,
+    NoAvailableSlotsInRackLevelException,
+    NoAvailableWeightInRackLevelException,
     NotEnoughRackLevelResourcesException,
     NotEnoughRackResourcesException,
     NotEnoughSectionResourcesException,
     RackLevelIsNotEmptyException,
     ServiceException,
+    StockAlreadyInRackLevelException,
     TooLittleRackLevelSlotsAmountException,
     TooLittleWeightAmountException,
     WeightLimitExceededException,
-    NoAvailableRackLevelSlotException,
-    StockAlreadyInRackLevelException,
-    NoAvailableSlotsInRackLevelException,
-    NoAvailableWeightInRackLevelException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -313,19 +313,20 @@ async def delete_single_rack_level(session: AsyncSession, rack_level_id: str):
     await session.commit()
     return result
 
+
 async def add_single_stock_to_rack_level(
     session: AsyncSession,
     rack_level_id: str,
     stock_schema: StockRackLevelInputSchema,
     user_id: str,
 ) -> dict[str, str]:
+    from src.apps.stocks.services.stock_services import (
+        manage_resources_state_when_managing_stocks,
+    )
     from src.apps.stocks.services.user_stock_services import create_user_stock_object
-    from src.apps.stocks.services.stock_services import manage_resources_state_when_managing_stocks
 
     if not (
-        rack_level_object := await if_exists(
-            RackLevel, "id", rack_level_id, session
-        )
+        rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)
     ):
         raise DoesNotExist(RackLevel.__name__, "id", rack_level_id)
 
@@ -345,20 +346,21 @@ async def add_single_stock_to_rack_level(
 
     if rack_level_slot_object.rack_level.available_weight < stock_object.weight:
         raise NoAvailableWeightInRackLevelException
-    
+
     _old_waiting_room_id = None
-    _old_rack_level_slot_id = None 
+    _old_rack_level_slot_id = None
     _new_rack_level_slot_object = None
-    
+
     statement = (
-                select(RackLevelSlot)
-                .filter(
-                    RackLevelSlot.stock == None,
-                    RackLevelSlot.is_active == True,
-                    RackLevelSlot.rack_level_id == rack_level_id)
-                .order_by(RackLevelSlot.rack_level_slot_number.asc())
-                .limit(1)
-            )
+        select(RackLevelSlot)
+        .filter(
+            RackLevelSlot.stock == None,
+            RackLevelSlot.is_active == True,
+            RackLevelSlot.rack_level_id == rack_level_id,
+        )
+        .order_by(RackLevelSlot.rack_level_slot_number.asc())
+        .limit(1)
+    )
 
     available_rack_level_slot = await session.execute(statement)
     rack_level_slot_object = available_rack_level_slot.scalar()
@@ -367,40 +369,43 @@ async def add_single_stock_to_rack_level(
             stock_object.product.name, stock_object.product_count, stock.weight
         )
     _new_rack_level_slot_object = rack_level_slot_object
-    
+
     if old_waiting_room_object := stock_object.waiting_room:
         old_waiting_room_object = await manage_old_waiting_room_state(
             session,
             stock_object,
             old_waiting_room_object,
-            old_waiting_room_id=_old_waiting_room_id
+            old_waiting_room_id=_old_waiting_room_id,
         )
         _old_waiting_room_id = old_waiting_room_object.id
-        
+
     if old_rack_level_slot_object := stock_object.rack_level_slot:
         old_rack_level_slot_object = await manage_old_rack_level_slot_state(
             session,
             stock_object,
             old_rack_level_slot_object,
-            old_rack_level_slot_id=_old_rack_level_slot_id
+            old_rack_level_slot_id=_old_rack_level_slot_id,
         )
         _old_rack_level_slot_id = old_rack_level_slot_object.id
-        
+
     user_stock = await create_user_stock_object(
-            session,
-            stock_object.id,
-            user_id,
-            from_waiting_room_id=_old_waiting_room_id,
-            to_rack_level_slot_id=_new_rack_level_slot_object.id,
-            from_rack_level_slot_id=_old_rack_level_slot_id
-        )
-    
+        session,
+        stock_object.id,
+        user_id,
+        from_waiting_room_id=_old_waiting_room_id,
+        to_rack_level_slot_id=_new_rack_level_slot_object.id,
+        from_rack_level_slot_id=_old_rack_level_slot_id,
+    )
+
     rack_level_slot = await manage_resources_state_when_managing_stocks(
-        session, _new_rack_level_slot_object, stock_object.weight, adding_resources=False
+        session,
+        _new_rack_level_slot_object,
+        stock_object.weight,
+        adding_resources=False,
     )
     session.add(rack_level_slot)
     session.add(rack_level_object)
-    
+
     stock_object.rack_level_slot_id = rack_level_slot.id
     session.add(stock_object)
     await session.commit()

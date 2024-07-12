@@ -19,8 +19,8 @@ from src.apps.rack_levels.schemas import (
     RackLevelOutputSchema,
     RackLevelUpdateSchema,
 )
-from src.apps.stocks.schemas.stock_schemas import StockRackLevelSlotInputSchema
 from src.apps.stocks.models import Stock
+from src.apps.stocks.schemas.stock_schemas import StockRackLevelSlotInputSchema
 from src.core.exceptions import (
     AlreadyExists,
     CantActivateRackLevelSlotException,
@@ -28,13 +28,13 @@ from src.core.exceptions import (
     DoesNotExist,
     ExistingGapBetweenInactiveSlotsToDeleteException,
     IsOccupied,
+    NoAvailableSlotsInRackLevelException,
+    NoAvailableWeightInRackLevelException,
     NotEnoughRackLevelResourcesException,
     RackLevelSlotIsNotEmptyException,
     ServiceException,
-    TooSmallInactiveSlotsQuantityException,
     StockAlreadyInRackLevelException,
-    NoAvailableSlotsInRackLevelException,
-    NoAvailableWeightInRackLevelException
+    TooSmallInactiveSlotsQuantityException,
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -163,6 +163,7 @@ async def manage_single_rack_level_slot_state(
     session: AsyncSession, rack_level_slot_id: str, activate_slot: bool = True
 ) -> dict[str, str]:
     from src.apps.rack_levels.services import manage_rack_level_state
+
     if not (
         rack_level_slot_object := await if_exists(
             RackLevelSlot, "id", rack_level_slot_id, session
@@ -292,23 +293,28 @@ async def manage_rack_level_slots_when_changing_rack_level_max_slots(
             )
         return
 
+
 async def manage_old_rack_level_slot_state(
     session: AsyncSession,
     stock_object: Stock,
     old_rack_level_slot_object: RackLevelSlot,
-    old_rack_level_slot_id: str
+    old_rack_level_slot_id: str,
 ) -> RackLevel:
-    from src.apps.stocks.services.stock_services import manage_resources_state_when_managing_stocks
+    from src.apps.stocks.services.stock_services import (
+        manage_resources_state_when_managing_stocks,
+    )
+
     old_rack_level_slot_object = await manage_resources_state_when_managing_stocks(
-            session,
-            old_rack_level_slot_object,
-            adding_resources=True,
-            stock_weight=stock_object.weight
-        )
-        
+        session,
+        old_rack_level_slot_object,
+        adding_resources=True,
+        stock_weight=stock_object.weight,
+    )
+
     old_rack_level_slot_id = old_rack_level_slot_object.id
     stock_object.rack_level_slot_id = None
     return old_rack_level_slot_object
+
 
 async def add_single_stock_to_rack_level_slot(
     session: AsyncSession,
@@ -316,8 +322,10 @@ async def add_single_stock_to_rack_level_slot(
     stock_schema: StockRackLevelSlotInputSchema,
     user_id: str,
 ) -> dict[str, str]:
+    from src.apps.stocks.services.stock_services import (
+        manage_resources_state_when_managing_stocks,
+    )
     from src.apps.stocks.services.user_stock_services import create_user_stock_object
-    from src.apps.stocks.services.stock_services import manage_resources_state_when_managing_stocks
     from src.apps.waiting_rooms.services import manage_old_waiting_room_state
 
     if not (
@@ -343,44 +351,47 @@ async def add_single_stock_to_rack_level_slot(
 
     if rack_level_slot_object.rack_level.available_weight < stock_object.weight:
         raise NoAvailableWeightInRackLevelException
-    
+
     _old_waiting_room_id = None
-    _old_rack_level_slot_id = None 
+    _old_rack_level_slot_id = None
     _new_rack_level_slot_object = None
-    
+
     if old_waiting_room_object := stock_object.waiting_room:
         old_waiting_room_object = await manage_old_waiting_room_state(
             session,
             stock_object,
             old_waiting_room_object,
-            old_waiting_room_id=_old_waiting_room_id
+            old_waiting_room_id=_old_waiting_room_id,
         )
         _old_waiting_room_id = old_waiting_room_object.id
-        
+
     if old_rack_level_slot_object := stock_object.rack_level_slot:
         old_rack_level_slot_object = await manage_old_rack_level_slot_state(
             session,
             stock_object,
             old_rack_level_slot_object,
-            old_rack_level_slot_id=_old_rack_level_slot_id
+            old_rack_level_slot_id=_old_rack_level_slot_id,
         )
         _old_rack_level_slot_id = old_rack_level_slot_object.id
-        
+
     _new_rack_level_slot_object = rack_level_slot_object
     await create_user_stock_object(
-            session,
-            stock_object.id,
-            user_id,
-            from_waiting_room_id=_old_waiting_room_id,
-            to_rack_level_slot_id=_new_rack_level_slot_object.id,
-            from_rack_level_slot_id=_old_rack_level_slot_id
-        )
-    
+        session,
+        stock_object.id,
+        user_id,
+        from_waiting_room_id=_old_waiting_room_id,
+        to_rack_level_slot_id=_new_rack_level_slot_object.id,
+        from_rack_level_slot_id=_old_rack_level_slot_id,
+    )
+
     rack_level_slot = await manage_resources_state_when_managing_stocks(
-        session, _new_rack_level_slot_object, stock_object.weight, adding_resources=False
+        session,
+        _new_rack_level_slot_object,
+        stock_object.weight,
+        adding_resources=False,
     )
     session.add(rack_level_slot)
-    
+
     stock_object.rack_level_slot_id = rack_level_slot.id
     session.add(stock_object)
     print(stock_object.__dict__)
