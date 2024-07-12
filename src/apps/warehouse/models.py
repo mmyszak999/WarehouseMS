@@ -1,3 +1,5 @@
+import datetime as dt
+
 from sqlalchemy import (
     DECIMAL,
     Boolean,
@@ -43,7 +45,8 @@ class Warehouse(Base):
         Integer, nullable=False, default=default_available_waiting_rooms
     )
     occupied_waiting_rooms = Column(Integer, nullable=False, default=0)
-    sections = relationship("Section", back_populates="warehouse", lazy="joined")
+    sections = relationship("Section", back_populates="warehouse", lazy="selectin")
     waiting_rooms = relationship(
-        "WaitingRoom", back_populates="warehouse", lazy="joined"
+        "WaitingRoom", back_populates="warehouse", lazy="selectin"
     )
+    created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

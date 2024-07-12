@@ -6,6 +6,7 @@ from src.apps.emails.routers import email_router
 from src.apps.issues.routers import issue_router
 from src.apps.products.routers.category_routers import category_router
 from src.apps.products.routers.product_routers import product_router
+from src.apps.rack_level_slots.routers import rack_level_slot_router
 from src.apps.rack_levels.routers import rack_level_router
 from src.apps.racks.routers import rack_router
 from src.apps.receptions.routers import reception_router
@@ -20,19 +21,26 @@ from src.core.exceptions import (
     AccountAlreadyDeactivatedException,
     AccountNotActivatedException,
     AlreadyExists,
+    AmbiguousStockStoragePlaceDuringReceptionException,
     AuthenticationException,
     AuthorizationException,
     CannotMoveIssuedStockException,
     CannotRetrieveIssuedStockException,
+    CantActivateRackLevelSlotException,
+    CantDeactivateRackLevelSlotException,
     DoesNotExist,
+    ExistingGapBetweenInactiveSlotsToDeleteException,
     IsOccupied,
     LegacyProductException,
     MissingIssueDataException,
     MissingProductDataException,
     MissingReceptionDataException,
+    NoAvailableSlotsInRackLevelException,
     NoAvailableSlotsInWaitingRoomException,
     NoAvailableWaitingRoomsException,
+    NoAvailableWeightInRackLevelException,
     NoAvailableWeightInWaitingRoomException,
+    NotEnoughRackLevelResourcesException,
     NotEnoughRackResourcesException,
     NotEnoughSectionResourcesException,
     NotEnoughWarehouseResourcesException,
@@ -41,8 +49,10 @@ from src.core.exceptions import (
     ProductIsAlreadyLegacyException,
     RackIsNotEmptyException,
     RackLevelIsNotEmptyException,
+    RackLevelSlotIsNotEmptyException,
     SectionIsNotEmptyException,
     ServiceException,
+    StockAlreadyInRackLevelException,
     StockAlreadyInWaitingRoomException,
     TooLittleRackLevelsAmountException,
     TooLittleRackLevelSlotsAmountException,
@@ -52,6 +62,7 @@ from src.core.exceptions import (
     TooLittleWaitingRoomSpaceException,
     TooLittleWaitingRoomWeightException,
     TooLittleWeightAmountException,
+    TooSmallInactiveSlotsQuantityException,
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
     WaitingRoomIsNotEmptyException,
@@ -81,6 +92,7 @@ root_router.include_router(waiting_room_router)
 root_router.include_router(warehouse_router)
 root_router.include_router(section_router)
 root_router.include_router(rack_level_router)
+root_router.include_router(rack_level_slot_router)
 
 app.include_router(root_router)
 
@@ -473,6 +485,96 @@ async def too_little_rack_level_slots_amount_exception(
 @app.exception_handler(RackLevelIsNotEmptyException)
 async def rack_level_is_not_empty_exception(
     request: Request, exception: RackLevelIsNotEmptyException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(NotEnoughRackLevelResourcesException)
+async def not_enough_rack_level_resources_exception(
+    request: Request, exception: NotEnoughRackLevelResourcesException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(CantActivateRackLevelSlotException)
+async def cant_activate_rack_level_slot_exception(
+    request: Request, exception: CantActivateRackLevelSlotException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(CantDeactivateRackLevelSlotException)
+async def cant_deactivate_rack_level_slot_exception(
+    request: Request, exception: CantDeactivateRackLevelSlotException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(RackLevelSlotIsNotEmptyException)
+async def rack_level_slot_is_not_empty_exception(
+    request: Request, exception: RackLevelSlotIsNotEmptyException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(TooSmallInactiveSlotsQuantityException)
+async def too_small_inactive_slots_quantity_exception(
+    request: Request, exception: TooSmallInactiveSlotsQuantityException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(ExistingGapBetweenInactiveSlotsToDeleteException)
+async def existing_gap_between_inactive_slots_to_delete_exception(
+    request: Request, exception: ExistingGapBetweenInactiveSlotsToDeleteException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(AmbiguousStockStoragePlaceDuringReceptionException)
+async def ambiguous_stock_storage_place_during_reception_exception(
+    request: Request, exception: AmbiguousStockStoragePlaceDuringReceptionException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(StockAlreadyInRackLevelException)
+async def stock_already_in_rack_level_exception(
+    request: Request, exception: StockAlreadyInRackLevelException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(NoAvailableSlotsInRackLevelException)
+async def no_available_slots_in_rack_level_exception(
+    request: Request, exception: NoAvailableSlotsInRackLevelException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(NoAvailableWeightInRackLevelException)
+async def no_available_weight_in_rack_level_exception(
+    request: Request, exception: NoAvailableWeightInRackLevelException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}

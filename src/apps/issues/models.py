@@ -1,3 +1,5 @@
+import datetime as dt
+
 from sqlalchemy import (
     DECIMAL,
     Boolean,
@@ -42,3 +44,4 @@ class Issue(Base):
         foreign_keys="UserStock.issue_id",
         lazy="joined",
     )
+    created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

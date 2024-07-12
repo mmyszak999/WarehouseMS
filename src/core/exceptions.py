@@ -279,3 +279,79 @@ class RackLevelIsNotEmptyException(ServiceException):
         super().__init__(
             f"The rack level cannot be deleted because it is not empty! Reason: positive amount of {resource} "
         )
+
+
+class NotEnoughRackLevelResourcesException(ServiceException):
+    def __init__(self, resource: str, reason: str) -> None:
+        super().__init__(f"The rack level can have no more {resource} - {reason} !")
+
+
+class CantDeactivateRackLevelSlotException(ServiceException):
+    def __init__(self, reason: str) -> None:
+        super().__init__(f"The rack level slot cannot be  deactivated - {reason} !")
+
+
+class CantActivateRackLevelSlotException(ServiceException):
+    def __init__(self, reason: str) -> None:
+        super().__init__(f"The rack level slot cannot be activated - {reason} !")
+
+
+class RackLevelSlotIsNotEmptyException(ServiceException):
+    def __init__(self, resource: str) -> None:
+        super().__init__(
+            f"The rack level slot cannot be deleted because it is not empty! Reason: {resource} "
+        )
+
+
+class TooSmallInactiveSlotsQuantityException(ServiceException):
+    def __init__(self, inactive_slots: int) -> None:
+        super().__init__(
+            f"Cannot reduce the amount of the rack level slots - too small amount of inactive slots ({inactive_slots}) !"
+        )
+
+
+class ExistingGapBetweenInactiveSlotsToDeleteException(ServiceException):
+    def __init__(self, slots_amount: int) -> None:
+        super().__init__(
+            f"Requested to reduce the rack level slots amount by {slots_amount}. "
+            f"There is a gap between these {slots_amount} slots being removed. "
+            f"Make the last {slots_amount} empty and try again!"
+        )
+
+
+class NoAvailableRackLevelSlotException(ServiceException):
+    def __init__(
+        self, product_name: Decimal, product_count: int, stock_weight: Decimal
+    ) -> None:
+        super().__init__(
+            "The stock can't be recepted because there is no available rack level slot in the requested rack level "
+            "for the new stock (due to lack of space/weight limit)! "
+            f"Stock data: product_name: {product_name}, count: {product_count}, weight: {stock_weight} "
+        )
+
+
+class AmbiguousStockStoragePlaceDuringReceptionException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            "Stock cannot be placed on the waiting room and the rack level slot simultaneously! "
+            "Please pick only one! "
+        )
+
+
+class StockAlreadyInRackLevelException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(f"The requested stock was already placed in this rack level! ")
+
+
+class NoAvailableSlotsInRackLevelException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"This rack level has no more available slots to store the stocks! "
+        )
+
+
+class NoAvailableWeightInRackLevelException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"This rack level has no more available weight to store the stocks! "
+        )

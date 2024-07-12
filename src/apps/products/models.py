@@ -1,3 +1,5 @@
+import datetime as dt
+
 from sqlalchemy import (
     DECIMAL,
     Boolean,
@@ -48,6 +50,7 @@ class Category(Base):
         secondary=category_product_association_table,
         back_populates="categories",
     )
+    created_at = Column(DateTime, default=dt.datetime.now, nullable=True)
 
 
 class Product(Base):
@@ -72,4 +75,5 @@ class Product(Base):
         back_populates="products",
         lazy="joined",
     )
-    stocks = relationship("Stock", back_populates="product", lazy="joined")
+    stocks = relationship("Stock", back_populates="product", lazy="selectin")
+    created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

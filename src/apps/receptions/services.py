@@ -58,25 +58,45 @@ async def base_create_reception(
         product.get("waiting_room_id", None) for product in products_data
     ]
 
+    rack_level_slots_ids = [
+        product.get("rack_level_slot_id", None) for product in products_data
+    ]
+
+    rack_level_ids = [product.get("rack_level_id", None) for product in products_data]
+
     new_reception = Reception(
         user_id=user_id, description=reception_input.get("description")
     )
     session.add(new_reception)
     await session.flush()
-    return products, product_counts, new_reception, waiting_rooms_ids
+    return (
+        products,
+        product_counts,
+        new_reception,
+        waiting_rooms_ids,
+        rack_level_slots_ids,
+        rack_level_ids,
+    )
 
 
 async def create_reception(
     session: AsyncSession, reception_input: ReceptionInputSchema, user_id: str
 ) -> ReceptionOutputSchema:
 
-    products, product_counts, new_reception, waiting_room_ids = (
-        await base_create_reception(session, user_id, reception_input)
-    )
+    (
+        products,
+        product_counts,
+        new_reception,
+        waiting_room_ids,
+        rack_level_slots_ids,
+        rack_level_ids,
+    ) = await base_create_reception(session, user_id, reception_input)
     await create_stocks(
         session,
         user_id,
         waiting_room_ids,
+        rack_level_slots_ids,
+        rack_level_ids,
         products,
         product_counts,
         new_reception.id,

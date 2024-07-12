@@ -1,6 +1,9 @@
+import datetime as dt
+
 from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql.sqltypes import DateTime
 
 from src.apps.issues.models import Issue
 from src.core.utils.utils import generate_uuid
@@ -30,11 +33,12 @@ class User(Base):
     can_move_stocks = Column(Boolean, nullable=False, server_default="false")
     can_recept_stocks = Column(Boolean, nullable=False, server_default="false")
     can_issue_stocks = Column(Boolean, nullable=False, server_default="false")
-    issues = relationship("Issue", back_populates="user")
-    receptions = relationship("Reception", back_populates="user")
+    issues = relationship("Issue", back_populates="user", lazy="raise")
+    receptions = relationship("Reception", back_populates="user", lazy="raise")
     stock_user_history = relationship(
         "UserStock",
         back_populates="user",
         foreign_keys="UserStock.user_id",
-        lazy="joined",
+        lazy="selectin",
     )
+    created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

@@ -1,3 +1,5 @@
+import datetime as dt
+
 from sqlalchemy import (
     DECIMAL,
     Boolean,
@@ -45,6 +47,10 @@ class RackLevel(Base):
         Integer, nullable=False, default=default_available_rack_level_slots
     )
     occupied_slots = Column(Integer, nullable=False, default=0)
+    active_slots = Column(
+        Integer, nullable=False, default=default_available_rack_level_slots
+    )
+    inactive_slots = Column(Integer, nullable=False, default=0)
 
     rack_id = Column(
         String,
@@ -52,3 +58,7 @@ class RackLevel(Base):
         nullable=False,
     )
     rack = relationship("Rack", back_populates="rack_levels", lazy="joined")
+    rack_level_slots = relationship(
+        "RackLevelSlot", back_populates="rack_level", lazy="selectin"
+    )
+    created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

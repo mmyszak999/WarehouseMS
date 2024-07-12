@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime as dt
 
 from sqlalchemy import (
     DECIMAL,
@@ -10,8 +10,9 @@ from sqlalchemy import (
     String,
     Table,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import TIMESTAMP, UUID
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 from sqlalchemy.sql.sqltypes import DateTime
 
 from src.core.utils.time import get_current_time
@@ -42,7 +43,7 @@ class UserStock(Base):
         lazy="joined",
     )
 
-    moved_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    moved_at = Column(DateTime, default=dt.datetime.now, onupdate=dt.datetime.now)
 
     from_waiting_room_id = Column(
         String, ForeignKey("waiting_room.id", ondelete="SET NULL"), nullable=True
@@ -63,6 +64,20 @@ class UserStock(Base):
     )
     issue = relationship("Issue", foreign_keys=[issue_id], lazy="joined")
 
+    to_rack_level_slot_id = Column(
+        String, ForeignKey("rack_level_slot.id", ondelete="SET NULL"), nullable=True
+    )
+    to_rack_level_slot = relationship(
+        "RackLevelSlot", foreign_keys=[to_rack_level_slot_id], lazy="joined"
+    )
+
+    from_rack_level_slot_id = Column(
+        String, ForeignKey("rack_level_slot.id", ondelete="SET NULL"), nullable=True
+    )
+    from_rack_level_slot = relationship(
+        "RackLevelSlot", foreign_keys=[from_rack_level_slot_id], lazy="joined"
+    )
+
 
 class Stock(Base):
     __tablename__ = "stock"
@@ -75,25 +90,25 @@ class Stock(Base):
         ForeignKey("product.id", ondelete="SET NULL", onupdate="cascade"),
         nullable=True,
     )
-    product = relationship("Product", back_populates="stocks", lazy="joined")
+    product = relationship("Product", back_populates="stocks", lazy="selectin")
     reception_id = Column(
         String,
         ForeignKey("reception.id", ondelete="SET NULL", onupdate="cascade"),
         nullable=True,
     )
-    reception = relationship("Reception", back_populates="stocks", lazy="joined")
+    reception = relationship("Reception", back_populates="stocks", lazy="selectin")
     issue_id = Column(
         String,
         ForeignKey("issue.id", ondelete="SET NULL", onupdate="cascade"),
         nullable=True,
     )
-    issue = relationship("Issue", back_populates="stocks", lazy="joined")
+    issue = relationship("Issue", back_populates="stocks", lazy="selectin")
     waiting_room_id = Column(
         String,
         ForeignKey("waiting_room.id", ondelete="SET NULL", onupdate="cascade"),
         nullable=True,
     )
-    waiting_room = relationship("WaitingRoom", back_populates="stocks", lazy="joined")
+    waiting_room = relationship("WaitingRoom", back_populates="stocks", lazy="selectin")
     product_count = Column(Integer, nullable=False)
     is_issued = Column(Boolean, nullable=False, server_default="false")
     updated_at = Column(DateTime, nullable=True)
@@ -101,5 +116,14 @@ class Stock(Base):
         "UserStock",
         back_populates="stock",
         foreign_keys="UserStock.stock_id",
-        lazy="joined",
+        lazy="selectin",
     )
+    rack_level_slot = relationship(
+        "RackLevelSlot", uselist=False, back_populates="stock", lazy="joined"
+    )
+    rack_level_slot_id = Column(
+        String,
+        ForeignKey("rack_level_slot.id", ondelete="SET NULL", onupdate="cascade"),
+        nullable=True,
+    )
+    created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

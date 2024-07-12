@@ -33,6 +33,7 @@ class StockInputSchema(StockBaseSchema):
     product_id: str
     reception_id: Optional[str]
     waiting_room_id: Optional[str]
+    rack_level_slot_id: Optional[str]
 
     class Config:
         orm_mode = True
@@ -47,10 +48,26 @@ class StockWaitingRoomBasicOutputSchema(BaseModel):
         orm_mode = True
 
 
+class StockRackLevelSlotBasicOutputSchema(BaseModel):
+    rack_level_slot_number: int
+    description: Optional[str]
+    is_active: bool
+    id: str
+
+    class Config:
+        orm_mode = True
+
+
 class StockWithoutWaitingRoomOutputSchema(StockBaseSchema):
     id: str
     product: ProductBasicOutputSchema
-    reception: Optional[ReceptionBasicOutputSchema]
+
+    class Config:
+        orm_mode = True
+
+
+class StockWithoutRackLevelSlotOutputSchema(StockWithoutWaitingRoomOutputSchema):
+    pass
 
     class Config:
         orm_mode = True
@@ -58,6 +75,8 @@ class StockWithoutWaitingRoomOutputSchema(StockBaseSchema):
 
 class StockBasicOutputSchema(StockWithoutWaitingRoomOutputSchema):
     waiting_room: Optional[StockWaitingRoomBasicOutputSchema]
+    rack_level_slot: Optional[StockRackLevelSlotBasicOutputSchema]
+    created_at: Optional[datetime]
 
     class Config:
         orm_mode = True
@@ -66,6 +85,7 @@ class StockBasicOutputSchema(StockWithoutWaitingRoomOutputSchema):
 class StockOutputSchema(StockBasicOutputSchema):
     is_issued: bool
     updated_at: Optional[datetime]
+    reception: Optional[ReceptionBasicOutputSchema]
 
     class Config:
         orm_mode = True
@@ -79,6 +99,20 @@ class StockIssueInputSchema(BaseModel):
 
 
 class StockWaitingRoomInputSchema(StockIssueInputSchema):
+    pass
+
+    class Config:
+        orm_mode = True
+
+
+class StockRackLevelInputSchema(StockIssueInputSchema):
+    pass
+
+    class Config:
+        orm_mode = True
+
+
+class StockRackLevelSlotInputSchema(StockIssueInputSchema):
     pass
 
     class Config:

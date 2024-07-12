@@ -59,6 +59,7 @@ class WarehouseBaseOutputSchema(WarehouseBaseSchema):
     available_waiting_rooms: int
     occupied_sections: int
     occupied_waiting_rooms: int
+    created_at: Optional[datetime]
 
     class Config:
         orm_mode = True

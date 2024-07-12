@@ -1,5 +1,6 @@
 from src.apps.issues.models import *
 from src.apps.products.models import *
+from src.apps.rack_level_slots.models import *
 from src.apps.rack_levels.models import *
 from src.apps.racks.models import *
 from src.apps.receptions.models import *

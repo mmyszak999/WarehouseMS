@@ -15,6 +15,8 @@ class ReceptionProductInputSchema(BaseModel):
     product_id: str
     product_count: int
     waiting_room_id: str = None
+    rack_level_slot_id: str = None
+    rack_level_id: str = None
 
     @validator("product_count")
     def validate_product_count(cls, product_count: int) -> int:
@@ -46,6 +48,7 @@ class ReceptionBasicOutputSchema(BaseModel):
     user: UserInfoOutputSchema
     reception_date: datetime
     description: Optional[str]
+    created_at: Optional[datetime]
 
     class Config:
         orm_mode = True

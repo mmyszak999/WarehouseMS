@@ -4,6 +4,8 @@ from typing import Optional
 
 from pydantic import BaseModel, Field, validator
 
+from src.apps.rack_level_slots.schemas import RackLevelSlotBaseOutputSchema
+
 
 class RackLevelBaseSchema(BaseModel):
     rack_level_number: int
@@ -61,13 +63,16 @@ class RackLevelBaseOutputSchema(RackLevelBaseSchema):
     occupied_weight: Decimal
     available_slots: int
     occupied_slots: int
+    active_slots: int
+    inactive_slots: int
+    created_at: Optional[datetime]
 
     class Config:
         orm_mode = True
 
 
 class RackLevelOutputSchema(RackLevelBaseOutputSchema):
-    pass
+    rack_level_slots: list[RackLevelSlotBaseOutputSchema]
 
     class Config:
         orm_mode = True

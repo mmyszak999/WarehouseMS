@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.apps.rack_level_slots.services import manage_old_rack_level_slot_state
 from src.apps.stocks.models import Stock
 from src.apps.stocks.schemas.stock_schemas import StockWaitingRoomInputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
@@ -115,16 +116,16 @@ async def manage_waiting_room_state(
     max_stocks: int = None,
     stocks_involved: bool = False,
     adding_stock_to_waiting_room: bool = True,
-    stock_object: Stock = None,
+    stock_weight: Decimal = None,
 ) -> WaitingRoom:
     multiplier = 1 if adding_stock_to_waiting_room else -1
     if stocks_involved:
-        if stock_object is None:
-            raise ServiceException("Stock object was not provided! ")
+        if stock_weight is None:
+            raise ServiceException("Stock weight was not provided! ")
         waiting_room_object.available_slots -= multiplier
         waiting_room_object.occupied_slots += multiplier
-        waiting_room_object.current_stock_weight += multiplier * stock_object.weight
-        waiting_room_object.available_stock_weight -= multiplier * stock_object.weight
+        waiting_room_object.current_stock_weight += multiplier * stock_weight
+        waiting_room_object.available_stock_weight -= multiplier * stock_weight
     else:
         if max_weight is not None:
             new_available_weight = max_weight - waiting_room_object.current_stock_weight
@@ -205,12 +206,33 @@ async def delete_single_waiting_room(session: AsyncSession, waiting_room_id: str
     return result
 
 
+async def manage_old_waiting_room_state(
+    session: AsyncSession,
+    stock_object: Stock,
+    old_waiting_room_object: WaitingRoom,
+    old_waiting_room_id: str,
+) -> WaitingRoom:
+    old_waiting_room_object = await manage_waiting_room_state(
+        old_waiting_room_object,
+        stocks_involved=True,
+        adding_stock_to_waiting_room=False,
+        stock_weight=stock_object.weight,
+    )
+    session.add(old_waiting_room_object)
+    old_waiting_room_id = old_waiting_room_object.id
+    stock_object.waiting_room_id = None
+    return old_waiting_room_object
+
+
 async def add_single_stock_to_waiting_room(
     session: AsyncSession,
     waiting_room_id: str,
     stock_schema: StockWaitingRoomInputSchema,
     user_id: str,
 ) -> dict[str, str]:
+    from src.apps.stocks.services.stock_services import (
+        manage_resources_state_when_managing_stocks,
+    )
     from src.apps.stocks.services.user_stock_services import create_user_stock_object
 
     if not (
@@ -236,26 +258,38 @@ async def add_single_stock_to_waiting_room(
     if waiting_room_object.available_stock_weight < stock_object.weight:
         raise NoAvailableWeightInWaitingRoomException
 
+    _old_waiting_room_id = None
+    _old_rack_level_slot_id = None
+
     if old_waiting_room_object := stock_object.waiting_room:
-        # remember that later, stock may not be in waiting room, but on the warehouse shelf
-        # so consider the case when stock is not in waiting room then
-        old_waiting_room_object = await manage_waiting_room_state(
-            old_waiting_room_object,
-            stocks_involved=True,
-            adding_stock_to_waiting_room=False,
-            stock_object=stock_object,
-        )
-        session.add(old_waiting_room_object)
-        user_stock_object = await create_user_stock_object(
+        old_waiting_room_object = await manage_old_waiting_room_state(
             session,
-            stock_object.id,
-            user_id,
-            from_waiting_room_id=old_waiting_room_object.id,
-            to_waiting_room_id=waiting_room_object.id,
+            stock_object,
+            old_waiting_room_object,
+            old_waiting_room_id=_old_waiting_room_id,
         )
+        _old_waiting_room_id = old_waiting_room_object.id
+
+    if old_rack_level_slot_object := stock_object.rack_level_slot:
+        old_rack_level_slot_object = await manage_old_rack_level_slot_state(
+            session,
+            stock_object,
+            old_rack_level_slot_object,
+            old_rack_level_slot_id=_old_rack_level_slot_id,
+        )
+        _old_rack_level_slot_id = old_rack_level_slot_object.id
+
+    await create_user_stock_object(
+        session,
+        stock_object.id,
+        user_id,
+        from_waiting_room_id=_old_waiting_room_id,
+        to_waiting_room_id=waiting_room_object.id,
+        from_rack_level_slot_id=_old_rack_level_slot_id,
+    )
 
     waiting_room_object = await manage_waiting_room_state(
-        waiting_room_object, stocks_involved=True, stock_object=stock_object
+        waiting_room_object, stocks_involved=True, stock_weight=stock_object.weight
     )
     session.add(waiting_room_object)
 
@@ -263,4 +297,4 @@ async def add_single_stock_to_waiting_room(
     session.add(stock_object)
     await session.commit()
 
-    return {"message": "Stock was successfully add to the waiting room! "}
+    return {"message": "Stock was successfully added to the waiting room! "}

@@ -58,6 +58,7 @@ class RackBaseOutputSchema(RackBaseSchema):
     occupied_levels: int
     reserved_weight: Decimal
     weight_to_reserve: Decimal
+    created_at: Optional[datetime]
 
     class Config:
         orm_mode = True
