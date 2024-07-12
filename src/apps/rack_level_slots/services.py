@@ -32,6 +32,9 @@ from src.core.exceptions import (
     RackLevelSlotIsNotEmptyException,
     ServiceException,
     TooSmallInactiveSlotsQuantityException,
+    StockAlreadyInRackLevelException,
+    NoAvailableSlotsInRackLevelException,
+    NoAvailableWeightInRackLevelException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -294,7 +297,7 @@ async def manage_old_rack_level_slot_state(
     stock_object: Stock,
     old_rack_level_slot_object: RackLevelSlot,
     old_rack_level_slot_id: str
-) -> None:
+) -> RackLevel:
     from src.apps.stocks.services.stock_services import manage_resources_state_when_managing_stocks
     old_rack_level_slot_object = await manage_resources_state_when_managing_stocks(
             session,
@@ -305,6 +308,7 @@ async def manage_old_rack_level_slot_state(
         
     old_rack_level_slot_id = old_rack_level_slot_object.id
     stock_object.rack_level_slot_id = None
+    return old_rack_level_slot_object
 
 async def add_single_stock_to_rack_level_slot(
     session: AsyncSession,
@@ -332,33 +336,35 @@ async def add_single_stock_to_rack_level_slot(
 
     if stock_object.rack_level_slot:
         if stock_object.rack_level_slot.rack_level_id == rack_level_slot_id:
-            raise StockAlreadyInWaitingRoomException
+            raise StockAlreadyInRackLevelException
 
     if not rack_level_slot_object.rack_level.available_slots:
-        raise NoAvailableSlotsInWaitingRoomException
+        raise NoAvailableSlotsInRackLevelException
 
     if rack_level_slot_object.rack_level.available_weight < stock_object.weight:
-        raise NoAvailableWeightInWaitingRoomException
+        raise NoAvailableWeightInRackLevelException
     
     _old_waiting_room_id = None
     _old_rack_level_slot_id = None 
     _new_rack_level_slot_object = None
     
     if old_waiting_room_object := stock_object.waiting_room:
-        await manage_old_waiting_room_state(
+        old_waiting_room_object = await manage_old_waiting_room_state(
             session,
             stock_object,
             old_waiting_room_object,
             old_waiting_room_id=_old_waiting_room_id
         )
+        _old_waiting_room_id = old_waiting_room_object.id
         
     if old_rack_level_slot_object := stock_object.rack_level_slot:
-        await manage_old_rack_level_slot_state(
+        old_rack_level_slot_object = await manage_old_rack_level_slot_state(
             session,
             stock_object,
             old_rack_level_slot_object,
             old_rack_level_slot_id=_old_rack_level_slot_id
         )
+        _old_rack_level_slot_id = old_rack_level_slot_object.id
         
     _new_rack_level_slot_object = rack_level_slot_object
     await create_user_stock_object(

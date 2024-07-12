@@ -210,7 +210,7 @@ async def manage_old_waiting_room_state(
     stock_object: Stock,
     old_waiting_room_object: WaitingRoom,
     old_waiting_room_id: str
-) -> None:
+) -> WaitingRoom:
     old_waiting_room_object = await manage_waiting_room_state(
             old_waiting_room_object,
             stocks_involved=True,
@@ -220,6 +220,7 @@ async def manage_old_waiting_room_state(
     session.add(old_waiting_room_object)
     old_waiting_room_id = old_waiting_room_object.id
     stock_object.waiting_room_id = None
+    return old_waiting_room_object
 
 
 async def add_single_stock_to_waiting_room(

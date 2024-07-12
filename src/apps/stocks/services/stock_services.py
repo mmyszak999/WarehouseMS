@@ -85,7 +85,6 @@ async def create_stocks(
             rack_level_slot_id,
             rack_level_id,
         ].count(None)
-        print(entered_values_check)
         if entered_values_check < 2:
             raise AmbiguousStockStoragePlaceDuringReceptionException
 
@@ -206,7 +205,6 @@ async def create_stocks(
             _rack_level_slot_id = rack_level_slot_object.id
             _rack_level_slot = rack_level_slot_object
 
-        print("wow", stock_input.dict())
         new_stock = Stock(**stock_input.dict())
         session.add(new_stock)
         await session.flush()
@@ -225,7 +223,6 @@ async def create_stocks(
             session.add(_rack_level_slot)
 
         await session.flush()
-        print(_rack_level_slot.__dict__)
     return stock_list
 
 
@@ -319,7 +316,6 @@ async def issue_stocks(
             )
             stock.rack_level_slot_id = None
             stock.rack_level_slot = None
-            print("w0w", rack_level_slot.__dict__)
 
         stock.issue_id = issue_id
         stock.is_issued = True
@@ -343,7 +339,6 @@ async def manage_resources_state_when_managing_stocks(
         stock_weight=stock_weight,
     )
     session.add(rack_level_object)
-    print(rack_level_object.__dict__)
 
     rack_object = await manage_rack_state(
         rack_level_object.rack,
@@ -352,7 +347,6 @@ async def manage_resources_state_when_managing_stocks(
         stock_weight=stock_weight,
     )
     session.add(rack_object)
-    print(rack_object.__dict__)
 
     section_object = await manage_section_state(
         rack_object.section,
@@ -361,7 +355,6 @@ async def manage_resources_state_when_managing_stocks(
         stock_weight=stock_weight,
     )
     session.add(section_object)
-    print(section_object.__dict__)
     session.add(rack_level_slot_object)
     
     return rack_level_slot_object

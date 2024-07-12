@@ -67,6 +67,9 @@ from src.core.exceptions import (
     WarehouseDoesNotExistException,
     WarehouseIsNotEmptyException,
     WeightLimitExceededException,
+    StockAlreadyInRackLevelException,
+    NoAvailableSlotsInRackLevelException,
+    NoAvailableWeightInRackLevelException
 )
 
 app = FastAPI(
@@ -545,6 +548,32 @@ async def existing_gap_between_inactive_slots_to_delete_exception(
 @app.exception_handler(AmbiguousStockStoragePlaceDuringReceptionException)
 async def ambiguous_stock_storage_place_during_reception_exception(
     request: Request, exception: AmbiguousStockStoragePlaceDuringReceptionException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+@app.exception_handler(StockAlreadyInRackLevelException)
+async def stock_already_in_rack_level_exception(
+    request: Request, exception: StockAlreadyInRackLevelException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(NoAvailableSlotsInRackLevelException)
+async def no_available_slots_in_rack_level_exception(
+    request: Request, exception: NoAvailableSlotsInRackLevelException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+
+@app.exception_handler(NoAvailableWeightInRackLevelException)
+async def no_available_weight_in_rack_level_exception(
+    request: Request, exception: NoAvailableWeightInRackLevelException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}

@@ -38,7 +38,10 @@ from src.core.exceptions import (
     TooLittleRackLevelSlotsAmountException,
     TooLittleWeightAmountException,
     WeightLimitExceededException,
-    NoAvailableRackLevelSlotException
+    NoAvailableRackLevelSlotException,
+    StockAlreadyInRackLevelException,
+    NoAvailableSlotsInRackLevelException,
+    NoAvailableWeightInRackLevelException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -334,14 +337,14 @@ async def add_single_stock_to_rack_level(
         raise CannotMoveIssuedStockException
 
     if stock_object.rack_level_slot:
-        if stock_object.rack_level_slot.rack_level_id == rack_level_id:
-            raise StockAlreadyInWaitingRoomException
+        if stock_object.rack_level_slot.rack_level_id == rack_level_slot_id:
+            raise StockAlreadyInRackLevelException
 
-    if not rack_level_object.available_slots:
-        raise NoAvailableSlotsInWaitingRoomException
+    if not rack_level_slot_object.rack_level.available_slots:
+        raise NoAvailableSlotsInRackLevelException
 
-    if rack_level_object.available_weight < stock_object.weight:
-        raise NoAvailableWeightInWaitingRoomException
+    if rack_level_slot_object.rack_level.available_weight < stock_object.weight:
+        raise NoAvailableWeightInRackLevelException
     
     _old_waiting_room_id = None
     _old_rack_level_slot_id = None 
@@ -366,22 +369,24 @@ async def add_single_stock_to_rack_level(
     _new_rack_level_slot_object = rack_level_slot_object
     
     if old_waiting_room_object := stock_object.waiting_room:
-        await manage_old_waiting_room_state(
+        old_waiting_room_object = await manage_old_waiting_room_state(
             session,
             stock_object,
             old_waiting_room_object,
             old_waiting_room_id=_old_waiting_room_id
         )
+        _old_waiting_room_id = old_waiting_room_object.id
         
     if old_rack_level_slot_object := stock_object.rack_level_slot:
-        await manage_old_rack_level_slot_state(
+        old_rack_level_slot_object = await manage_old_rack_level_slot_state(
             session,
             stock_object,
             old_rack_level_slot_object,
             old_rack_level_slot_id=_old_rack_level_slot_id
         )
+        _old_rack_level_slot_id = old_rack_level_slot_object.id
         
-    await create_user_stock_object(
+    user_stock = await create_user_stock_object(
             session,
             stock_object.id,
             user_id,
@@ -398,7 +403,6 @@ async def add_single_stock_to_rack_level(
     
     stock_object.rack_level_slot_id = rack_level_slot.id
     session.add(stock_object)
-    print(stock_object.__dict__)
     await session.commit()
 
     return {"message": "Stock was successfully added to the rack level! "}

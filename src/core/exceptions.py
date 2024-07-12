@@ -336,3 +336,21 @@ class AmbiguousStockStoragePlaceDuringReceptionException(ServiceException):
             "Stock cannot be placed on the waiting room and the rack level slot simultaneously! "
             "Please pick only one! "
         )
+
+class StockAlreadyInRackLevelException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(f"The requested stock was already placed in this rack level! ")
+
+
+class NoAvailableSlotsInRackLevelException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"This rack level has no more available slots to store the stocks! "
+        )
+
+
+class NoAvailableWeightInRackLevelException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"This rack level has no more available weight to store the stocks! "
+        )
