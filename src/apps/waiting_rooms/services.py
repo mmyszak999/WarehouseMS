@@ -262,20 +262,22 @@ async def add_single_stock_to_waiting_room(
     _old_rack_level_slot_id = None
 
     if old_waiting_room_object := stock_object.waiting_room:
-        await manage_old_waiting_room_state(
+        old_waiting_room_object = await manage_old_waiting_room_state(
             session,
             stock_object,
             old_waiting_room_object,
             old_waiting_room_id=_old_waiting_room_id,
         )
+        _old_waiting_room_id = old_waiting_room_object.id
 
     if old_rack_level_slot_object := stock_object.rack_level_slot:
-        await manage_old_rack_level_slot_state(
+        old_rack_level_slot_object = await manage_old_rack_level_slot_state(
             session,
             stock_object,
             old_rack_level_slot_object,
             old_rack_level_slot_id=_old_rack_level_slot_id,
         )
+        _old_rack_level_slot_id = old_rack_level_slot_object.id
 
     await create_user_stock_object(
         session,

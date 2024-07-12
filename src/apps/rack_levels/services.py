@@ -290,11 +290,11 @@ async def delete_single_rack_level(session: AsyncSession, rack_level_id: str):
     ):
         raise DoesNotExist(RackLevel.__name__, "id", rack_level_id)
 
-    """if rack_level_object.occupied_weight:
-        raise RackLevelIsNotEmptyException(resource="occupied weight")"""
+    if rack_level_object.occupied_weight:
+        raise RackLevelIsNotEmptyException(resource="occupied weight")
 
-    """if rack_level_object.occupied_slots:
-        raise RackLevelIsNotEmptyException(resource="occupied slots")"""
+    if rack_level_object.occupied_slots:
+        raise RackLevelIsNotEmptyException(resource="occupied slots")
 
     statement = delete(RackLevel).filter(RackLevel.id == rack_level_id)
 
@@ -338,7 +338,7 @@ async def add_single_stock_to_rack_level(
         raise CannotMoveIssuedStockException
 
     if stock_object.rack_level_slot:
-        if stock_object.rack_level_slot.rack_level_id == rack_level_slot_id:
+        if stock_object.rack_level_slot.rack_level_id == rack_level_id:
             raise StockAlreadyInRackLevelException
 
     if not rack_level_slot_object.rack_level.available_slots:

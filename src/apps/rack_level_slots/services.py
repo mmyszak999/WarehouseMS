@@ -189,18 +189,6 @@ async def manage_single_rack_level_slot_state(
             RackLevel.__name__, "id", rack_level_slot_object.rack_level_id
         )
 
-    if (not rack_level_object.available_slots) and (not activate_slot):
-        raise CantDeactivateRackLevelSlotException(
-            reason="All available slots are occupied! "
-        )
-
-    if (
-        rack_level_object.active_slots == rack_level_object.max_slots
-    ) and activate_slot:
-        raise CantActivateRackLevelSlotException(
-            reason="Reached max amount of activated slots in the rack level! "
-        )
-
     rack_level_slot_object.is_active = activate_slot
     session.add(rack_level_slot_object)
 
@@ -342,10 +330,6 @@ async def add_single_stock_to_rack_level_slot(
     if stock_object.is_issued:
         raise CannotMoveIssuedStockException
 
-    if stock_object.rack_level_slot:
-        if stock_object.rack_level_slot.rack_level_id == rack_level_slot_id:
-            raise StockAlreadyInRackLevelException
-
     if not rack_level_slot_object.rack_level.available_slots:
         raise NoAvailableSlotsInRackLevelException
 
@@ -394,7 +378,6 @@ async def add_single_stock_to_rack_level_slot(
 
     stock_object.rack_level_slot_id = rack_level_slot.id
     session.add(stock_object)
-    print(stock_object.__dict__)
     await session.commit()
 
     return {"message": "Stock was successfully added to the rack level slot! "}

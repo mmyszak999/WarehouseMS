@@ -31,20 +31,6 @@ from src.dependencies.user import authenticate_user
 rack_level_slot_router = APIRouter(prefix="/rack-level-slots", tags=["rack_level_slot"])
 
 
-@rack_level_slot_router.post(
-    "/",
-    response_model=RackLevelSlotOutputSchema,
-    status_code=status.HTTP_201_CREATED,
-)
-async def post_rack_level_slot(
-    rack_level_slot: RackLevelSlotInputSchema,
-    session: AsyncSession = Depends(get_db),
-    request_user: User = Depends(authenticate_user),
-) -> RackLevelSlotOutputSchema:
-    await check_if_staff(request_user)
-    return await create_rack_level_slot(session, rack_level_slot)
-
-
 @rack_level_slot_router.get(
     "/",
     response_model=Union[

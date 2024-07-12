@@ -123,4 +123,4 @@ async def add_stock_to_rack_level(
     result = await add_single_stock_to_rack_level(
         session, rack_level_id, stock_schema, request_user.id
     )
-    return JSONResponse(result)
+    return JSONResponse(status_code=status.HTTP_200_OK, content=result)
