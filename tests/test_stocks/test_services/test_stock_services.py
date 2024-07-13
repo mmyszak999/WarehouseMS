@@ -69,6 +69,8 @@ async def test_if_stocks_were_created_correctly(
         async_session,
         user_id=db_staff_user.id,
         waiting_rooms_ids=[None, None, None],
+        rack_level_ids=[None, None, None],
+        rack_level_slots_ids=[None, None, None],
         testing=True,
         input_schemas=stock_inputs,
     )
@@ -87,7 +89,8 @@ async def test_raise_exception_when_product_data_is_missing(
 ):
     with pytest.raises(MissingProductDataException):
         await create_stocks(
-            async_session, user_id=db_staff_user.id, waiting_rooms_ids=[None]
+            async_session, user_id=db_staff_user.id, waiting_rooms_ids=[None],
+            rack_level_ids=[None], rack_level_slots_ids=[None],
         )
 
 
@@ -118,6 +121,8 @@ async def test_raise_exception_when_there_is_no_waiting_room_available_for_new_s
             products=products,
             product_counts=product_counts,
             waiting_rooms_ids=[None],
+            rack_level_ids=[None],
+            rack_level_slots_ids=[None],
         )
 
 
@@ -125,6 +130,7 @@ async def test_raise_exception_when_there_is_no_waiting_room_available_for_new_s
 async def test_raise_exception_when_waiting_room_with_provided_id_does_not_exist_when_creating_stocks(
     async_session: AsyncSession,
     db_products: PagedResponseSchema[ProductOutputSchema],
+    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     products = [
@@ -138,6 +144,8 @@ async def test_raise_exception_when_waiting_room_with_provided_id_does_not_exist
             products=products,
             product_counts=product_counts,
             waiting_rooms_ids=[generate_uuid()],
+            rack_level_ids=[None],
+            rack_level_slots_ids=[None],
         )
 
 
@@ -146,6 +154,7 @@ async def test_check_if_stocks_are_created_correctly_with_provided_waiting_room_
     async_session: AsyncSession,
     db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
+    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     products = [
@@ -167,6 +176,8 @@ async def test_check_if_stocks_are_created_correctly_with_provided_waiting_room_
         products=products,
         product_counts=product_counts,
         waiting_rooms_ids=[waiting_room.id],
+        rack_level_ids=[None],
+        rack_level_slots_ids=[None],
     )
 
     assert stocks[0].waiting_room_id == waiting_room.id
@@ -199,6 +210,8 @@ async def test_raise_exception_when_waiting_room_with_provided_id_is_not_availab
             products=products,
             product_counts=product_counts,
             waiting_rooms_ids=[waiting_room.id],
+            rack_level_ids=[None],
+            rack_level_slots_ids=[None],
         )
 
 
@@ -222,7 +235,9 @@ async def test_check_if_new_stock_will_be_correctly_added_to_available_waiting_r
     ]
     product_counts = [4]
     stocks = await create_stocks(
-        async_session, db_staff_user.id, [waiting_room.id], products, product_counts
+        async_session, db_staff_user.id, [waiting_room.id], 
+        rack_level_ids=[None], rack_level_slots_ids=[None],
+        products=products, product_counts=product_counts
     )
     await async_session.flush()
 

@@ -21,6 +21,7 @@ from src.apps.racks.services import create_rack, get_all_racks, get_single_rack
 from src.apps.sections.models import Section
 from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.sections.services import create_section, get_single_section
+from src.apps.warehouse.schemas import WarehouseOutputSchema
 from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,
@@ -188,7 +189,7 @@ async def test_raise_exception_when_rack_level_not_provided_when_managing_state(
 @pytest.mark.asyncio
 async def test_if_rack_level_max_slots_are_correctly_managed(
     async_session: AsyncSession,
-    db_racks: PagedResponseSchema[RackOutputSchema],
+    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
 ):
     rack_level = await if_exists(

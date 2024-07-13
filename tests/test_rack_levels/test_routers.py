@@ -6,6 +6,7 @@ from httpx import AsyncClient, Response
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.rack_levels.schemas import RackLevelOutputSchema
 from src.apps.racks.schemas import RackOutputSchema
+from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.users.schemas import UserOutputSchema
 from src.core.factory.rack_level_factory import (
@@ -140,6 +141,7 @@ async def test_authenticated_user_can_get_all_rack_levels(
 @pytest.mark.asyncio
 async def test_only_staff_can_update_single_rack_level(
     async_client: AsyncClient,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
     user: UserOutputSchema,
     user_headers: dict[str, str],
