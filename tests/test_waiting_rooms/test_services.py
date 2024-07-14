@@ -8,6 +8,7 @@ from src.apps.stocks.schemas.stock_schemas import (
 )
 from src.apps.stocks.services.stock_services import create_stocks
 from src.apps.users.schemas import UserOutputSchema
+from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
 from src.apps.waiting_rooms.schemas import (
     WaitingRoomInputSchema,
@@ -51,6 +52,8 @@ from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid
 from tests.test_products.conftest import db_categories, db_products
 from tests.test_sections.conftest import db_sections
+from tests.test_rack_levels.conftest import db_rack_levels
+from tests.test_racks.conftest import db_racks
 from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,
@@ -90,7 +93,6 @@ async def test_raise_exception_when_there_is_no_more_available_waiting_room_when
 @pytest.mark.asyncio
 async def test_if_only_one_waiting_room_was_returned(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
     waiting_room = await get_single_waiting_room(
@@ -103,7 +105,6 @@ async def test_if_only_one_waiting_room_was_returned(
 @pytest.mark.asyncio
 async def test_raise_exception_while_getting_nonexistent_waiting_room(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
     with pytest.raises(DoesNotExist):
@@ -113,7 +114,6 @@ async def test_raise_exception_while_getting_nonexistent_waiting_room(
 @pytest.mark.asyncio
 async def test_if_multiple_waiting_rooms_were_returned(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
     waiting_rooms = await get_all_waiting_rooms(
@@ -125,7 +125,6 @@ async def test_if_multiple_waiting_rooms_were_returned(
 @pytest.mark.asyncio
 async def test_raise_exception_while_updating_nonexistent_waiitng_room(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
     update_data = WaitingRoomInputSchemaFactory().generate()
@@ -136,7 +135,7 @@ async def test_raise_exception_while_updating_nonexistent_waiitng_room(
 @pytest.mark.asyncio
 async def test_raise_exception_while_requested_max_weight_is_smaller_than_the_current_stock_weight(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -180,7 +179,7 @@ async def test_raise_exception_while_requested_max_weight_is_smaller_than_the_cu
 @pytest.mark.asyncio
 async def test_raise_exception_while_requested_max_stock_amount_is_smaller_than_the_current_stock_amount(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -225,7 +224,6 @@ async def test_raise_exception_while_requested_max_stock_amount_is_smaller_than_
 @pytest.mark.asyncio
 async def test_raise_exception_while_deleting_nonexistent_waiitng_room(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
 ):
     with pytest.raises(DoesNotExist):
@@ -269,7 +267,6 @@ async def test_raise_exception_while_adding_stock_to_nonexistent_waiting_room(
 @pytest.mark.asyncio
 async def test_raise_exception_while_adding_nonexistent_stock_to_waiting_room(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -310,7 +307,11 @@ async def test_raise_exception_while_adding_stock_to_the_current_waiting_room(
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
-    available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
+    print(db_stocks.results)
+    available_stocks = [stock for stock in db_stocks.results if stock.waiting_room_id]
+    print(
+        available_stocks
+    )
     stock_schema = StockWaitingRoomInputSchema(id=available_stocks[0].id)
 
     with pytest.raises(StockAlreadyInWaitingRoomException):
@@ -447,7 +448,7 @@ async def test_check_if_available_stock_amount_is_set_correctly(
 @pytest.mark.asyncio
 async def test_check_if_old_and_new_waiting_room_state_is_managed_correctly(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):

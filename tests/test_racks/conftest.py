@@ -20,19 +20,14 @@ from tests.test_users.conftest import (
     superuser_auth_headers,
 )
 from tests.test_warehouse.conftest import db_warehouse
+from tests.test_sections.conftest import db_sections
 
 
 @pytest_asyncio.fixture
 async def db_racks(
     async_session: AsyncSession,
-    db_sections: PagedResponseSchema[SectionOutputSchema],
+    db_sections: PagedResponseSchema[SectionOutputSchema]
 ) -> PagedResponseSchema[RackOutputSchema]:
-    for section in db_sections.results:
-        for _ in range(section.max_racks - 2):
-            await create_rack(
-                async_session, RackInputSchemaFactory().generate(section_id=section.id)
-            )
-
     return await get_all_racks(
         async_session, PageParams(), output_schema=RackOutputSchema
     )

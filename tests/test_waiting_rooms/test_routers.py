@@ -17,6 +17,8 @@ from src.core.factory.waiting_room_factory import (
 from src.core.pagination.schemas import PagedResponseSchema
 from tests.test_products.conftest import db_categories, db_products
 from tests.test_sections.conftest import db_sections
+from tests.test_rack_levels.conftest import db_rack_levels
+from tests.test_racks.conftest import db_racks
 from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,

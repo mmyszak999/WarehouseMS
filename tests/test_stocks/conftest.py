@@ -18,10 +18,16 @@ from src.apps.stocks.schemas.stock_schemas import (
     StockIssueInputSchema,
     StockOutputSchema,
 )
+from src.apps.racks.models import Rack
+from src.apps.rack_levels.schemas import RackLevelOutputSchema
+from src.apps.racks.schemas import RackOutputSchema
 from src.apps.stocks.schemas.user_stock_schemas import UserStockOutputSchema
+from src.apps.rack_level_slots.schemas import RackLevelSlotOutputSchema
+from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.services.stock_services import get_all_stocks
 from src.apps.stocks.services.user_stock_services import get_all_user_stocks
 from src.apps.users.schemas import UserOutputSchema
+from src.apps.racks.services import get_all_racks
 from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
 from src.apps.waiting_rooms.services import create_waiting_room, get_all_waiting_rooms
 from src.core.factory.issue_factory import IssueInputSchemaFactory
@@ -36,6 +42,8 @@ from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from tests.test_products.conftest import db_categories, db_products
 from tests.test_sections.conftest import db_sections
+from tests.test_racks.conftest import db_racks
+from tests.test_rack_levels.conftest import db_rack_levels
 from tests.test_users.conftest import (
     auth_headers,
     create_superuser,
@@ -46,7 +54,7 @@ from tests.test_users.conftest import (
 )
 
 DB_WAITING_ROOMS_SCHEMAS = [
-    WaitingRoomInputSchemaFactory().generate() for _ in range(3)
+    WaitingRoomInputSchemaFactory().generate() for _ in range(2)
 ]
 
 
@@ -54,6 +62,7 @@ DB_WAITING_ROOMS_SCHEMAS = [
 async def db_stocks(
     async_session: AsyncSession,
     db_sections: PagedResponseSchema[SectionOutputSchema],
+    db_racks: PagedResponseSchema[RackOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ) -> PagedResponseSchema[StockOutputSchema]:
@@ -62,13 +71,30 @@ async def db_stocks(
         for waiting_room in DB_WAITING_ROOMS_SCHEMAS
     ]
     products = db_products.results + db_products.results
-    for product in products:
+    
+    for product, rack in zip(products, db_racks.results):
+        rack = await if_exists(
+            Rack, "id", rack.id, async_session
+        )
         reception_input = ReceptionInputSchemaFactory().generate(
             products_data=[
-                ReceptionProductInputSchemaFactory().generate(product_id=product.id)
+                ReceptionProductInputSchemaFactory().generate(
+                    product_id=product.id,
+                    rack_level_id=rack.rack_levels[0].id)
             ]
         )
         await create_reception(async_session, reception_input, db_staff_user.id)
+        
+    await async_session.flush()
+    await async_session.refresh(waiting_rooms[0])
+    reception_input = ReceptionInputSchemaFactory().generate(
+        products_data=[
+            ReceptionProductInputSchemaFactory().generate(
+                product_id=db_products.results[0].id,
+                waiting_room_id=waiting_rooms[0].id)
+        ]
+    )
+    await create_reception(async_session, reception_input, db_staff_user.id)
 
     stocks = await get_all_stocks(async_session, PageParams())
     issue_input = IssueInputSchemaFactory().generate(
@@ -81,7 +107,6 @@ async def db_stocks(
         async_session, WaitingRoomInputSchemaFactory().generate(), testing=True
     )
     [await async_session.refresh(waiting_room) for waiting_room in waiting_rooms]
-
     return await get_all_stocks(async_session, PageParams())
 
 

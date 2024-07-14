@@ -126,6 +126,7 @@ async def test_raise_exception_when_pick_too_high_rack_level(
 @pytest.mark.asyncio
 async def test_raise_exception_when_rack_already_contains_rack_level_with_that_level_number(
     async_session: AsyncSession,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
     db_racks: PagedResponseSchema[RackOutputSchema],
 ):

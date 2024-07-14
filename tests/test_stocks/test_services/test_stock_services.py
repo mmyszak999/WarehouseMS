@@ -3,6 +3,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.issues.services import create_issue
 from src.apps.products.models import Product
+from src.apps.sections.schemas import (
+    SectionOutputSchema
+)
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.stocks.models import Stock
 from src.apps.stocks.schemas.stock_schemas import (
@@ -282,15 +285,42 @@ async def test_if_all_stocks_were_returned(
 @pytest.mark.asyncio
 async def test_if_stocks_are_issued_correctly(
     async_session: AsyncSession,
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
-    available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
-    stock_object = await if_exists(Stock, "id", available_stocks[0].id, async_session)
+
+    products = [
+        await if_exists(Product, "id", db_products.results[0].id, async_session)
+    ]
+    product_counts = [4]
+
+    waiting_room_input = WaitingRoomInputSchemaFactory().generate(
+        max_stocks=5, max_weight=9000
+    )
+    waiting_room = await create_waiting_room(
+        async_session, waiting_room_input, testing=True
+    )
+    await async_session.flush()
+
+    stocks = await create_stocks(
+        async_session,
+        user_id=db_staff_user.id,
+        products=products,
+        product_counts=product_counts,
+        waiting_rooms_ids=[waiting_room.id],
+        rack_level_ids=[None],
+        rack_level_slots_ids=[None],
+    )
+
+    stock_object = stocks[0]
     waiting_room_before = await if_exists(
         WaitingRoom, "id", stock_object.waiting_room_id, async_session
     )
+
+    
     issue_schema = IssueInputSchemaFactory().generate(
         stock_ids=[StockIssueInputSchema(id=stock_object.id)]
     )
