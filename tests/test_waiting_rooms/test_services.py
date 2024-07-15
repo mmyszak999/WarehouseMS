@@ -2,15 +2,15 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
+from src.apps.rack_level_slots.models import RackLevelSlot
+from src.apps.sections.schemas import SectionOutputSchema
+from src.apps.stocks.models import Stock
 from src.apps.stocks.schemas.stock_schemas import (
     StockOutputSchema,
     StockWaitingRoomInputSchema,
 )
-from src.apps.stocks.models import Stock
-from src.apps.rack_level_slots.models import RackLevelSlot
 from src.apps.stocks.services.stock_services import create_stocks
 from src.apps.users.schemas import UserOutputSchema
-from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
 from src.apps.waiting_rooms.schemas import (
     WaitingRoomInputSchema,
@@ -23,9 +23,9 @@ from src.apps.waiting_rooms.services import (
     delete_single_waiting_room,
     get_all_waiting_rooms,
     get_single_waiting_room,
+    manage_old_waiting_room_state,
     manage_waiting_room_state,
     update_single_waiting_room,
-    manage_old_waiting_room_state
 )
 from src.apps.warehouse.services import create_warehouse
 from src.core.exceptions import (
@@ -54,9 +54,9 @@ from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid
 from tests.test_products.conftest import db_categories, db_products
-from tests.test_sections.conftest import db_sections
 from tests.test_rack_levels.conftest import db_rack_levels
 from tests.test_racks.conftest import db_racks
+from tests.test_sections.conftest import db_sections
 from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
     auth_headers,
@@ -365,8 +365,7 @@ async def test_raise_exception_when_waiting_room_got_no_available_weight_for_new
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_no_stock_provided_while_managing_waiting_room_state(
-    async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema]
+    async_session: AsyncSession, db_stocks: PagedResponseSchema[StockOutputSchema]
 ):
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     waiting_room_input = WaitingRoomInputSchemaFactory().generate(
@@ -512,31 +511,27 @@ async def test_check_if_stock_from_rack_level_slot_is_added_to_the_waiting_room_
         async_session, waiting_room_input_1, testing=True
     )
 
-    stock = await if_exists(
-        Stock, "id", db_stocks.results[0].id, async_session
-    )
+    stock = await if_exists(Stock, "id", db_stocks.results[0].id, async_session)
     print(stock.__dict__, "3")
-    
+
     old_rack_level_slot = await if_exists(
         RackLevelSlot, "id", stock.rack_level_slot_id, async_session
     )
     print(old_rack_level_slot.stock, "1")
-    
+
     stock_schema = StockWaitingRoomInputSchema(id=stock.id)
     await add_single_stock_to_waiting_room(
         async_session, waiting_room_1.id, stock_schema, db_staff_user.id
     )
-    
+
     print(old_rack_level_slot.__dict__, "2")
     await async_session.refresh(stock)
     print(stock.__dict__, "3")
-    
-    
+
     """await async_session.flush()
     await async_session.refresh(waiting_room_1)
     await async_session.refresh(old_rack_level_slot)
     await async_session.refresh(stock)"""
-    
 
     assert waiting_room_1.occupied_slots == 1
     assert old_rack_level_slot.stock_id == None

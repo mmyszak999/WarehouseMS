@@ -8,27 +8,26 @@ from src.apps.products.schemas.category_schemas import (
     CategoryOutputSchema,
 )
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
+from src.apps.rack_level_slots.schemas import RackLevelSlotOutputSchema
+from src.apps.rack_levels.schemas import RackLevelOutputSchema
+from src.apps.racks.models import Rack
+from src.apps.racks.schemas import RackOutputSchema
+from src.apps.racks.services import get_all_racks
 from src.apps.receptions.schemas import (
     ReceptionOutputSchema,
     ReceptionProductInputSchema,
 )
 from src.apps.receptions.services import create_reception, get_all_receptions
-from src.apps.waiting_rooms.models import WaitingRoom
 from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.schemas.stock_schemas import (
     StockIssueInputSchema,
     StockOutputSchema,
 )
-from src.apps.racks.models import Rack
-from src.apps.rack_levels.schemas import RackLevelOutputSchema
-from src.apps.racks.schemas import RackOutputSchema
 from src.apps.stocks.schemas.user_stock_schemas import UserStockOutputSchema
-from src.apps.rack_level_slots.schemas import RackLevelSlotOutputSchema
-from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.services.stock_services import get_all_stocks
 from src.apps.stocks.services.user_stock_services import get_all_user_stocks
 from src.apps.users.schemas import UserOutputSchema
-from src.apps.racks.services import get_all_racks
+from src.apps.waiting_rooms.models import WaitingRoom
 from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
 from src.apps.waiting_rooms.services import create_waiting_room, get_all_waiting_rooms
 from src.core.factory.issue_factory import IssueInputSchemaFactory
@@ -42,9 +41,9 @@ from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from tests.test_products.conftest import db_categories, db_products
-from tests.test_sections.conftest import db_sections
-from tests.test_racks.conftest import db_racks
 from tests.test_rack_levels.conftest import db_rack_levels
+from tests.test_racks.conftest import db_racks
+from tests.test_sections.conftest import db_sections
 from tests.test_users.conftest import (
     auth_headers,
     create_superuser,
@@ -71,37 +70,39 @@ async def db_stocks(
         for waiting_room in DB_WAITING_ROOMS_SCHEMAS
     ]
     products = db_products.results + db_products.results
-    
-    db_racks = await get_all_racks(async_session, PageParams(), output_schema=RackOutputSchema)
+
+    db_racks = await get_all_racks(
+        async_session, PageParams(), output_schema=RackOutputSchema
+    )
     for product, rack in zip(products, db_racks.results):
-        rack = await if_exists(
-            Rack, "id", rack.id, async_session
-        )
+        rack = await if_exists(Rack, "id", rack.id, async_session)
         reception_input = ReceptionInputSchemaFactory().generate(
             products_data=[
                 ReceptionProductInputSchemaFactory().generate(
-                    product_id=product.id,
-                    rack_level_id=rack.rack_levels[0].id)
+                    product_id=product.id, rack_level_id=rack.rack_levels[0].id
+                )
             ]
         )
         await create_reception(async_session, reception_input, db_staff_user.id)
-    
-    #one stock to the waiting room
+
+    # one stock to the waiting room
     reception_input = ReceptionInputSchemaFactory().generate(
         products_data=[
             ReceptionProductInputSchemaFactory().generate(
                 product_id=db_products.results[0].id,
-                waiting_room_id=waiting_rooms[0].id)
+                waiting_room_id=waiting_rooms[0].id,
+            )
         ]
     )
     await create_reception(async_session, reception_input, db_staff_user.id)
-    
-    #one stock will be issued
+
+    # one stock will be issued
     reception_input = ReceptionInputSchemaFactory().generate(
         products_data=[
             ReceptionProductInputSchemaFactory().generate(
                 product_id=db_products.results[0].id,
-                waiting_room_id=waiting_rooms[1].id)
+                waiting_room_id=waiting_rooms[1].id,
+            )
         ]
     )
     result = await create_reception(async_session, reception_input, db_staff_user.id)

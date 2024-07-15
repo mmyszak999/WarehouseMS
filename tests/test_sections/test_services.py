@@ -323,8 +323,7 @@ async def test_raise_exception_when_deleting_nonexistent_section(
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_deleting_section_with_occupied_racks(
-    async_session: AsyncSession,
-    db_sections: PagedResponseSchema[SectionOutputSchema]
+    async_session: AsyncSession, db_sections: PagedResponseSchema[SectionOutputSchema]
 ):
     with pytest.raises(SectionIsNotEmptyException):
         await delete_single_section(async_session, db_sections.results[0].id)

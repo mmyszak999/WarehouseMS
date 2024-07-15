@@ -13,7 +13,7 @@ from src.apps.stocks.schemas.stock_schemas import (
     StockIssueInputSchema,
     StockOutputSchema,
 )
-from src.apps.stocks.services.stock_services import issue_stocks, get_all_stocks
+from src.apps.stocks.services.stock_services import get_all_stocks, issue_stocks
 from src.apps.users.schemas import UserOutputSchema
 from src.core.exceptions import (
     AlreadyExists,
@@ -29,10 +29,10 @@ from src.core.factory.issue_factory import (
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.utils import generate_uuid
+from tests.test_rack_levels.conftest import db_rack_levels
+from tests.test_racks.conftest import db_racks
 from tests.test_sections.conftest import db_sections
 from tests.test_stocks.conftest import db_stocks
-from tests.test_racks.conftest import db_racks
-from tests.test_rack_levels.conftest import db_rack_levels
 from tests.test_users.conftest import (
     auth_headers,
     db_staff_user,

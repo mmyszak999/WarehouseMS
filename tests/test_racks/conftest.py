@@ -11,6 +11,7 @@ from src.core.factory.rack_factory import RackInputSchemaFactory
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
+from tests.test_sections.conftest import db_sections
 from tests.test_users.conftest import (
     auth_headers,
     create_superuser,
@@ -20,13 +21,11 @@ from tests.test_users.conftest import (
     superuser_auth_headers,
 )
 from tests.test_warehouse.conftest import db_warehouse
-from tests.test_sections.conftest import db_sections
 
 
 @pytest_asyncio.fixture
 async def db_racks(
-    async_session: AsyncSession,
-    db_sections: PagedResponseSchema[SectionOutputSchema]
+    async_session: AsyncSession, db_sections: PagedResponseSchema[SectionOutputSchema]
 ) -> PagedResponseSchema[RackOutputSchema]:
     return await get_all_racks(
         async_session, PageParams(), output_schema=RackOutputSchema

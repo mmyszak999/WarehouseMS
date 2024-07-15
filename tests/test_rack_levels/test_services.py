@@ -476,9 +476,8 @@ async def test_check_if_rack_level_slots_are_created_correctly_when_creating_rac
         rack_id=rack_output.id, rack_level_number=1
     )
     rack_level_output = await create_rack_level(async_session, rack_level_input)
-    
+
     assert rack_level_output.max_slots == len(rack_level_output.rack_level_slots)
-    assert rack_level_output.max_slots == len([
-        slot for slot in rack_level_output.rack_level_slots if slot.is_active
-    ])
-    
+    assert rack_level_output.max_slots == len(
+        [slot for slot in rack_level_output.rack_level_slots if slot.is_active]
+    )

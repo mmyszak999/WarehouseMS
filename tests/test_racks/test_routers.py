@@ -136,7 +136,6 @@ async def test_authenticated_user_can_get_all_racks(
 @pytest.mark.asyncio
 async def test_only_staff_user_can_update_single_rack(
     async_client: AsyncClient,
-    
     db_racks: PagedResponseSchema[RackOutputSchema],
     user: UserOutputSchema,
     user_headers: dict[str, str],
@@ -181,8 +180,7 @@ async def test_only_staff_user_can_delete_single_rack(
 ):
     rack_input = RackInputSchemaFactory().generate(section_id=db_sections.results[0].id)
     rack_output = await create_rack(async_session, rack_input)
-    
-    
+
     response = await async_client.delete(
         f"racks/{rack_output.id}", headers=user_headers
     )

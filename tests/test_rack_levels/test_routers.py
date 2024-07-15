@@ -7,13 +7,15 @@ from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.rack_levels.schemas import RackLevelOutputSchema
 from src.apps.racks.schemas import RackOutputSchema
 from src.apps.sections.schemas import SectionOutputSchema
-from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
+from src.apps.stocks.schemas.stock_schemas import (
+    StockOutputSchema,
+    StockRackLevelInputSchema,
+)
 from src.apps.users.schemas import UserOutputSchema
 from src.core.factory.rack_level_factory import (
     RackLevelInputSchemaFactory,
     RackLevelUpdateSchemaFactory,
 )
-from src.apps.stocks.schemas.stock_schemas import StockRackLevelInputSchema
 from src.core.pagination.schemas import PagedResponseSchema
 from tests.test_products.conftest import db_categories, db_products
 from tests.test_rack_levels.conftest import db_rack_levels

@@ -1,7 +1,7 @@
 import pytest
 from fastapi import status
 from fastapi_jwt_auth import AuthJWT
-from httpx import AsyncClient, Response 
+from httpx import AsyncClient, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
@@ -181,8 +181,6 @@ async def test_only_staff_can_get_delete_single_section(
 ):
     section_input = SectionInputSchemaFactory().generate()
     section = await create_section(async_session, section_input)
-    
-    response = await async_client.delete(
-        f"sections/{section.id}", headers=user_headers
-    )
+
+    response = await async_client.delete(f"sections/{section.id}", headers=user_headers)
     assert response.status_code == status_code
