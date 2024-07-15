@@ -95,6 +95,29 @@ async def test_raise_exception_when_creating_user_stock_with_nonexistent_waiting
 
 
 @pytest.mark.asyncio
+async def test_raise_exception_when_creating_user_stock_with_nonexistent_rack_level_slots(
+    async_session: AsyncSession,
+    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    with pytest.raises(DoesNotExist):
+        await create_user_stock_object(
+            async_session,
+            from_rack_level_slot_id=generate_uuid(),
+            user_id=db_staff_user.id,
+            stock_id=db_stocks.results[0].id,
+        )
+
+    with pytest.raises(DoesNotExist):
+        await create_user_stock_object(
+            async_session,
+            to_rack_level_slot_id=generate_uuid(),
+            user_id=db_staff_user.id,
+            stock_id=db_stocks.results[0].id,
+        )
+
+
+@pytest.mark.asyncio
 async def test_raise_exception_when_creating_user_stock_with_nonexistent_user(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
