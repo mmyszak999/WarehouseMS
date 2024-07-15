@@ -13,6 +13,7 @@ from src.apps.receptions.schemas import (
     ReceptionProductInputSchema,
 )
 from src.apps.receptions.services import create_reception, get_all_receptions
+from src.apps.waiting_rooms.models import WaitingRoom
 from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.schemas.stock_schemas import (
     StockIssueInputSchema,
@@ -62,7 +63,6 @@ DB_WAITING_ROOMS_SCHEMAS = [
 async def db_stocks(
     async_session: AsyncSession,
     db_sections: PagedResponseSchema[SectionOutputSchema],
-    db_racks: PagedResponseSchema[RackOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ) -> PagedResponseSchema[StockOutputSchema]:
@@ -72,6 +72,7 @@ async def db_stocks(
     ]
     products = db_products.results + db_products.results
     
+    db_racks = await get_all_racks(async_session, PageParams(), output_schema=RackOutputSchema)
     for product, rack in zip(products, db_racks.results):
         rack = await if_exists(
             Rack, "id", rack.id, async_session
@@ -84,9 +85,8 @@ async def db_stocks(
             ]
         )
         await create_reception(async_session, reception_input, db_staff_user.id)
-        
-    await async_session.flush()
-    await async_session.refresh(waiting_rooms[0])
+    
+    #one stock to the waiting room
     reception_input = ReceptionInputSchemaFactory().generate(
         products_data=[
             ReceptionProductInputSchemaFactory().generate(
@@ -95,10 +95,18 @@ async def db_stocks(
         ]
     )
     await create_reception(async_session, reception_input, db_staff_user.id)
-
-    stocks = await get_all_stocks(async_session, PageParams())
+    
+    #one stock will be issued
+    reception_input = ReceptionInputSchemaFactory().generate(
+        products_data=[
+            ReceptionProductInputSchemaFactory().generate(
+                product_id=db_products.results[0].id,
+                waiting_room_id=waiting_rooms[1].id)
+        ]
+    )
+    result = await create_reception(async_session, reception_input, db_staff_user.id)
     issue_input = IssueInputSchemaFactory().generate(
-        stock_ids=[StockIssueInputSchema(id=stocks.results[-1].id)]
+        stock_ids=[StockIssueInputSchema(id=result.stocks[0].id)]
     )
     await create_issue(async_session, issue_input, db_staff_user.id)
     await async_session.flush()
@@ -106,7 +114,8 @@ async def db_stocks(
     waiting_room_with_no_stocks = await create_waiting_room(
         async_session, WaitingRoomInputSchemaFactory().generate(), testing=True
     )
-    [await async_session.refresh(waiting_room) for waiting_room in waiting_rooms]
+    await async_session.refresh(waiting_room_with_no_stocks)
+    await async_session.refresh(waiting_rooms[0])
     return await get_all_stocks(async_session, PageParams())
 
 

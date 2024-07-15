@@ -51,7 +51,6 @@ async def test_only_user_with_proper_permission_can_create_reception(
     user_headers: dict[str, str],
     db_products: PagedResponseSchema[ProductOutputSchema],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
     reception_data = ReceptionInputSchemaFactory().generate(
@@ -89,9 +88,7 @@ async def test_only_user_with_proper_permission_can_get_all_receptions(
     user: UserOutputSchema,
     user_headers: dict[str, str],
     db_products: PagedResponseSchema[ProductOutputSchema],
-    db_sections: PagedResponseSchema[SectionOutputSchema],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
 
@@ -123,9 +120,7 @@ async def test_only_user_with_proper_permission_can_get_single_reception(
     user: UserOutputSchema,
     user_headers: dict[str, str],
     db_products: PagedResponseSchema[ProductOutputSchema],
-    db_sections: PagedResponseSchema[SectionOutputSchema],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
 
@@ -159,9 +154,7 @@ async def test_only_user_with_proper_permission_can_update_single_reception(
     user: UserOutputSchema,
     user_headers: dict[str, str],
     db_products: PagedResponseSchema[ProductOutputSchema],
-    db_sections: PagedResponseSchema[SectionOutputSchema],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
     update_data = ReceptionUpdateSchemaFactory().generate(description="wow")

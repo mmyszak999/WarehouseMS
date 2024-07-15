@@ -13,7 +13,7 @@ from src.apps.stocks.schemas.stock_schemas import (
     StockIssueInputSchema,
     StockOutputSchema,
 )
-from src.apps.stocks.services.stock_services import issue_stocks
+from src.apps.stocks.services.stock_services import issue_stocks, get_all_stocks
 from src.apps.users.schemas import UserOutputSchema
 from src.core.exceptions import (
     AlreadyExists,
@@ -45,10 +45,10 @@ from tests.test_warehouse.conftest import db_warehouse
 @pytest.mark.asyncio
 async def test_if_issue_was_created_correctly(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
+    db_stocks = await get_all_stocks(async_session, PageParams())
     issue_input = IssueInputSchemaFactory().generate(
         stock_ids=[
             StockIssueInputSchema(id=db_stocks.results[0].id),
@@ -65,7 +65,6 @@ async def test_if_issue_was_created_correctly(
 @pytest.mark.asyncio
 async def test_raise_exception_when_issue_data_is_missing(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -76,7 +75,6 @@ async def test_raise_exception_when_issue_data_is_missing(
 @pytest.mark.asyncio
 async def test_if_only_one_issue_was_returned(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -88,7 +86,6 @@ async def test_if_only_one_issue_was_returned(
 @pytest.mark.asyncio
 async def test_raise_exception_while_getting_nonexistent_issue(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -99,7 +96,6 @@ async def test_raise_exception_while_getting_nonexistent_issue(
 @pytest.mark.asyncio
 async def test_if_multiple_issues_were_returned(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -110,7 +106,6 @@ async def test_if_multiple_issues_were_returned(
 @pytest.mark.asyncio
 async def test_raise_exception_while_updating_nonexistent_issue(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):

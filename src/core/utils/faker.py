@@ -25,7 +25,7 @@ def set_product_weight() -> int:
 
 
 def set_product_count() -> int:
-    return random.randint(2, 10)
+    return random.randint(2, 5)
 
 
 def set_waiting_room_weight() -> int:
@@ -37,7 +37,7 @@ def set_waiting_room_stocks() -> int:
 
 
 def set_max_waiting_rooms() -> int:
-    return random.randint(6, 9)
+    return random.randint(5, 8)
 
 
 def set_max_sections() -> int:

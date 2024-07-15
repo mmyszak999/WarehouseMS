@@ -37,7 +37,7 @@ class Issue(Base):
         nullable=True,
     )
     user = relationship("User", back_populates="issues", lazy="joined")
-    stocks = relationship("Stock", back_populates="issue", lazy="joined")
+    stocks = relationship("Stock", back_populates="issue", lazy="selectin")
     stock_user_history = relationship(
         "UserStock",
         back_populates="issue",

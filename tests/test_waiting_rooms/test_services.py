@@ -304,14 +304,9 @@ async def test_raise_exception_while_adding_issued_stock_to_waiting_room(
 async def test_raise_exception_while_adding_stock_to_the_current_waiting_room(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
-    print(db_stocks.results)
     available_stocks = [stock for stock in db_stocks.results if stock.waiting_room_id]
-    print(
-        available_stocks
-    )
     stock_schema = StockWaitingRoomInputSchema(id=available_stocks[0].id)
 
     with pytest.raises(StockAlreadyInWaitingRoomException):
@@ -327,7 +322,6 @@ async def test_raise_exception_while_adding_stock_to_the_current_waiting_room(
 async def test_raise_exception_when_waiting_room_got_no_available_space_for_new_stocks(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
@@ -351,7 +345,6 @@ async def test_raise_exception_when_waiting_room_got_no_available_space_for_new_
 async def test_raise_exception_when_waiting_room_got_no_available_weight_for_new_stocks(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
@@ -370,8 +363,7 @@ async def test_raise_exception_when_waiting_room_got_no_available_weight_for_new
 @pytest.mark.asyncio
 async def test_raise_exception_when_no_stock_provided_while_managing_waiting_room_state(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
+    db_stocks: PagedResponseSchema[StockOutputSchema]
 ):
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     waiting_room_input = WaitingRoomInputSchemaFactory().generate(
@@ -388,7 +380,6 @@ async def test_raise_exception_when_no_stock_provided_while_managing_waiting_roo
 async def test_check_if_available_weight_is_set_correctly(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     waiting_room_input = WaitingRoomInputSchemaFactory().generate(
@@ -420,7 +411,6 @@ async def test_check_if_available_weight_is_set_correctly(
 async def test_check_if_available_stock_amount_is_set_correctly(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     waiting_room_input = WaitingRoomInputSchemaFactory().generate(max_stocks=1)

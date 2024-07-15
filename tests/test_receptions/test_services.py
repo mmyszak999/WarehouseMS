@@ -96,7 +96,6 @@ async def test_raise_exception_when_reception_data_is_missing(
 @pytest.mark.asyncio
 async def test_if_only_one_reception_was_returned(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
     reception = await get_single_reception(async_session, db_receptions.results[1].id)
@@ -107,7 +106,6 @@ async def test_if_only_one_reception_was_returned(
 @pytest.mark.asyncio
 async def test_raise_exception_while_getting_nonexistent_reception(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
     with pytest.raises(DoesNotExist):
@@ -117,7 +115,6 @@ async def test_raise_exception_while_getting_nonexistent_reception(
 @pytest.mark.asyncio
 async def test_if_multiple_receptions_were_returned(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
     receptions = await get_all_receptions(async_session, PageParams(page=1, size=5))
@@ -127,7 +124,6 @@ async def test_if_multiple_receptions_were_returned(
 @pytest.mark.asyncio
 async def test_raise_exception_while_updating_nonexistent_reception(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
     update_data = ReceptionUpdateSchemaFactory().generate()

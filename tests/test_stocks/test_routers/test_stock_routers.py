@@ -43,7 +43,6 @@ async def test_only_authenticated_user_can_get_available_stocks(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
-    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
@@ -76,7 +75,6 @@ async def test_only_staff_user_can_get_all_stocks(
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
-    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_stocks: PagedResponseSchema[StockOutputSchema],
 ):
@@ -108,7 +106,6 @@ async def test_only_staff_user_can_get_all_stock_history(
     user_headers: dict[str, str],
     db_products: PagedResponseSchema[ProductOutputSchema],
     status_code: int,
-    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
@@ -140,7 +137,6 @@ async def test_only_staff_user_can_get_all_data_about_single_stock(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
-    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
@@ -173,12 +169,9 @@ async def test_only_authenticated_user_can_get_basic_data_about_single_stock(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],
-    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     response = await async_client.get(

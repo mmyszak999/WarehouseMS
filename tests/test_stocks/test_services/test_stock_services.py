@@ -286,9 +286,7 @@ async def test_if_all_stocks_were_returned(
 async def test_if_stocks_are_issued_correctly(
     async_session: AsyncSession,
     db_products: PagedResponseSchema[ProductOutputSchema],
-    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
 
