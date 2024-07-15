@@ -13,6 +13,7 @@ from src.core.factory.rack_level_factory import (
     RackLevelInputSchemaFactory,
     RackLevelUpdateSchemaFactory,
 )
+from src.apps.stocks.schemas.stock_schemas import StockRackLevelInputSchema
 from src.core.pagination.schemas import PagedResponseSchema
 from tests.test_products.conftest import db_categories, db_products
 from tests.test_rack_levels.conftest import db_rack_levels
@@ -184,5 +185,38 @@ async def test_only_staff_can_delete_single_rack_level(
 ):
     response = await async_client.delete(
         f"rack_levels/{db_rack_levels.results[0].id}", headers=user_headers
+    )
+    assert response.status_code == status_code
+
+
+@pytest.mark.parametrize(
+    "user, user_headers, status_code",
+    [
+        (
+            pytest.lazy_fixture("db_user"),
+            pytest.lazy_fixture("auth_headers"),
+            status.HTTP_403_FORBIDDEN,
+        ),
+        (
+            pytest.lazy_fixture("db_staff_user"),
+            pytest.lazy_fixture("staff_auth_headers"),
+            status.HTTP_200_OK,
+        ),
+    ],
+)
+@pytest.mark.asyncio
+async def test_only_staff_can_add_single_stock_to_rack_level(
+    async_client: AsyncClient,
+    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
+    user: UserOutputSchema,
+    user_headers: dict[str, str],
+    status_code: int,
+):
+    rack_level_input = StockRackLevelInputSchema(id=db_stocks.results[0].id)
+    response = await async_client.patch(
+        f"rack_levels/{db_rack_levels.results[2].id}/add-stock",
+        headers=user_headers,
+        content=rack_level_input.json(),
     )
     assert response.status_code == status_code

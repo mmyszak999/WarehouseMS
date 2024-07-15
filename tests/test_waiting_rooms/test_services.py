@@ -6,6 +6,8 @@ from src.apps.stocks.schemas.stock_schemas import (
     StockOutputSchema,
     StockWaitingRoomInputSchema,
 )
+from src.apps.stocks.models import Stock
+from src.apps.rack_level_slots.models import RackLevelSlot
 from src.apps.stocks.services.stock_services import create_stocks
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.sections.schemas import SectionOutputSchema
@@ -23,6 +25,7 @@ from src.apps.waiting_rooms.services import (
     get_single_waiting_room,
     manage_waiting_room_state,
     update_single_waiting_room,
+    manage_old_waiting_room_state
 )
 from src.apps.warehouse.services import create_warehouse
 from src.core.exceptions import (
@@ -495,3 +498,47 @@ async def test_check_if_old_and_new_waiting_room_state_is_managed_correctly(
 
     assert old_waiting_room.occupied_slots == 0
     assert old_waiting_room.current_stock_weight == 0
+
+
+@pytest.mark.asyncio
+async def test_check_if_stock_from_rack_level_slot_is_added_to_the_waiting_room_correctly(
+    async_session: AsyncSession,
+    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    waiting_room_input_1 = WaitingRoomInputSchemaFactory().generate(max_stocks=1)
+    waiting_room_1 = await create_waiting_room(
+        async_session, waiting_room_input_1, testing=True
+    )
+
+    stock = await if_exists(
+        Stock, "id", db_stocks.results[0].id, async_session
+    )
+    print(stock.__dict__, "3")
+    
+    old_rack_level_slot = await if_exists(
+        RackLevelSlot, "id", stock.rack_level_slot_id, async_session
+    )
+    print(old_rack_level_slot.stock, "1")
+    
+    stock_schema = StockWaitingRoomInputSchema(id=stock.id)
+    await add_single_stock_to_waiting_room(
+        async_session, waiting_room_1.id, stock_schema, db_staff_user.id
+    )
+    
+    print(old_rack_level_slot.__dict__, "2")
+    await async_session.refresh(stock)
+    print(stock.__dict__, "3")
+    
+    
+    """await async_session.flush()
+    await async_session.refresh(waiting_room_1)
+    await async_session.refresh(old_rack_level_slot)
+    await async_session.refresh(stock)"""
+    
+
+    assert waiting_room_1.occupied_slots == 1
+    assert old_rack_level_slot.stock_id == None
+    assert stock.rack_level_slot_id == None
+    assert stock.waiting_room_id == waiting_room_1.id

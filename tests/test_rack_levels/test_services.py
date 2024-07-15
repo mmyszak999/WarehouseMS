@@ -462,3 +462,23 @@ async def test_check_if_rack_state_managed_correctly_when_rack_level_deleted(
         rack_object_with_no_rack_levels.weight_to_reserve
         == rack_output.weight_to_reserve
     )
+
+
+@pytest.mark.asyncio
+async def test_check_if_rack_level_slots_are_created_correctly_when_creating_rack_level(
+    async_session: AsyncSession,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
+):
+    rack_input = RackInputSchemaFactory().generate(section_id=db_sections.results[0].id)
+    rack_output = await create_rack(async_session, rack_input)
+
+    rack_level_input = RackLevelInputSchemaFactory().generate(
+        rack_id=rack_output.id, rack_level_number=1
+    )
+    rack_level_output = await create_rack_level(async_session, rack_level_input)
+    
+    assert rack_level_output.max_slots == len(rack_level_output.rack_level_slots)
+    assert rack_level_output.max_slots == len([
+        slot for slot in rack_level_output.rack_level_slots if slot.is_active
+    ])
+    

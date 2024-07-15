@@ -51,7 +51,7 @@ from src.core.utils.orm import if_exists
 
 async def create_rack_level(
     session: AsyncSession, rack_level_input: RackLevelInputSchema
-) -> RackLevelBaseOutputSchema:
+) -> RackLevelOutputSchema:
     from src.apps.rack_level_slots.schemas import RackLevelSlotInputSchema
     from src.apps.rack_level_slots.services import create_rack_level_slot
 
@@ -121,7 +121,7 @@ async def create_rack_level(
     await session.refresh(rack)
     await session.refresh(new_rack_level)
 
-    return RackLevelBaseOutputSchema.from_orm(new_rack_level)
+    return RackLevelOutputSchema.from_orm(new_rack_level)
 
 
 async def get_single_rack_level(
@@ -341,10 +341,10 @@ async def add_single_stock_to_rack_level(
         if stock_object.rack_level_slot.rack_level_id == rack_level_id:
             raise StockAlreadyInRackLevelException
 
-    if not rack_level_slot_object.rack_level.available_slots:
+    if not rack_level_object.available_slots:
         raise NoAvailableSlotsInRackLevelException
 
-    if rack_level_slot_object.rack_level.available_weight < stock_object.weight:
+    if rack_level_object.available_weight < stock_object.weight:
         raise NoAvailableWeightInRackLevelException
 
     _old_waiting_room_id = None
