@@ -59,6 +59,6 @@ class Section(Base):
         ForeignKey("warehouse.id", onupdate="SET NULL"),
         nullable=False,
     )
-    warehouse = relationship("Warehouse", back_populates="sections", lazy="joined")
+    warehouse = relationship("Warehouse", back_populates="sections", lazy="selectin")
     racks = relationship("Rack", back_populates="section", lazy="selectin")
     created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

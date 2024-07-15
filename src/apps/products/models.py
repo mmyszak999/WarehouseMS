@@ -73,7 +73,7 @@ class Product(Base):
         "Category",
         secondary=category_product_association_table,
         back_populates="products",
-        lazy="joined",
+        lazy="selectin",
     )
     stocks = relationship("Stock", back_populates="product", lazy="selectin")
     created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

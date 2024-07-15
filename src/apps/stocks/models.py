@@ -30,7 +30,7 @@ class UserStock(Base):
         "User",
         back_populates="stock_user_history",
         foreign_keys=[user_id],
-        lazy="joined",
+        lazy="selectin",
     )
 
     stock_id = Column(
@@ -40,7 +40,7 @@ class UserStock(Base):
         "Stock",
         back_populates="stock_user_history",
         foreign_keys=[stock_id],
-        lazy="joined",
+        lazy="selectin",
     )
 
     moved_at = Column(DateTime, default=dt.datetime.now, onupdate=dt.datetime.now)
@@ -49,33 +49,33 @@ class UserStock(Base):
         String, ForeignKey("waiting_room.id", ondelete="SET NULL"), nullable=True
     )
     from_waiting_room = relationship(
-        "WaitingRoom", foreign_keys=[from_waiting_room_id], lazy="joined"
+        "WaitingRoom", foreign_keys=[from_waiting_room_id], lazy="selectin"
     )
 
     to_waiting_room_id = Column(
         String, ForeignKey("waiting_room.id", ondelete="SET NULL"), nullable=True
     )
     to_waiting_room = relationship(
-        "WaitingRoom", foreign_keys=[to_waiting_room_id], lazy="joined"
+        "WaitingRoom", foreign_keys=[to_waiting_room_id], lazy="selectin"
     )
 
     issue_id = Column(
         String, ForeignKey("issue.id", ondelete="SET NULL"), nullable=True
     )
-    issue = relationship("Issue", foreign_keys=[issue_id], lazy="joined")
+    issue = relationship("Issue", foreign_keys=[issue_id], lazy="selectin")
 
     to_rack_level_slot_id = Column(
         String, ForeignKey("rack_level_slot.id", ondelete="SET NULL"), nullable=True
     )
     to_rack_level_slot = relationship(
-        "RackLevelSlot", foreign_keys=[to_rack_level_slot_id], lazy="joined"
+        "RackLevelSlot", foreign_keys=[to_rack_level_slot_id], lazy="selectin"
     )
 
     from_rack_level_slot_id = Column(
         String, ForeignKey("rack_level_slot.id", ondelete="SET NULL"), nullable=True
     )
     from_rack_level_slot = relationship(
-        "RackLevelSlot", foreign_keys=[from_rack_level_slot_id], lazy="joined"
+        "RackLevelSlot", foreign_keys=[from_rack_level_slot_id], lazy="selectin"
     )
 
 
@@ -119,7 +119,7 @@ class Stock(Base):
         lazy="selectin",
     )
     rack_level_slot = relationship(
-        "RackLevelSlot", uselist=False, back_populates="stock", lazy="joined"
+        "RackLevelSlot", uselist=False, back_populates="stock", lazy="selectin"
     )
     rack_level_slot_id = Column(
         String,
