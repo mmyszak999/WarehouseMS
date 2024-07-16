@@ -512,27 +512,18 @@ async def test_check_if_stock_from_rack_level_slot_is_added_to_the_waiting_room_
     )
 
     stock = await if_exists(Stock, "id", db_stocks.results[0].id, async_session)
-    print(stock.__dict__, "3")
 
     old_rack_level_slot = await if_exists(
         RackLevelSlot, "id", stock.rack_level_slot_id, async_session
     )
-    print(old_rack_level_slot.stock, "1")
 
     stock_schema = StockWaitingRoomInputSchema(id=stock.id)
     await add_single_stock_to_waiting_room(
         async_session, waiting_room_1.id, stock_schema, db_staff_user.id
     )
 
-    print(old_rack_level_slot.__dict__, "2")
     await async_session.refresh(stock)
-    print(stock.__dict__, "3")
-
-    """await async_session.flush()
-    await async_session.refresh(waiting_room_1)
-    await async_session.refresh(old_rack_level_slot)
-    await async_session.refresh(stock)"""
-
+    
     assert waiting_room_1.occupied_slots == 1
     assert old_rack_level_slot.stock_id == None
     assert stock.rack_level_slot_id == None
