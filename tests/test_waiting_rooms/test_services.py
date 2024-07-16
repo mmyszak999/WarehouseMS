@@ -523,7 +523,7 @@ async def test_check_if_stock_from_rack_level_slot_is_added_to_the_waiting_room_
     )
 
     await async_session.refresh(stock)
-    
+
     assert waiting_room_1.occupied_slots == 1
     assert old_rack_level_slot.stock_id == None
     assert stock.rack_level_slot_id == None

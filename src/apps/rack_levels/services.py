@@ -28,6 +28,7 @@ from src.apps.stocks.schemas.stock_schemas import StockRackLevelInputSchema
 from src.apps.waiting_rooms.services import manage_old_waiting_room_state
 from src.core.exceptions import (
     AlreadyExists,
+    CannotMoveIssuedStockException,
     DoesNotExist,
     IsOccupied,
     NoAvailableRackLevelSlotException,
@@ -251,11 +252,11 @@ async def update_single_rack_level(
 
         max_slots_difference = new_max_slots - rack_level_object.max_slots
         if (new_max_slots < rack_level_object.max_slots) and (
-            (rack_level_object.available_slots - max_slots_difference) < 0
+            (rack_level_object.active_slots > new_max_slots)
         ):
             raise NotEnoughRackLevelResourcesException(
                 resource="slots",
-                reason="new max slots amount too small in relation to the available slots amount",
+                reason="new max slots amount too small in relation to the active slots amount",
             )
 
         creating_slots = False if max_slots_difference <= 0 else True
@@ -366,7 +367,7 @@ async def add_single_stock_to_rack_level(
     rack_level_slot_object = available_rack_level_slot.scalar()
     if not rack_level_slot_object:
         raise NoAvailableRackLevelSlotException(
-            stock_object.product.name, stock_object.product_count, stock.weight
+            stock_object.product.name, stock_object.product_count, stock_object.weight
         )
     _new_rack_level_slot_object = rack_level_slot_object
 
