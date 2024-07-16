@@ -710,6 +710,10 @@ async def test_raise_exception_when_rack_level_does_not_have_matching_available_
     db_sections: PagedResponseSchema[SectionOutputSchema],
     db_staff_user: PagedResponseSchema[UserOutputSchema],
 ):
+    not_issued_stocks = [
+        stock for stock in db_stocks.results if not stock.is_issued
+    ]
+    
     rack_input = RackInputSchemaFactory().generate(
         section_id=db_sections.results[0].id, max_levels=1
     )
@@ -720,7 +724,7 @@ async def test_raise_exception_when_rack_level_does_not_have_matching_available_
     )
     rack_level_output = await create_rack_level(async_session, rack_level_input_1)
 
-    stock_1 = db_stocks.results[0]
+    stock_1 = not_issued_stocks[0]
     stock_id_input_1 = StockRackLevelSlotInputSchema(id=stock_1.id)
     await add_single_stock_to_rack_level(
         async_session, rack_level_output.id, stock_id_input_1, db_staff_user.id
@@ -733,7 +737,7 @@ async def test_raise_exception_when_rack_level_does_not_have_matching_available_
     async_session.add(rack_level_object)
     await async_session.commit()
 
-    stock_2 = db_stocks.results[0]
+    stock_2 = not_issued_stocks[0]
     stock_id_input_2 = StockRackLevelSlotInputSchema(id=stock_2.id)
 
     with pytest.raises(NoAvailableRackLevelSlotException):

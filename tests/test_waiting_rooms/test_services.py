@@ -506,12 +506,15 @@ async def test_check_if_stock_from_rack_level_slot_is_added_to_the_waiting_room_
     db_products: PagedResponseSchema[ProductOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
+    not_issued_stocks = [
+        stock for stock in db_stocks.results if not stock.is_issued
+    ]
     waiting_room_input_1 = WaitingRoomInputSchemaFactory().generate(max_stocks=1)
     waiting_room_1 = await create_waiting_room(
         async_session, waiting_room_input_1, testing=True
     )
 
-    stock = await if_exists(Stock, "id", db_stocks.results[0].id, async_session)
+    stock = await if_exists(Stock, "id", not_issued_stocks[0].id, async_session)
 
     old_rack_level_slot = await if_exists(
         RackLevelSlot, "id", stock.rack_level_slot_id, async_session
