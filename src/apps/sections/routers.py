@@ -10,6 +10,14 @@ from src.apps.sections.schemas import (
     SectionOutputSchema,
     SectionUpdateSchema,
 )
+from src.apps.racks.schemas import (
+    RackBaseOutputSchema,
+    RackOutputSchema,
+)
+from src.apps.racks.services import (
+    get_all_racks,
+    get_single_rack,
+)
 from src.apps.sections.services import (
     create_section,
     delete_single_section,
@@ -74,7 +82,45 @@ async def get_section(
         return await get_single_section(session, section_id)
     return await get_single_section(
         session, section_id, output_schema=SectionBaseOutputSchema
-    )zz
+    )
+
+
+@section_router.get(
+    "/{section_id}/racks",
+    response_model=Union[
+        PagedResponseSchema[RackBaseOutputSchema],
+        PagedResponseSchema[RackOutputSchema],
+    ],
+    status_code=status.HTTP_200_OK,
+)
+async def get_section_racks(
+    section_id: str,
+    session: AsyncSession = Depends(get_db),
+    page_params: PageParams = Depends(),
+    request_user: User = Depends(authenticate_user),
+) -> Union[
+    PagedResponseSchema[RackBaseOutputSchema],
+    PagedResponseSchema[RackOutputSchema],
+]:
+    return await get_all_racks(session, page_params, section_id=section_id)
+
+
+@section_router.get(
+    "/{section_id}/racks/{rack_id}",
+    response_model=Union[RackOutputSchema, RackBaseOutputSchema],
+    status_code=status.HTTP_200_OK,
+)
+async def get_section_rack(
+    section_id: str,
+    rack_id: str,
+    session: AsyncSession = Depends(get_db),
+    request_user: User = Depends(authenticate_user),
+) -> Union[RackBaseOutputSchema, RackOutputSchema]:
+    if request_user.is_staff or request_user.can_move_stocks:
+        return await get_single_rack(session, rack_id, section_id=section_id)
+    return await get_single_rack(
+        session, rack_id, output_schema=RackBaseOutputSchema, section_id=section_id
+    )
 
 
 @section_router.patch(
