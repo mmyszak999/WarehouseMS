@@ -68,6 +68,7 @@ async def create_waiting_room(
 
     if testing:
         await session.commit()
+        await session.refresh(new_waiting_room)
         return new_waiting_room
 
     await session.commit()
@@ -277,6 +278,7 @@ async def add_single_stock_to_waiting_room(
             old_rack_level_slot_object,
             old_rack_level_slot_id=_old_rack_level_slot_id,
         )
+        old_rack_level_slot_object.stock_id = None
         _old_rack_level_slot_id = old_rack_level_slot_object.id
 
     await create_user_stock_object(

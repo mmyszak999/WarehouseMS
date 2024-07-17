@@ -15,7 +15,7 @@ class CategoryInputSchemaFactory(SchemaFactory):
 
     def generate(self, name: str = None):
         return self.schema_class(
-            name=name or self.faker.ecommerce_category(),
+            name=name or self.faker.sentence(),
         )
 
 

@@ -88,7 +88,6 @@ async def test_raise_exception_when_there_is_no_space_for_new_sections_while_cre
 @pytest.mark.asyncio
 async def test_if_single_section_is_returned(
     async_session: AsyncSession,
-    db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
     db_sections: PagedResponseSchema[SectionOutputSchema],
 ):
     section = await get_single_section(async_session, db_sections.results[0].id)
@@ -324,9 +323,7 @@ async def test_raise_exception_when_deleting_nonexistent_section(
 
 @pytest.mark.asyncio
 async def test_raise_exception_when_deleting_section_with_occupied_racks(
-    async_session: AsyncSession,
-    db_sections: PagedResponseSchema[SectionOutputSchema],
-    db_racks: PagedResponseSchema[RackOutputSchema],
+    async_session: AsyncSession, db_sections: PagedResponseSchema[SectionOutputSchema]
 ):
     with pytest.raises(SectionIsNotEmptyException):
         await delete_single_section(async_session, db_sections.results[0].id)

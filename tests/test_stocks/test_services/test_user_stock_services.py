@@ -95,6 +95,29 @@ async def test_raise_exception_when_creating_user_stock_with_nonexistent_waiting
 
 
 @pytest.mark.asyncio
+async def test_raise_exception_when_creating_user_stock_with_nonexistent_rack_level_slots(
+    async_session: AsyncSession,
+    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    with pytest.raises(DoesNotExist):
+        await create_user_stock_object(
+            async_session,
+            from_rack_level_slot_id=generate_uuid(),
+            user_id=db_staff_user.id,
+            stock_id=db_stocks.results[0].id,
+        )
+
+    with pytest.raises(DoesNotExist):
+        await create_user_stock_object(
+            async_session,
+            to_rack_level_slot_id=generate_uuid(),
+            user_id=db_staff_user.id,
+            stock_id=db_stocks.results[0].id,
+        )
+
+
+@pytest.mark.asyncio
 async def test_raise_exception_when_creating_user_stock_with_nonexistent_user(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
@@ -145,7 +168,6 @@ async def test_raise_exception_when_getting_nonexistent_user_stock(
 @pytest.mark.asyncio
 async def test_check_if_single_user_stock_was_returned(
     async_session: AsyncSession,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_user_stocks: PagedResponseSchema[UserStockOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
@@ -160,7 +182,6 @@ async def test_check_if_single_user_stock_was_returned(
 async def test_check_if_returned_stock_history_is_complete_and_got_only_one_stock_involved(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_user_stocks: PagedResponseSchema[UserStockOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     issued_stocks = [stock for stock in db_stocks.results if stock.is_issued]
@@ -178,7 +199,6 @@ async def test_check_if_returned_stock_history_is_complete_and_got_only_one_stoc
 async def test_raise_exception_when_getting_stock_history_for_nonexistent_stock(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_user_stocks: PagedResponseSchema[UserStockOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     with pytest.raises(DoesNotExist):
@@ -191,7 +211,6 @@ async def test_raise_exception_when_getting_stock_history_for_nonexistent_stock(
 async def test_check_if_returned_stock_history_contain_only_single_user_activities(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_user_stocks: PagedResponseSchema[UserStockOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     user_stocks = await get_all_user_stocks_with_single_user_involvement(
@@ -207,7 +226,6 @@ async def test_check_if_returned_stock_history_contain_only_single_user_activiti
 async def test_raise_exception_when_getting_stock_history_containing_only_single_user_activities(
     async_session: AsyncSession,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_user_stocks: PagedResponseSchema[UserStockOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     with pytest.raises(DoesNotExist):

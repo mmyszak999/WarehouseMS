@@ -11,6 +11,7 @@ from src.core.factory.rack_factory import RackInputSchemaFactory
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
+from tests.test_sections.conftest import db_sections
 from tests.test_users.conftest import (
     auth_headers,
     create_superuser,
@@ -24,15 +25,8 @@ from tests.test_warehouse.conftest import db_warehouse
 
 @pytest_asyncio.fixture
 async def db_racks(
-    async_session: AsyncSession,
-    db_sections: PagedResponseSchema[SectionOutputSchema],
+    async_session: AsyncSession, db_sections: PagedResponseSchema[SectionOutputSchema]
 ) -> PagedResponseSchema[RackOutputSchema]:
-    for section in db_sections.results:
-        for _ in range(section.max_racks - 2):
-            await create_rack(
-                async_session, RackInputSchemaFactory().generate(section_id=section.id)
-            )
-
     return await get_all_racks(
         async_session, PageParams(), output_schema=RackOutputSchema
     )

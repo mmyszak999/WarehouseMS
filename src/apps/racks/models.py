@@ -57,6 +57,6 @@ class Rack(Base):
         ForeignKey("section.id", onupdate="SET NULL"),
         nullable=False,
     )
-    section = relationship("Section", back_populates="racks", lazy="joined")
+    section = relationship("Section", back_populates="racks", lazy="selectin")
     rack_levels = relationship("RackLevel", back_populates="rack", lazy="selectin")
     created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

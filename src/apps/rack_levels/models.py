@@ -57,7 +57,7 @@ class RackLevel(Base):
         ForeignKey("rack.id", onupdate="SET NULL"),
         nullable=False,
     )
-    rack = relationship("Rack", back_populates="rack_levels", lazy="joined")
+    rack = relationship("Rack", back_populates="rack_levels", lazy="selectin")
     rack_level_slots = relationship(
         "RackLevelSlot", back_populates="rack_level", lazy="selectin"
     )

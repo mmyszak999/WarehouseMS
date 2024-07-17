@@ -67,6 +67,7 @@ async def create_rack(
     session.add(section)
 
     await session.commit()
+    await session.refresh(section)
     return RackBaseOutputSchema.from_orm(new_rack)
 
 

@@ -5,6 +5,7 @@ from httpx import AsyncClient, Response
 
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.receptions.schemas import ReceptionOutputSchema
+from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.users.schemas import UserOutputSchema
 from src.core.factory.reception_factory import (
@@ -14,6 +15,8 @@ from src.core.factory.reception_factory import (
 )
 from src.core.pagination.schemas import PagedResponseSchema
 from tests.test_products.conftest import db_products
+from tests.test_rack_levels.conftest import db_rack_levels
+from tests.test_racks.conftest import db_racks
 from tests.test_receptions.conftest import db_receptions
 from tests.test_sections.conftest import db_sections
 from tests.test_stocks.conftest import db_stocks
@@ -48,7 +51,6 @@ async def test_only_user_with_proper_permission_can_create_reception(
     user_headers: dict[str, str],
     db_products: PagedResponseSchema[ProductOutputSchema],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
     reception_data = ReceptionInputSchemaFactory().generate(
@@ -87,7 +89,6 @@ async def test_only_user_with_proper_permission_can_get_all_receptions(
     user_headers: dict[str, str],
     db_products: PagedResponseSchema[ProductOutputSchema],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
 
@@ -120,7 +121,6 @@ async def test_only_user_with_proper_permission_can_get_single_reception(
     user_headers: dict[str, str],
     db_products: PagedResponseSchema[ProductOutputSchema],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
 
@@ -155,7 +155,6 @@ async def test_only_user_with_proper_permission_can_update_single_reception(
     user_headers: dict[str, str],
     db_products: PagedResponseSchema[ProductOutputSchema],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
     update_data = ReceptionUpdateSchemaFactory().generate(description="wow")

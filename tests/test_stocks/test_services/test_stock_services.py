@@ -4,6 +4,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.apps.issues.services import create_issue
 from src.apps.products.models import Product
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
+from src.apps.rack_level_slots.models import RackLevelSlot
+from src.apps.rack_level_slots.schemas import RackLevelSlotOutputSchema
+from src.apps.rack_levels.models import RackLevel
+from src.apps.rack_levels.services import create_rack_level
+from src.apps.racks.schemas import RackInputSchema, RackOutputSchema, RackUpdateSchema
+from src.apps.racks.services import create_rack, get_all_racks, get_single_rack
+from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.models import Stock
 from src.apps.stocks.schemas.stock_schemas import (
     StockIssueInputSchema,
@@ -23,13 +30,19 @@ from src.apps.waiting_rooms.services import create_waiting_room
 from src.apps.warehouse.schemas import WarehouseOutputSchema
 from src.core.exceptions import (
     AlreadyExists,
+    AmbiguousStockStoragePlaceDuringReceptionException,
     CannotRetrieveIssuedStockException,
     DoesNotExist,
     IsOccupied,
     MissingProductDataException,
+    NoAvailableRackLevelSlotException,
     NoAvailableWaitingRoomsException,
+    NotEnoughRackLevelResourcesException,
+    ServiceException,
 )
 from src.core.factory.issue_factory import IssueInputSchemaFactory
+from src.core.factory.rack_factory import RackInputSchemaFactory
+from src.core.factory.rack_level_factory import RackLevelInputSchemaFactory
 from src.core.factory.stock_factory import StockInputSchemaFactory
 from src.core.factory.waiting_room_factory import WaitingRoomInputSchemaFactory
 from src.core.pagination.models import PageParams
@@ -37,6 +50,7 @@ from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from src.core.utils.utils import generate_uuid
 from tests.test_products.conftest import db_products
+from tests.test_rack_level_slots.conftest import db_rack_level_slots
 from tests.test_sections.conftest import db_sections
 from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
@@ -69,6 +83,8 @@ async def test_if_stocks_were_created_correctly(
         async_session,
         user_id=db_staff_user.id,
         waiting_rooms_ids=[None, None, None],
+        rack_level_ids=[None, None, None],
+        rack_level_slots_ids=[None, None, None],
         testing=True,
         input_schemas=stock_inputs,
     )
@@ -87,7 +103,11 @@ async def test_raise_exception_when_product_data_is_missing(
 ):
     with pytest.raises(MissingProductDataException):
         await create_stocks(
-            async_session, user_id=db_staff_user.id, waiting_rooms_ids=[None]
+            async_session,
+            user_id=db_staff_user.id,
+            waiting_rooms_ids=[None],
+            rack_level_ids=[None],
+            rack_level_slots_ids=[None],
         )
 
 
@@ -118,6 +138,8 @@ async def test_raise_exception_when_there_is_no_waiting_room_available_for_new_s
             products=products,
             product_counts=product_counts,
             waiting_rooms_ids=[None],
+            rack_level_ids=[None],
+            rack_level_slots_ids=[None],
         )
 
 
@@ -125,6 +147,7 @@ async def test_raise_exception_when_there_is_no_waiting_room_available_for_new_s
 async def test_raise_exception_when_waiting_room_with_provided_id_does_not_exist_when_creating_stocks(
     async_session: AsyncSession,
     db_products: PagedResponseSchema[ProductOutputSchema],
+    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     products = [
@@ -138,6 +161,8 @@ async def test_raise_exception_when_waiting_room_with_provided_id_does_not_exist
             products=products,
             product_counts=product_counts,
             waiting_rooms_ids=[generate_uuid()],
+            rack_level_ids=[None],
+            rack_level_slots_ids=[None],
         )
 
 
@@ -146,6 +171,7 @@ async def test_check_if_stocks_are_created_correctly_with_provided_waiting_room_
     async_session: AsyncSession,
     db_warehouse: PagedResponseSchema[WarehouseOutputSchema],
     db_products: PagedResponseSchema[ProductOutputSchema],
+    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
     products = [
@@ -167,6 +193,8 @@ async def test_check_if_stocks_are_created_correctly_with_provided_waiting_room_
         products=products,
         product_counts=product_counts,
         waiting_rooms_ids=[waiting_room.id],
+        rack_level_ids=[None],
+        rack_level_slots_ids=[None],
     )
 
     assert stocks[0].waiting_room_id == waiting_room.id
@@ -199,6 +227,8 @@ async def test_raise_exception_when_waiting_room_with_provided_id_is_not_availab
             products=products,
             product_counts=product_counts,
             waiting_rooms_ids=[waiting_room.id],
+            rack_level_ids=[None],
+            rack_level_slots_ids=[None],
         )
 
 
@@ -222,7 +252,13 @@ async def test_check_if_new_stock_will_be_correctly_added_to_available_waiting_r
     ]
     product_counts = [4]
     stocks = await create_stocks(
-        async_session, db_staff_user.id, [waiting_room.id], products, product_counts
+        async_session,
+        db_staff_user.id,
+        [waiting_room.id],
+        rack_level_ids=[None],
+        rack_level_slots_ids=[None],
+        products=products,
+        product_counts=product_counts,
     )
     await async_session.flush()
 
@@ -267,15 +303,39 @@ async def test_if_all_stocks_were_returned(
 @pytest.mark.asyncio
 async def test_if_stocks_are_issued_correctly(
     async_session: AsyncSession,
+    db_products: PagedResponseSchema[ProductOutputSchema],
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
-    available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
-    stock_object = await if_exists(Stock, "id", available_stocks[0].id, async_session)
+
+    products = [
+        await if_exists(Product, "id", db_products.results[0].id, async_session)
+    ]
+    product_counts = [4]
+
+    waiting_room_input = WaitingRoomInputSchemaFactory().generate(
+        max_stocks=5, max_weight=9000
+    )
+    waiting_room = await create_waiting_room(
+        async_session, waiting_room_input, testing=True
+    )
+    await async_session.flush()
+
+    stocks = await create_stocks(
+        async_session,
+        user_id=db_staff_user.id,
+        products=products,
+        product_counts=product_counts,
+        waiting_rooms_ids=[waiting_room.id],
+        rack_level_ids=[None],
+        rack_level_slots_ids=[None],
+    )
+
+    stock_object = stocks[0]
     waiting_room_before = await if_exists(
         WaitingRoom, "id", stock_object.waiting_room_id, async_session
     )
+
     issue_schema = IssueInputSchemaFactory().generate(
         stock_ids=[StockIssueInputSchema(id=stock_object.id)]
     )
@@ -292,3 +352,261 @@ async def test_if_stocks_are_issued_correctly(
     assert set(waiting_room_before.stocks) - set([stock_object]) == set(
         waiting_room_after.stocks
     )
+
+
+@pytest.mark.asyncio
+async def test_raise_exception_when_provided_multiple_stock_storage_places(
+    async_session: AsyncSession,
+    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    product_count = 5
+    product = await if_exists(Product, "id", db_products.results[0].id, async_session)
+    with pytest.raises(AmbiguousStockStoragePlaceDuringReceptionException):
+        await create_stocks(
+            async_session,
+            user_id=db_staff_user.id,
+            waiting_rooms_ids=[generate_uuid()],
+            rack_level_ids=[generate_uuid()],
+            rack_level_slots_ids=[None],
+            product_counts=[product_count],
+            products=[product],
+        )
+
+
+@pytest.mark.asyncio
+async def test_if_random_waiting_room_is_provided_for_stock_when_no_storage_place_was_assigned(
+    async_session: AsyncSession,
+    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    product_count = 5
+    product = await if_exists(Product, "id", db_products.results[0].id, async_session)
+
+    stocks = await create_stocks(
+        async_session,
+        user_id=db_staff_user.id,
+        waiting_rooms_ids=[None],
+        rack_level_ids=[None],
+        rack_level_slots_ids=[None],
+        product_counts=[product_count],
+        products=[product],
+    )
+
+    stock = stocks[0]
+
+    assert isinstance(stock.waiting_room, WaitingRoom) == True
+
+
+@pytest.mark.asyncio
+async def test_raise_exception_when_provided_nonexistent_rack_level_slot_id(
+    async_session: AsyncSession,
+    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    product_count = 5
+    product = await if_exists(Product, "id", db_products.results[0].id, async_session)
+
+    with pytest.raises(DoesNotExist):
+        await create_stocks(
+            async_session,
+            user_id=db_staff_user.id,
+            waiting_rooms_ids=[None],
+            rack_level_ids=[None],
+            rack_level_slots_ids=[generate_uuid()],
+            product_counts=[product_count],
+            products=[product],
+        )
+
+
+@pytest.mark.asyncio
+async def test_raise_exception_when_rack_level_slot_is_not_active_or_occupied(
+    async_session: AsyncSession,
+    db_rack_level_slots: PagedResponseSchema[RackLevelSlotOutputSchema],
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    product_count = 5
+    product = await if_exists(Product, "id", db_products.results[0].id, async_session)
+
+    rack_level_slot_output = db_rack_level_slots.results[2]
+    rack_level_slot_object = await if_exists(
+        RackLevelSlot, "id", rack_level_slot_output.id, async_session
+    )
+    rack_level_slot_object.is_active = False
+    async_session.add(rack_level_slot_object)
+    await async_session.commit()
+
+    with pytest.raises(ServiceException):
+        await create_stocks(
+            async_session,
+            user_id=db_staff_user.id,
+            waiting_rooms_ids=[None],
+            rack_level_ids=[None],
+            rack_level_slots_ids=[rack_level_slot_object.id],
+            product_counts=[product_count],
+            products=[product],
+        )
+
+
+@pytest.mark.asyncio
+async def test_raise_exception_when_rack_level_object_do_not_have_enough_available_weight_for_new_stock(
+    async_session: AsyncSession,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    rack_input = RackInputSchemaFactory().generate(section_id=db_sections.results[0].id)
+    rack_output = await create_rack(async_session, rack_input)
+
+    rack_level_input = RackLevelInputSchemaFactory().generate(
+        rack_id=rack_output.id, rack_level_number=1, max_weight=4
+    )
+    rack_level_output = await create_rack_level(async_session, rack_level_input)
+    rack_level_object = await if_exists(
+        RackLevel, "id", rack_level_output.id, async_session
+    )
+
+    product_count = 5
+    product = await if_exists(Product, "id", db_products.results[0].id, async_session)
+
+    with pytest.raises(NotEnoughRackLevelResourcesException):
+        await create_stocks(
+            async_session,
+            user_id=db_staff_user.id,
+            waiting_rooms_ids=[None],
+            rack_level_ids=[None],
+            rack_level_slots_ids=[rack_level_object.rack_level_slots[0].id],
+            product_counts=[product_count],
+            products=[product],
+        )
+
+
+@pytest.mark.asyncio
+async def test_raise_exception_when_provided_nonexistent_rack_level_id(
+    async_session: AsyncSession,
+    db_stocks: PagedResponseSchema[StockOutputSchema],
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    product_count = 5
+    product = await if_exists(Product, "id", db_products.results[0].id, async_session)
+
+    with pytest.raises(DoesNotExist):
+        await create_stocks(
+            async_session,
+            user_id=db_staff_user.id,
+            waiting_rooms_ids=[None],
+            rack_level_ids=[generate_uuid()],
+            rack_level_slots_ids=[None],
+            product_counts=[product_count],
+            products=[product],
+        )
+
+
+@pytest.mark.asyncio
+async def test_raise_exception_when_rack_level_does_not_have_enough_available_slots_for_new_stocks(
+    async_session: AsyncSession,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    rack_input = RackInputSchemaFactory().generate(section_id=db_sections.results[0].id)
+    rack_output = await create_rack(async_session, rack_input)
+
+    rack_level_input = RackLevelInputSchemaFactory().generate(
+        rack_id=rack_output.id, rack_level_number=1, max_slots=1
+    )
+    rack_level_output = await create_rack_level(async_session, rack_level_input)
+    rack_level_object = await if_exists(
+        RackLevel, "id", rack_level_output.id, async_session
+    )
+    rack_level_object.available_slots = 0
+    async_session.add(rack_level_object)
+    await async_session.commit()
+
+    product_count = 5
+    product = await if_exists(Product, "id", db_products.results[0].id, async_session)
+
+    with pytest.raises(NotEnoughRackLevelResourcesException):
+        await create_stocks(
+            async_session,
+            user_id=db_staff_user.id,
+            waiting_rooms_ids=[None],
+            rack_level_ids=[rack_level_object.id],
+            rack_level_slots_ids=[None],
+            product_counts=[product_count],
+            products=[product],
+        )
+
+
+@pytest.mark.asyncio
+async def test_raise_exception_when_rack_level_does_not_have_enough_available_weight_for_new_stocks(
+    async_session: AsyncSession,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    rack_input = RackInputSchemaFactory().generate(section_id=db_sections.results[0].id)
+    rack_output = await create_rack(async_session, rack_input)
+
+    rack_level_input = RackLevelInputSchemaFactory().generate(
+        rack_id=rack_output.id, rack_level_number=1, max_weight=4
+    )
+    rack_level_output = await create_rack_level(async_session, rack_level_input)
+    rack_level_object = await if_exists(
+        RackLevel, "id", rack_level_output.id, async_session
+    )
+
+    product_count = 5
+    product = await if_exists(Product, "id", db_products.results[0].id, async_session)
+
+    with pytest.raises(NotEnoughRackLevelResourcesException):
+        await create_stocks(
+            async_session,
+            user_id=db_staff_user.id,
+            waiting_rooms_ids=[None],
+            rack_level_ids=[rack_level_object.id],
+            rack_level_slots_ids=[None],
+            product_counts=[product_count],
+            products=[product],
+        )
+
+
+@pytest.mark.asyncio
+async def test_raise_exception_when_rack_level_does_not_have_active_or_not_occupied_slots_for_new_slots(
+    async_session: AsyncSession,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
+    db_products: PagedResponseSchema[ProductOutputSchema],
+    db_staff_user: UserOutputSchema,
+):
+    rack_input = RackInputSchemaFactory().generate(section_id=db_sections.results[0].id)
+    rack_output = await create_rack(async_session, rack_input)
+
+    rack_level_input = RackLevelInputSchemaFactory().generate(
+        rack_id=rack_output.id, rack_level_number=1, max_slots=1
+    )
+    rack_level_output = await create_rack_level(async_session, rack_level_input)
+    rack_level_object = await if_exists(
+        RackLevel, "id", rack_level_output.id, async_session
+    )
+    rack_level_object.rack_level_slots[0].is_active = False
+    async_session.add(rack_level_object)
+    await async_session.commit()
+
+    product_count = 5
+    product = await if_exists(Product, "id", db_products.results[0].id, async_session)
+
+    with pytest.raises(NoAvailableRackLevelSlotException):
+        await create_stocks(
+            async_session,
+            user_id=db_staff_user.id,
+            waiting_rooms_ids=[None],
+            rack_level_ids=[rack_level_object.id],
+            rack_level_slots_ids=[None],
+            product_counts=[product_count],
+            products=[product],
+        )

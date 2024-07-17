@@ -17,6 +17,8 @@ from src.core.factory.issue_factory import (
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.utils.orm import if_exists
 from tests.test_issues.conftest import db_issues
+from tests.test_rack_levels.conftest import db_rack_levels
+from tests.test_racks.conftest import db_racks
 from tests.test_sections.conftest import db_sections
 from tests.test_stocks.conftest import db_stocks
 from tests.test_users.conftest import (
@@ -84,7 +86,6 @@ async def test_only_user_with_proper_permission_can_get_all_issues(
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
 
@@ -116,7 +117,6 @@ async def test_only_user_with_proper_permission_can_get_single_issue(
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
     response = await async_client.get(
@@ -149,7 +149,6 @@ async def test_only_user_with_proper_permission_can_update_single_issue(
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
     update_data = IssueUpdateSchemaFactory().generate(description="wow")

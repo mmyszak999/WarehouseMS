@@ -6,6 +6,7 @@ from httpx import AsyncClient, Response
 from src.apps.issues.schemas import IssueOutputSchema
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.receptions.schemas import ReceptionOutputSchema
+from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.users.schemas import UserOutputSchema
 from src.core.pagination.schemas import PagedResponseSchema
@@ -47,7 +48,6 @@ async def test_only_authenticated_user_can_get_available_stocks(
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_receptions: PagedResponseSchema[ReceptionOutputSchema],
 ):
-
     response = await async_client.get("stocks/", headers=user_headers)
 
     assert response.status_code == status_code
@@ -172,14 +172,11 @@ async def test_only_authenticated_user_can_get_basic_data_about_single_stock(
     db_products: PagedResponseSchema[ProductOutputSchema],
     status_code: int,
     db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_receptions: PagedResponseSchema[ReceptionOutputSchema],
-    db_issues: PagedResponseSchema[IssueOutputSchema],
 ):
     available_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
     response = await async_client.get(
         f"stocks/{available_stocks[0].id}", headers=user_headers
     )
-    print(response.json())
 
     assert response.status_code == status_code
     assert available_stocks[0].id == response.json()["id"]

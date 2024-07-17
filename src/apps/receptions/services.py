@@ -82,7 +82,6 @@ async def base_create_reception(
 async def create_reception(
     session: AsyncSession, reception_input: ReceptionInputSchema, user_id: str
 ) -> ReceptionOutputSchema:
-
     (
         products,
         product_counts,
@@ -91,7 +90,7 @@ async def create_reception(
         rack_level_slots_ids,
         rack_level_ids,
     ) = await base_create_reception(session, user_id, reception_input)
-    await create_stocks(
+    stocks = await create_stocks(
         session,
         user_id,
         waiting_room_ids,
@@ -103,6 +102,7 @@ async def create_reception(
     )
 
     await session.commit()
+    [await session.refresh(stock) for stock in stocks]
     await session.refresh(new_reception)
 
     return ReceptionOutputSchema.from_orm(new_reception)

@@ -39,7 +39,18 @@ class ReceptionProductInputSchemaFactory(SchemaFactory):
     def __init__(self, schema_class=ReceptionProductInputSchema):
         super().__init__(schema_class)
 
-    def generate(self, product_id: str, product_count: int = None):
+    def generate(
+        self,
+        product_id: str,
+        product_count: int = None,
+        waiting_room_id: str = None,
+        rack_level_slot_id: str = None,
+        rack_level_id: str = None,
+    ):
         return self.schema_class(
-            product_id=product_id, product_count=product_count or set_product_count()
+            product_id=product_id,
+            product_count=product_count or set_product_count(),
+            waiting_room_id=waiting_room_id,
+            rack_level_slot_id=rack_level_slot_id,
+            rack_level_id=rack_level_id,
         )

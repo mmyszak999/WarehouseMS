@@ -222,6 +222,8 @@ async def create_stocks(
         if _rack_level_slot:
             _rack_level_slot.stock_id = new_stock.id
             session.add(_rack_level_slot)
+            session.add(new_stock)
+            await session.refresh(_rack_level_slot)
 
         await session.flush()
     return stock_list

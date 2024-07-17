@@ -2,9 +2,11 @@ import pytest
 from fastapi import status
 from fastapi_jwt_auth import AuthJWT
 from httpx import AsyncClient, Response
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.racks.schemas import RackOutputSchema
+from src.apps.racks.services import create_rack, get_all_racks
 from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.users.schemas import UserOutputSchema
@@ -169,12 +171,17 @@ async def test_only_staff_user_can_update_single_rack(
 @pytest.mark.asyncio
 async def test_only_staff_user_can_delete_single_rack(
     async_client: AsyncClient,
+    async_session: AsyncSession,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
     db_racks: PagedResponseSchema[RackOutputSchema],
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
 ):
+    rack_input = RackInputSchemaFactory().generate(section_id=db_sections.results[0].id)
+    rack_output = await create_rack(async_session, rack_input)
+
     response = await async_client.delete(
-        f"racks/{db_racks.results[0].id}", headers=user_headers
+        f"racks/{rack_output.id}", headers=user_headers
     )
     assert response.status_code == status_code

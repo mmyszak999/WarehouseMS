@@ -28,6 +28,7 @@ from src.apps.stocks.schemas.stock_schemas import StockRackLevelInputSchema
 from src.apps.waiting_rooms.services import manage_old_waiting_room_state
 from src.core.exceptions import (
     AlreadyExists,
+    CannotMoveIssuedStockException,
     DoesNotExist,
     IsOccupied,
     NoAvailableRackLevelSlotException,
@@ -51,7 +52,7 @@ from src.core.utils.orm import if_exists
 
 async def create_rack_level(
     session: AsyncSession, rack_level_input: RackLevelInputSchema
-) -> RackLevelBaseOutputSchema:
+) -> RackLevelOutputSchema:
     from src.apps.rack_level_slots.schemas import RackLevelSlotInputSchema
     from src.apps.rack_level_slots.services import create_rack_level_slot
 
@@ -121,7 +122,7 @@ async def create_rack_level(
     await session.refresh(rack)
     await session.refresh(new_rack_level)
 
-    return RackLevelBaseOutputSchema.from_orm(new_rack_level)
+    return RackLevelOutputSchema.from_orm(new_rack_level)
 
 
 async def get_single_rack_level(
@@ -251,11 +252,11 @@ async def update_single_rack_level(
 
         max_slots_difference = new_max_slots - rack_level_object.max_slots
         if (new_max_slots < rack_level_object.max_slots) and (
-            (rack_level_object.available_slots - max_slots_difference) < 0
+            (rack_level_object.active_slots > new_max_slots)
         ):
             raise NotEnoughRackLevelResourcesException(
                 resource="slots",
-                reason="new max slots amount too small in relation to the available slots amount",
+                reason="new max slots amount too small in relation to the active slots amount",
             )
 
         creating_slots = False if max_slots_difference <= 0 else True
@@ -341,10 +342,10 @@ async def add_single_stock_to_rack_level(
         if stock_object.rack_level_slot.rack_level_id == rack_level_id:
             raise StockAlreadyInRackLevelException
 
-    if not rack_level_slot_object.rack_level.available_slots:
+    if not rack_level_object.available_slots:
         raise NoAvailableSlotsInRackLevelException
 
-    if rack_level_slot_object.rack_level.available_weight < stock_object.weight:
+    if rack_level_object.available_weight < stock_object.weight:
         raise NoAvailableWeightInRackLevelException
 
     _old_waiting_room_id = None
@@ -366,7 +367,7 @@ async def add_single_stock_to_rack_level(
     rack_level_slot_object = available_rack_level_slot.scalar()
     if not rack_level_slot_object:
         raise NoAvailableRackLevelSlotException(
-            stock_object.product.name, stock_object.product_count, stock.weight
+            stock_object.product.name, stock_object.product_count, stock_object.weight
         )
     _new_rack_level_slot_object = rack_level_slot_object
 

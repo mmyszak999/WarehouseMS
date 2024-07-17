@@ -44,7 +44,6 @@ async def test_only_user_with_permission_can_get_all_user_stocks(
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_user_stocks: PagedResponseSchema[UserStockOutputSchema],
 ):
     response = await async_client.get("user-stocks/", headers=user_headers)
@@ -75,7 +74,6 @@ async def test_only_user_with_permission_can_get_single_user_stock(
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
     db_user_stocks: PagedResponseSchema[UserStockOutputSchema],
 ):
     response = await async_client.get(

@@ -31,6 +31,6 @@ class Reception(Base):
         ForeignKey("user.id", ondelete="SET NULL", onupdate="cascade"),
         nullable=True,
     )
-    user = relationship("User", back_populates="receptions", lazy="joined")
+    user = relationship("User", back_populates="receptions", lazy="selectin")
     stocks = relationship("Stock", back_populates="reception", lazy="selectin")
     created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

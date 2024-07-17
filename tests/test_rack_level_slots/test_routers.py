@@ -2,22 +2,28 @@ import pytest
 from fastapi import status
 from fastapi_jwt_auth import AuthJWT
 from httpx import AsyncClient, Response
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
-from src.apps.rack_levels.schemas import RackLevelOutputSchema
+from src.apps.rack_level_slots.models import RackLevelSlot
+from src.apps.rack_level_slots.schemas import RackLevelSlotOutputSchema
 from src.apps.racks.schemas import RackOutputSchema
 from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.schemas.stock_schemas import (
     StockOutputSchema,
     StockRackLevelInputSchema,
+    StockRackLevelSlotInputSchema,
 )
 from src.apps.users.schemas import UserOutputSchema
-from src.core.factory.rack_level_factory import (
-    RackLevelInputSchemaFactory,
-    RackLevelUpdateSchemaFactory,
+from src.apps.waiting_rooms.schemas import WaitingRoomOutputSchema
+from src.core.factory.rack_level_slot_factory import (
+    RackLevelSlotInputSchemaFactory,
+    RackLevelSlotUpdateSchemaFactory,
 )
 from src.core.pagination.schemas import PagedResponseSchema
+from src.core.utils.orm import if_exists
 from tests.test_products.conftest import db_categories, db_products
+from tests.test_rack_level_slots.conftest import db_rack_level_slots
 from tests.test_rack_levels.conftest import db_rack_levels
 from tests.test_racks.conftest import db_racks
 from tests.test_sections.conftest import db_sections
@@ -28,6 +34,7 @@ from tests.test_users.conftest import (
     db_user,
     staff_auth_headers,
 )
+from tests.test_waiting_rooms.conftest import db_waiting_rooms
 from tests.test_warehouse.conftest import db_warehouse
 
 
@@ -37,43 +44,6 @@ from tests.test_warehouse.conftest import db_warehouse
         (
             pytest.lazy_fixture("db_user"),
             pytest.lazy_fixture("auth_headers"),
-            status.HTTP_403_FORBIDDEN,
-        ),
-        (
-            pytest.lazy_fixture("db_staff_user"),
-            pytest.lazy_fixture("staff_auth_headers"),
-            status.HTTP_201_CREATED,
-        ),
-    ],
-)
-@pytest.mark.asyncio
-async def test_only_staff_can_create_rack(
-    async_client: AsyncClient,
-    db_racks: PagedResponseSchema[RackOutputSchema],
-    user: UserOutputSchema,
-    user_headers: dict[str, str],
-    status_code: int,
-):
-    rack_level_input = RackLevelInputSchemaFactory().generate(
-        rack_id=db_racks.results[0].id, rack_level_number=db_racks.results[0].max_levels
-    )
-    response = await async_client.post(
-        "rack_levels/", headers=user_headers, content=rack_level_input.json()
-    )
-    assert response.status_code == status_code
-
-    if status_code == status.HTTP_201_CREATED:
-        assert (
-            response.json()["rack_level_number"] == rack_level_input.rack_level_number
-        )
-
-
-@pytest.mark.parametrize(
-    "user, user_headers, status_code",
-    [
-        (
-            pytest.lazy_fixture("db_user"),
-            pytest.lazy_fixture("auth_headers"),
             status.HTTP_200_OK,
         ),
         (
@@ -84,18 +54,18 @@ async def test_only_staff_can_create_rack(
     ],
 )
 @pytest.mark.asyncio
-async def test_authenticated_user_can_get_single_rack_level(
+async def test_authenticated_user_can_get_single_rack_level_slot(
     async_client: AsyncClient,
-    db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
+    db_rack_level_slots: PagedResponseSchema[RackLevelSlotOutputSchema],
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
 ):
     response = await async_client.get(
-        f"rack_levels/{db_rack_levels.results[0].id}", headers=user_headers
+        f"rack-level-slots/{db_rack_level_slots.results[0].id}", headers=user_headers
     )
     assert response.status_code == status_code
-    assert response.json()["id"] == db_rack_levels.results[0].id
+    assert response.json()["id"] == db_rack_level_slots.results[0].id
 
 
 @pytest.mark.parametrize(
@@ -114,16 +84,16 @@ async def test_authenticated_user_can_get_single_rack_level(
     ],
 )
 @pytest.mark.asyncio
-async def test_authenticated_user_can_get_all_rack_levels(
+async def test_authenticated_user_can_get_all_rack_level_slots(
     async_client: AsyncClient,
-    db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
+    db_rack_level_slots: PagedResponseSchema[RackLevelSlotOutputSchema],
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
 ):
-    response = await async_client.get("rack_levels/", headers=user_headers)
+    response = await async_client.get("rack-level-slots/", headers=user_headers)
     assert response.status_code == status_code
-    assert response.json()["total"] == db_rack_levels.total
+    assert response.json()["total"] == db_rack_level_slots.total
 
 
 @pytest.mark.parametrize(
@@ -142,24 +112,25 @@ async def test_authenticated_user_can_get_all_rack_levels(
     ],
 )
 @pytest.mark.asyncio
-async def test_only_staff_can_update_single_rack_level(
+async def test_only_staff_can_update_single_rack_level_slot(
     async_client: AsyncClient,
-    db_sections: PagedResponseSchema[SectionOutputSchema],
-    db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
+    db_rack_level_slots: PagedResponseSchema[RackLevelSlotOutputSchema],
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
 ):
-    rack_level_input = RackLevelUpdateSchemaFactory().generate(max_weight=2)
+    rack_level_slot_input = RackLevelSlotUpdateSchemaFactory().generate(
+        description="testt"
+    )
     response = await async_client.patch(
-        f"rack_levels/{db_rack_levels.results[0].id}",
+        f"rack-level-slots/{db_rack_level_slots.results[0].id}",
         headers=user_headers,
-        content=rack_level_input.json(),
+        content=rack_level_slot_input.json(),
     )
     assert response.status_code == status_code
 
     if status_code == status.HTTP_200_OK:
-        assert response.json()["max_weight"] == rack_level_input.max_weight
+        assert response.json()["description"] == rack_level_slot_input.description
 
 
 @pytest.mark.parametrize(
@@ -173,20 +144,21 @@ async def test_only_staff_can_update_single_rack_level(
         (
             pytest.lazy_fixture("db_staff_user"),
             pytest.lazy_fixture("staff_auth_headers"),
-            status.HTTP_204_NO_CONTENT,
+            status.HTTP_200_OK,
         ),
     ],
 )
 @pytest.mark.asyncio
-async def test_only_staff_can_delete_single_rack_level(
+async def test_only_staff_can_deactivate_single_rack_level_slot(
     async_client: AsyncClient,
-    db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
+    db_rack_level_slots: PagedResponseSchema[RackLevelSlotOutputSchema],
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
 ):
-    response = await async_client.delete(
-        f"rack_levels/{db_rack_levels.results[0].id}", headers=user_headers
+    response = await async_client.patch(
+        f"rack-level-slots/{db_rack_level_slots.results[0].id}/deactivate",
+        headers=user_headers,
     )
     assert response.status_code == status_code
 
@@ -207,18 +179,61 @@ async def test_only_staff_can_delete_single_rack_level(
     ],
 )
 @pytest.mark.asyncio
-async def test_only_staff_can_add_single_stock_to_rack_level(
+async def test_only_staff_can_activate_single_rack_level_slot(
     async_client: AsyncClient,
-    db_stocks: PagedResponseSchema[StockOutputSchema],
-    db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
+    async_session: AsyncSession,
+    db_rack_level_slots: PagedResponseSchema[RackLevelSlotOutputSchema],
     user: UserOutputSchema,
     user_headers: dict[str, str],
     status_code: int,
 ):
-    rack_level_input = StockRackLevelInputSchema(id=db_stocks.results[0].id)
+    rack_level_slot_object = await if_exists(
+        RackLevelSlot, "id", db_rack_level_slots.results[-1].id, async_session
+    )
+    rack_level_slot_object.is_active = False
+    async_session.add(rack_level_slot_object)
+    await async_session.commit()
+
     response = await async_client.patch(
-        f"rack_levels/{db_rack_levels.results[2].id}/add-stock",
+        f"rack-level-slots/{rack_level_slot_object.id}/activate", headers=user_headers
+    )
+    assert response.status_code == status_code
+
+
+@pytest.mark.parametrize(
+    "user, user_headers, status_code",
+    [
+        (
+            pytest.lazy_fixture("db_user"),
+            pytest.lazy_fixture("auth_headers"),
+            status.HTTP_403_FORBIDDEN,
+        ),
+        (
+            pytest.lazy_fixture("db_staff_user"),
+            pytest.lazy_fixture("staff_auth_headers"),
+            status.HTTP_200_OK,
+        ),
+    ],
+)
+@pytest.mark.asyncio
+async def test_only_staff_can_add_single_stock_to_rack_level_slot(
+    async_client: AsyncClient,
+    db_waiting_rooms: PagedResponseSchema[WaitingRoomOutputSchema],
+    db_rack_level_slots: PagedResponseSchema[RackLevelSlotOutputSchema],
+    user: UserOutputSchema,
+    user_headers: dict[str, str],
+    status_code: int,
+):
+    waiting_room_with_stocks = [
+        waiting_room for waiting_room in db_waiting_rooms.results if waiting_room.stocks
+    ]
+
+    stock_id_input = StockRackLevelSlotInputSchema(
+        id=waiting_room_with_stocks[0].stocks[0].id
+    )
+    response = await async_client.patch(
+        f"rack-level-slots/{db_rack_level_slots.results[-1].id}/add-stock",
         headers=user_headers,
-        content=rack_level_input.json(),
+        content=stock_id_input.json(),
     )
     assert response.status_code == status_code

@@ -23,6 +23,7 @@ from src.apps.stocks.models import Stock
 from src.apps.stocks.schemas.stock_schemas import StockRackLevelSlotInputSchema
 from src.core.exceptions import (
     AlreadyExists,
+    CannotMoveIssuedStockException,
     CantActivateRackLevelSlotException,
     CantDeactivateRackLevelSlotException,
     DoesNotExist,
@@ -87,6 +88,7 @@ async def create_rack_level_slot(
 
     new_rack_level_slot = RackLevelSlot(**rack_level_slot_data)
     session.add(new_rack_level_slot)
+    session.add(rack_level_object)
     await session.flush()
 
     return new_rack_level_slot
