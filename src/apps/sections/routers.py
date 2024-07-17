@@ -84,7 +84,6 @@ async def get_section(
         session, section_id, output_schema=SectionBaseOutputSchema
     )
 
-
 @section_router.get(
     "/{section_id}/racks",
     response_model=Union[

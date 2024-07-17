@@ -23,6 +23,7 @@ from src.apps.stocks.models import Stock
 from src.apps.stocks.schemas.stock_schemas import StockRackLevelSlotInputSchema
 from src.core.exceptions import (
     AlreadyExists,
+    CannotMoveIssuedStockException,
     CantActivateRackLevelSlotException,
     CantDeactivateRackLevelSlotException,
     DoesNotExist,
@@ -35,7 +36,6 @@ from src.core.exceptions import (
     ServiceException,
     StockAlreadyInRackLevelException,
     TooSmallInactiveSlotsQuantityException,
-    CannotMoveIssuedStockException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema

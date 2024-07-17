@@ -7,7 +7,7 @@ from httpx import AsyncClient
 from sqlalchemy import create_engine
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
-from sqlalchemy.pool import AsyncAdaptedQueuePool, NullPool
+from sqlalchemy.pool import NullPool
 
 from main import app
 from src.database.db_connection import Base
@@ -37,7 +37,7 @@ async def async_engine() -> AsyncEngine:
     yield engine
 
 
-@pytest_asyncio.fixture()
+@pytest_asyncio.fixture
 async def async_session(async_engine: AsyncEngine) -> AsyncSession:
     async with async_engine.connect() as conn:
         await conn.begin()
