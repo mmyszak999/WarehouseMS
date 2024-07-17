@@ -103,7 +103,7 @@ async def test_authenticated_user_can_get_all_sections(
     ],
 )
 @pytest.mark.asyncio
-async def test_authenticated_user_can_get_all_racks_from_the_section(
+async def test_authenticated_user_can_get_all_racks_from_the_specified_section(
     async_client: AsyncClient,
     db_sections: PagedResponseSchema[SectionOutputSchema],
     user: UserOutputSchema,

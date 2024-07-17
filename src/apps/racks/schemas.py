@@ -59,6 +59,7 @@ class RackBaseOutputSchema(RackBaseSchema):
     reserved_weight: Decimal
     weight_to_reserve: Decimal
     created_at: Optional[datetime]
+    section_id: str
 
     class Config:
         orm_mode = True
