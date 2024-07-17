@@ -186,7 +186,7 @@ async def test_raise_exception_when_getting_nonexistent_rack_level(
 
 
 @pytest.mark.asyncio
-async def test_raise_if_requested_rack_level_belongs_to_the_specified_rack(
+async def test_check_if_requested_rack_level_belongs_to_the_specified_rack(
     async_session: AsyncSession,
     db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
 ):
@@ -211,7 +211,7 @@ async def test_if_multiple_rack_levels_are_returned(
 
 
 @pytest.mark.asyncio
-async def test_raise_if_all_rack_levels_belongs_to_the_same_rack(
+async def test_check_if_all_rack_levels_belongs_to_the_same_rack(
     async_session: AsyncSession,
     db_racks: PagedResponseSchema[RackOutputSchema],
     db_rack_levels: PagedResponseSchema[RackLevelOutputSchema]

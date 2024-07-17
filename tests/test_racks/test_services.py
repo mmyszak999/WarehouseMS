@@ -149,7 +149,7 @@ async def test_if_multiple_racks_are_returned(
     
     
 @pytest.mark.asyncio
-async def test_raise_if_all_racks_belongs_to_the_same_section(
+async def test_check_if_all_racks_belongs_to_the_same_section(
     async_session: AsyncSession,
     db_sections: PagedResponseSchema[SectionOutputSchema],
     db_racks: PagedResponseSchema[RackOutputSchema],
