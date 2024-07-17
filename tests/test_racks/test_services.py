@@ -124,7 +124,7 @@ async def test_raise_exception_when_getting_nonexistent_rack(
 
 
 @pytest.mark.asyncio
-async def test_raise_if_requested_rack_belongs_to_the_specified_section(
+async def test_if_requested_rack_belongs_to_the_specified_section(
     async_session: AsyncSession,
     db_racks: PagedResponseSchema[RackOutputSchema],
 ):
@@ -146,6 +146,19 @@ async def test_if_multiple_racks_are_returned(
     racks = await get_all_racks(async_session, PageParams())
 
     assert racks.total == db_racks.total
+    
+    
+@pytest.mark.asyncio
+async def test_raise_if_all_racks_belongs_to_the_same_section(
+    async_session: AsyncSession,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
+    db_racks: PagedResponseSchema[RackOutputSchema],
+):
+    racks = await get_all_racks(
+        async_session, PageParams(), section_id=db_sections.results[0].id
+    )
+    
+    assert {rack.section_id for rack in racks.results} == {db_sections.results[0].id}
 
 
 @pytest.mark.asyncio

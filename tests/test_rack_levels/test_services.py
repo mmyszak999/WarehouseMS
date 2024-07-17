@@ -186,6 +186,21 @@ async def test_raise_exception_when_getting_nonexistent_rack_level(
 
 
 @pytest.mark.asyncio
+async def test_raise_if_requested_rack_level_belongs_to_the_specified_rack(
+    async_session: AsyncSession,
+    db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
+):
+    rack_level = db_rack_levels.results[0]
+    rack_level_object = await if_exists(
+        RackLevel, "id", rack_level.id, async_session
+    )
+    rack_level_output = await get_single_rack_level(
+        async_session, rack_level_id=rack_level.id, rack_id=rack_level_object.rack_id
+    )
+    assert rack_level_output.rack_id == rack_level_output.rack_id
+
+
+@pytest.mark.asyncio
 async def test_if_multiple_rack_levels_are_returned(
     async_session: AsyncSession,
     db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
@@ -193,6 +208,19 @@ async def test_if_multiple_rack_levels_are_returned(
     rack_levels = await get_all_rack_levels(async_session, PageParams())
 
     assert rack_levels.total == db_rack_levels.total
+
+
+@pytest.mark.asyncio
+async def test_raise_if_all_rack_levels_belongs_to_the_same_rack(
+    async_session: AsyncSession,
+    db_racks: PagedResponseSchema[RackOutputSchema],
+    db_rack_levels: PagedResponseSchema[RackLevelOutputSchema]
+):
+    rack_levels = await get_all_rack_levels(
+        async_session, PageParams(), rack_id=db_racks.results[0].id
+    )
+    
+    assert {rack_level.rack_id for rack_level in rack_levels.results} == {db_racks.results[0].id}
 
 
 @pytest.mark.asyncio
