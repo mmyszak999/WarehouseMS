@@ -205,7 +205,7 @@ async def create_stocks(
 
             _rack_level_slot_id = rack_level_slot_object.id
             _rack_level_slot = rack_level_slot_object
-            
+
         new_stock = Stock(**stock_input.dict())
         session.add(new_stock)
         await session.flush()

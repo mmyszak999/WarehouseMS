@@ -3,20 +3,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.rack_level_slots.models import RackLevelSlot
 from src.apps.rack_level_slots.schemas import RackLevelSlotOutputSchema
+from src.apps.rack_level_slots.services import (
+    add_single_stock_to_rack_level_slot,
+    create_rack_level_slot,
+    get_all_rack_level_slots,
+    get_single_rack_level_slot,
+    manage_rack_level_slots_when_changing_rack_level_max_slots,
+    manage_single_rack_level_slot_state,
+    update_single_rack_level_slot,
+)
 from src.apps.rack_levels.models import RackLevel
 from src.apps.rack_levels.schemas import (
     RackLevelInputSchema,
     RackLevelOutputSchema,
     RackLevelUpdateSchema,
-)
-from src.apps.rack_level_slots.services import (
-    add_single_stock_to_rack_level_slot,
-    create_rack_level_slot,
-    get_all_rack_level_slots,   
-    get_single_rack_level_slot,
-    update_single_rack_level_slot,
-    manage_single_rack_level_slot_state,
-    manage_rack_level_slots_when_changing_rack_level_max_slots
 )
 from src.apps.rack_levels.services import (
     add_single_stock_to_rack_level,
@@ -43,23 +43,23 @@ from src.apps.warehouse.schemas import WarehouseOutputSchema
 from src.core.exceptions import (
     AlreadyExists,
     CannotMoveIssuedStockException,
+    CantActivateRackLevelSlotException,
+    CantDeactivateRackLevelSlotException,
     DoesNotExist,
+    ExistingGapBetweenInactiveSlotsToDeleteException,
     NoAvailableRackLevelSlotException,
     NoAvailableSlotsInRackLevelException,
     NoAvailableWeightInRackLevelException,
     NotEnoughRackLevelResourcesException,
     NotEnoughRackResourcesException,
     RackLevelIsNotEmptyException,
+    RackLevelSlotIsNotEmptyException,
     ServiceException,
     StockAlreadyInRackLevelException,
     TooLittleRackLevelSlotsAmountException,
     TooLittleWeightAmountException,
-    WeightLimitExceededException,
-    RackLevelSlotIsNotEmptyException,
-    CantActivateRackLevelSlotException,
-    CantDeactivateRackLevelSlotException,
     TooSmallInactiveSlotsQuantityException,
-    ExistingGapBetweenInactiveSlotsToDeleteException
+    WeightLimitExceededException,
 )
 from src.core.factory.rack_factory import (
     RackInputSchemaFactory,
@@ -102,7 +102,9 @@ async def test_raise_exception_when_rack_level_slot_created_with_nonexistent_rac
     )
 
     with pytest.raises(DoesNotExist):
-        await create_rack_level_slot(async_session, rack_level_slot_input, creating_rack_level=True)
+        await create_rack_level_slot(
+            async_session, rack_level_slot_input, creating_rack_level=True
+        )
 
 
 async def test_raise_exception_when_rack_level_does_not_have_available_slots_when_creating_rack_level(
@@ -114,10 +116,9 @@ async def test_raise_exception_when_rack_level_does_not_have_available_slots_whe
         section_id=db_sections.results[0].id, max_levels=1
     )
     rack_output = await create_rack(async_session, rack_input)
-    
+
     rack_level_input_1 = RackLevelInputSchemaFactory().generate(
-        rack_id=rack_output.id,
-        rack_level_number=1
+        rack_id=rack_output.id, rack_level_number=1
     )
     rack_level_output = await create_rack_level(async_session, rack_level_input_1)
     rack_level_object = await if_exists(
@@ -148,11 +149,9 @@ async def test_raise_exception_when_new_slot_got_too_high_rack_level_slot_number
         section_id=db_sections.results[0].id, max_levels=1
     )
     rack_output = await create_rack(async_session, rack_input)
-    
+
     rack_level_input_1 = RackLevelInputSchemaFactory().generate(
-        rack_id=rack_output.id,
-        rack_level_number=1,
-        max_slots=1
+        rack_id=rack_output.id, rack_level_number=1, max_slots=1
     )
     rack_level_output = await create_rack_level(async_session, rack_level_input_1)
     rack_level_slot_object = await if_exists(
@@ -179,10 +178,9 @@ async def test_raise_exception_when_creating_slot_with_existing_number_on_the_ra
         section_id=db_sections.results[0].id, max_levels=1
     )
     rack_output = await create_rack(async_session, rack_input)
-    
+
     rack_level_input_1 = RackLevelInputSchemaFactory().generate(
-        rack_id=rack_output.id,
-        rack_level_number=1
+        rack_id=rack_output.id, rack_level_number=1
     )
     rack_level_output = await create_rack_level(async_session, rack_level_input_1)
     rack_level_slot_object = await if_exists(
@@ -196,6 +194,7 @@ async def test_raise_exception_when_creating_slot_with_existing_number_on_the_ra
         await create_rack_level_slot(
             async_session, rack_level_slot_input, creating_rack_level=True
         )
+
 
 @pytest.mark.asyncio
 async def test_if_single_rack_level_slot_is_returned(
@@ -226,16 +225,18 @@ async def test_if_multiple_rack_level_slots_are_returned(
     rack_level_slots = await get_all_rack_level_slots(async_session, PageParams())
 
     assert rack_level_slots.total == db_rack_level_slots.total
-    
-    
+
+
 @pytest.mark.asyncio
 async def test_raise_exception_when_updating_nonexistent_rack_level_slot(
     async_session: AsyncSession,
-    db_rack_level_slots: PagedResponseSchema[RackLevelSlotOutputSchema]
+    db_rack_level_slots: PagedResponseSchema[RackLevelSlotOutputSchema],
 ):
     rack_level_slot_input = RackLevelSlotUpdateSchemaFactory().generate()
     with pytest.raises(DoesNotExist):
-        await update_single_rack_level_slot(async_session, rack_level_slot_input, generate_uuid())
+        await update_single_rack_level_slot(
+            async_session, rack_level_slot_input, generate_uuid()
+        )
 
 
 async def test_raise_exception_when_managing_state_of_nonexistent_rack_level_slot(
@@ -244,7 +245,9 @@ async def test_raise_exception_when_managing_state_of_nonexistent_rack_level_slo
     db_staff_user: PagedResponseSchema[UserOutputSchema],
 ):
     with pytest.raises(DoesNotExist):
-        await manage_single_rack_level_slot_state(async_session, generate_uuid(), activate_slot=True)
+        await manage_single_rack_level_slot_state(
+            async_session, generate_uuid(), activate_slot=True
+        )
 
 
 async def test_raise_exception_when_managing_state_of_occupied_slot(
@@ -257,7 +260,9 @@ async def test_raise_exception_when_managing_state_of_occupied_slot(
     )
     occupied_slots = [slot for slot in rack_level_slots.results if slot.stock]
     with pytest.raises(RackLevelSlotIsNotEmptyException):
-        await manage_single_rack_level_slot_state(async_session, occupied_slots[0].id, activate_slot=True)
+        await manage_single_rack_level_slot_state(
+            async_session, occupied_slots[0].id, activate_slot=True
+        )
 
 
 async def test_raise_exception_when_activating_activated_slot(
@@ -267,9 +272,11 @@ async def test_raise_exception_when_activating_activated_slot(
     db_staff_user: PagedResponseSchema[UserOutputSchema],
 ):
     available_slots = [slot for slot in db_rack_level_slots.results if not slot.stock]
-    
+
     with pytest.raises(CantActivateRackLevelSlotException):
-        await manage_single_rack_level_slot_state(async_session, available_slots[0].id, activate_slot=True)
+        await manage_single_rack_level_slot_state(
+            async_session, available_slots[0].id, activate_slot=True
+        )
 
 
 async def test_raise_exception_when_deactivating_deactivated_slot(
@@ -283,23 +290,24 @@ async def test_raise_exception_when_deactivating_deactivated_slot(
         section_id=db_sections.results[0].id, max_levels=1
     )
     rack_output = await create_rack(async_session, rack_input)
-    
+
     rack_level_input_1 = RackLevelInputSchemaFactory().generate(
-        rack_id=rack_output.id,
-        rack_level_number=1
+        rack_id=rack_output.id, rack_level_number=1
     )
     rack_level_output = await create_rack_level(async_session, rack_level_input_1)
     rack_level_slot_object = await if_exists(
         RackLevelSlot, "id", rack_level_output.rack_level_slots[0].id, async_session
     )
-    
+
     rack_level_slot_object.is_active = False
     async_session.add(rack_level_slot_object)
     await async_session.commit()
     await async_session.refresh(rack_level_slot_object)
-    
+
     with pytest.raises(CantDeactivateRackLevelSlotException):
-        await manage_single_rack_level_slot_state(async_session, rack_level_slot_object.id, activate_slot=False)
+        await manage_single_rack_level_slot_state(
+            async_session, rack_level_slot_object.id, activate_slot=False
+        )
 
 
 async def test_check_if_rack_level_state_is_managed_correctly_when_changing_rack_level_slot_state(
@@ -309,18 +317,20 @@ async def test_check_if_rack_level_state_is_managed_correctly_when_changing_rack
     db_staff_user: PagedResponseSchema[UserOutputSchema],
 ):
     rack_level_output = db_rack_levels.results[0]
-    available_slots = [slot for slot in rack_level_output.rack_level_slots if not slot.stock]
-    
+    available_slots = [
+        slot for slot in rack_level_output.rack_level_slots if not slot.stock
+    ]
+
     rack_level_object = await if_exists(
         RackLevel, "id", rack_level_output.id, async_session
     )
-    
+
     await manage_single_rack_level_slot_state(
         async_session, available_slots[0].id, activate_slot=False
     )
-    
+
     await async_session.refresh(rack_level_object)
-    
+
     assert rack_level_object.active_slots == rack_level_output.active_slots - 1
     assert rack_level_object.available_slots == rack_level_output.available_slots - 1
     assert rack_level_object.inactive_slots == rack_level_output.inactive_slots + 1
@@ -333,20 +343,25 @@ async def test_check_if_rack_level_have_slots_created_when_max_slots_increases(
     db_staff_user: PagedResponseSchema[UserOutputSchema],
 ):
     rack_level_output = db_rack_levels.results[0]
-    
+
     rack_level_object = await if_exists(
         RackLevel, "id", rack_level_output.id, async_session
     )
-    
-    max_slots_difference=2
+
+    max_slots_difference = 2
     await manage_rack_level_slots_when_changing_rack_level_max_slots(
-        async_session, rack_level_object,
-        max_slots_difference=max_slots_difference, creating_slots=True
+        async_session,
+        rack_level_object,
+        max_slots_difference=max_slots_difference,
+        creating_slots=True,
     )
-    
+
     await async_session.refresh(rack_level_object)
-    
-    assert len(rack_level_object.rack_level_slots) == len(rack_level_output.rack_level_slots) + max_slots_difference
+
+    assert (
+        len(rack_level_object.rack_level_slots)
+        == len(rack_level_output.rack_level_slots) + max_slots_difference
+    )
 
 
 async def test_check_if_rack_level_have_slots_created_when_max_slots_decreased(
@@ -356,23 +371,28 @@ async def test_check_if_rack_level_have_slots_created_when_max_slots_decreased(
     db_staff_user: PagedResponseSchema[UserOutputSchema],
 ):
     rack_level_output = db_rack_levels.results[0]
-    
+
     rack_level_object = await if_exists(
         RackLevel, "id", rack_level_output.id, async_session
     )
-    rack_level_object.rack_level_slots[-1].is_active=False
+    rack_level_object.rack_level_slots[-1].is_active = False
     async_session.add(rack_level_object)
     await async_session.commit()
     await async_session.refresh(rack_level_object)
-    
-    max_slots_difference=-1
+
+    max_slots_difference = -1
     await manage_rack_level_slots_when_changing_rack_level_max_slots(
-        async_session, rack_level_object,
-        max_slots_difference=max_slots_difference, creating_slots=False
+        async_session,
+        rack_level_object,
+        max_slots_difference=max_slots_difference,
+        creating_slots=False,
     )
-    
+
     await async_session.refresh(rack_level_object)
-    assert len(rack_level_object.rack_level_slots) == len(rack_level_output.rack_level_slots) + max_slots_difference
+    assert (
+        len(rack_level_object.rack_level_slots)
+        == len(rack_level_output.rack_level_slots) + max_slots_difference
+    )
     assert rack_level_object.inactive_slots == rack_level_output - max_slots_difference
 
 
@@ -383,18 +403,21 @@ async def test_raise_exception_when_rack_level_does_not_have_enough_inactive_slo
     db_staff_user: PagedResponseSchema[UserOutputSchema],
 ):
     rack_level_output = db_rack_levels.results[0]
-    
+
     rack_level_object = await if_exists(
         RackLevel, "id", rack_level_output.id, async_session
     )
-    
-    max_slots_difference=-1
-    
+
+    max_slots_difference = -1
+
     with pytest.raises(TooSmallInactiveSlotsQuantityException):
         await manage_rack_level_slots_when_changing_rack_level_max_slots(
-            async_session, rack_level_object,
-            max_slots_difference=max_slots_difference, creating_slots=False
+            async_session,
+            rack_level_object,
+            max_slots_difference=max_slots_difference,
+            creating_slots=False,
         )
+
 
 async def test_check_if_rack_level_have_slots_created_when_max_slots_decreased(
     async_session: AsyncSession,
@@ -403,26 +426,25 @@ async def test_check_if_rack_level_have_slots_created_when_max_slots_decreased(
     db_staff_user: PagedResponseSchema[UserOutputSchema],
 ):
     rack_level_output = db_rack_levels.results[0]
-    
+
     rack_level_object = await if_exists(
         RackLevel, "id", rack_level_output.id, async_session
     )
-    rack_level_object.rack_level_slots[0].is_active=False
+    rack_level_object.rack_level_slots[0].is_active = False
     async_session.add(rack_level_object)
     await async_session.commit()
     await async_session.refresh(rack_level_object)
-    
-    max_slots_difference=-1
-    
+
+    max_slots_difference = -1
+
     with pytest.raises(ExistingGapBetweenInactiveSlotsToDeleteException):
         await manage_rack_level_slots_when_changing_rack_level_max_slots(
-            async_session, rack_level_object,
-            max_slots_difference=max_slots_difference, creating_slots=False
+            async_session,
+            rack_level_object,
+            max_slots_difference=max_slots_difference,
+            creating_slots=False,
         )
-    
-    
-"""d
-"""
+
 
 async def test_raise_exception_when_adding_stock_to_nonexistent_rack_level_slot(
     async_session: AsyncSession,
@@ -511,7 +533,7 @@ async def test_raise_exception_when_rack_level_does_not_have_available_weight_wh
         section_id=db_sections.results[0].id, max_levels=1
     )
     rack_output = await create_rack(async_session, rack_input)
-    
+
     rack_level_input_1 = RackLevelInputSchemaFactory().generate(
         rack_id=rack_output.id,
         rack_level_number=rack_output.max_levels,

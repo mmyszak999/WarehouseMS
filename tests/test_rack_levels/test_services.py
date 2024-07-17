@@ -542,31 +542,6 @@ async def test_check_if_rack_level_slots_are_created_correctly_when_creating_rac
     )
 
 
-"""@pytest.mark.asyncio
-async def test_raise_exception_when_adding_stock_to_nonexistent_rack_level(
-    async_session: AsyncSession,
-    db_racks: PagedResponseSchema[RackOutputSchema],
-):
-    rack_level_input_1 = RackLevelInputSchemaFactory().generate(
-        rack_id=db_racks.results[0].id, rack_level_number=db_racks.results[0].max_levels,
-        max_slots=3
-    )
-    rack_level_output = await create_rack_level(async_session, rack_level_input_1)
-    rack_level_object = await if_exists(
-        RackLevel, "id", rack_level_output.id, async_session
-    )
-
-    rack_level_object.active_slots = 2
-    async_session.add(rack_level_object)
-    await async_session.commit()
-
-    rack_level_input_2 = RackLevelUpdateSchemaFactory().generate(max_slots=1)
-    with pytest.raises(NotEnoughRackLevelResourcesException):
-        await update_single_rack_level(
-            async_session, rack_level_input_2, rack_level_object.id
-        )"""
-
-
 async def test_raise_exception_when_adding_stock_to_nonexistent_rack_level(
     async_session: AsyncSession,
     db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
@@ -710,10 +685,8 @@ async def test_raise_exception_when_rack_level_does_not_have_matching_available_
     db_sections: PagedResponseSchema[SectionOutputSchema],
     db_staff_user: PagedResponseSchema[UserOutputSchema],
 ):
-    not_issued_stocks = [
-        stock for stock in db_stocks.results if not stock.is_issued
-    ]
-    
+    not_issued_stocks = [stock for stock in db_stocks.results if not stock.is_issued]
+
     rack_input = RackInputSchemaFactory().generate(
         section_id=db_sections.results[0].id, max_levels=1
     )
