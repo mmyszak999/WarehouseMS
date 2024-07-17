@@ -17,6 +17,14 @@ from src.apps.racks.services import (
     get_single_rack,
     update_single_rack,
 )
+from src.apps.rack_levels.schemas import (
+    RackLevelBaseOutputSchema,
+    RackLevelOutputSchema,
+)
+from src.apps.rack_levels.services import (
+    get_all_rack_levels,
+    get_single_rack_level
+)
 from src.apps.users.models import User
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -73,6 +81,44 @@ async def get_rack(
     if request_user.is_staff or request_user.can_move_stocks:
         return await get_single_rack(session, rack_id)
     return await get_single_rack(session, rack_id, output_schema=RackBaseOutputSchema)
+
+
+@rack_router.get(
+    "/{rack_id}/rack_levels",
+    response_model=Union[
+        PagedResponseSchema[RackLevelBaseOutputSchema],
+        PagedResponseSchema[RackLevelOutputSchema],
+    ],
+    status_code=status.HTTP_200_OK,
+)
+async def get_rack_levels_in_the_rack(
+    rack_id: str,
+    session: AsyncSession = Depends(get_db),
+    page_params: PageParams = Depends(),
+    request_user: User = Depends(authenticate_user),
+) -> Union[
+    PagedResponseSchema[RackLevelBaseOutputSchema],
+    PagedResponseSchema[RackLevelOutputSchema],
+]:
+    return await get_all_rack_levels(session, page_params, rack_id=rack_id)
+
+
+@rack_router.get(
+    "/{rack_id}/rack_levels/{rack_level_id}",
+    response_model=Union[RackLevelOutputSchema, RackLevelBaseOutputSchema],
+    status_code=status.HTTP_200_OK,
+)
+async def get_rack_level_from_the_rack(
+    rack_id: str,
+    rack_level_id: str,
+    session: AsyncSession = Depends(get_db),
+    request_user: User = Depends(authenticate_user),
+) -> Union[RackLevelOutputSchema, RackLevelBaseOutputSchema]:
+    if request_user.is_staff or request_user.can_move_stocks:
+        return await get_single_rack_level(session, rack_level_id, rack_id=rack_id)
+    return await get_single_rack_level(
+        session, rack_level_id, output_schema=RackLevelBaseOutputSchema, rack_id=rack_id
+    )
 
 
 @rack_router.patch(
