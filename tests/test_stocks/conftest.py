@@ -106,6 +106,7 @@ async def db_stocks(
         ]
     )
     result = await create_reception(async_session, reception_input, db_staff_user.id)
+
     issue_input = IssueInputSchemaFactory().generate(
         stock_ids=[StockIssueInputSchema(id=result.stocks[0].id)]
     )

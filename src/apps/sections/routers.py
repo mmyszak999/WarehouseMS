@@ -74,7 +74,7 @@ async def get_section(
         return await get_single_section(session, section_id)
     return await get_single_section(
         session, section_id, output_schema=SectionBaseOutputSchema
-    )
+    )zz
 
 
 @section_router.patch(

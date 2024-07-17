@@ -49,7 +49,7 @@ async def db_sections(
             )
 
     for rack in racks:
-        for level_number in range(1, rack.max_levels - 2):
+        for level_number in range(1, rack.max_levels - 1):
             await create_rack_level(
                 async_session,
                 RackLevelInputSchemaFactory().generate(

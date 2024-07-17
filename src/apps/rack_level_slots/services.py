@@ -35,6 +35,7 @@ from src.core.exceptions import (
     ServiceException,
     StockAlreadyInRackLevelException,
     TooSmallInactiveSlotsQuantityException,
+    CannotMoveIssuedStockException
 )
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
@@ -87,6 +88,7 @@ async def create_rack_level_slot(
 
     new_rack_level_slot = RackLevelSlot(**rack_level_slot_data)
     session.add(new_rack_level_slot)
+    session.add(rack_level_object)
     await session.flush()
 
     return new_rack_level_slot

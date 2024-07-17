@@ -27,7 +27,7 @@ from src.apps.sections.services import create_section, get_single_section
 from src.apps.stocks.models import Stock
 from src.apps.stocks.schemas.stock_schemas import (
     StockOutputSchema,
-    StockRackLevelSlotInputSchema,
+    StockRackLevelInputSchema,
 )
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.warehouse.schemas import WarehouseOutputSchema
@@ -573,7 +573,7 @@ async def test_raise_exception_when_adding_stock_to_nonexistent_rack_level(
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_staff_user: PagedResponseSchema[UserOutputSchema],
 ):
-    stock_id_input = StockRackLevelSlotInputSchema(id=db_stocks.results[0].id)
+    stock_id_input = StockRackLevelInputSchema(id=db_stocks.results[0].id)
     with pytest.raises(DoesNotExist):
         await add_single_stock_to_rack_level(
             async_session, generate_uuid(), stock_id_input, db_staff_user.id
@@ -586,7 +586,7 @@ async def test_raise_exception_when_adding_nonexistent_stock_to_rack_level(
     db_stocks: PagedResponseSchema[StockOutputSchema],
     db_staff_user: PagedResponseSchema[UserOutputSchema],
 ):
-    stock_id_input = StockRackLevelSlotInputSchema(id=generate_uuid())
+    stock_id_input = StockRackLevelInputSchema(id=generate_uuid())
     with pytest.raises(DoesNotExist):
         await add_single_stock_to_rack_level(
             async_session,
@@ -603,7 +603,7 @@ async def test_raise_exception_when_adding_issued_stock_to_rack_level(
     db_staff_user: PagedResponseSchema[UserOutputSchema],
 ):
     issued_stocks = [stock for stock in db_stocks.results if stock.is_issued]
-    stock_id_input = StockRackLevelSlotInputSchema(id=issued_stocks[0].id)
+    stock_id_input = StockRackLevelInputSchema(id=issued_stocks[0].id)
     with pytest.raises(CannotMoveIssuedStockException):
         await add_single_stock_to_rack_level(
             async_session,
@@ -633,7 +633,7 @@ async def test_raise_exception_when_adding_the_stock_to_the_their_actual_rack_le
     )
     stock_object = await if_exists(Stock, "id", db_stocks.results[0].id, async_session)
 
-    stock_id_input_1 = StockRackLevelSlotInputSchema(id=db_stocks.results[0].id)
+    stock_id_input_1 = StockRackLevelInputSchema(id=db_stocks.results[0].id)
     await add_single_stock_to_rack_level(
         async_session, rack_level_object.id, stock_id_input_1, db_staff_user.id
     )
@@ -669,7 +669,7 @@ async def test_raise_exception_when_rack_level_does_not_have_available_slots_whe
     async_session.add(rack_level_object)
     await async_session.commit()
 
-    stock_id_input = StockRackLevelSlotInputSchema(id=db_stocks.results[0].id)
+    stock_id_input = StockRackLevelInputSchema(id=db_stocks.results[0].id)
     with pytest.raises(NoAvailableSlotsInRackLevelException):
         await add_single_stock_to_rack_level(
             async_session, rack_level_object.id, stock_id_input, db_staff_user.id
@@ -697,7 +697,7 @@ async def test_raise_exception_when_rack_level_does_not_have_available_weight_wh
     async_session.add(rack_level_object)
     await async_session.commit()
 
-    stock_id_input = StockRackLevelSlotInputSchema(id=stock.id)
+    stock_id_input = StockRackLevelInputSchema(id=stock.id)
     with pytest.raises(NoAvailableWeightInRackLevelException):
         await add_single_stock_to_rack_level(
             async_session, rack_level_object.id, stock_id_input, db_staff_user.id
@@ -725,7 +725,7 @@ async def test_raise_exception_when_rack_level_does_not_have_matching_available_
     rack_level_output = await create_rack_level(async_session, rack_level_input_1)
 
     stock_1 = not_issued_stocks[0]
-    stock_id_input_1 = StockRackLevelSlotInputSchema(id=stock_1.id)
+    stock_id_input_1 = StockRackLevelInputSchema(id=stock_1.id)
     await add_single_stock_to_rack_level(
         async_session, rack_level_output.id, stock_id_input_1, db_staff_user.id
     )
@@ -738,7 +738,7 @@ async def test_raise_exception_when_rack_level_does_not_have_matching_available_
     await async_session.commit()
 
     stock_2 = not_issued_stocks[0]
-    stock_id_input_2 = StockRackLevelSlotInputSchema(id=stock_2.id)
+    stock_id_input_2 = StockRackLevelInputSchema(id=stock_2.id)
 
     with pytest.raises(NoAvailableRackLevelSlotException):
         await add_single_stock_to_rack_level(
