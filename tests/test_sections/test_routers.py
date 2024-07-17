@@ -85,7 +85,34 @@ async def test_authenticated_user_can_get_all_sections(
 ):
     response = await async_client.get("sections/", headers=user_headers)
     assert response.status_code == status_code
-    assert response.json()["results"][0]["id"] == db_sections.results[0].id
+
+
+@pytest.mark.parametrize(
+    "user, user_headers, status_code",
+    [
+        (
+            pytest.lazy_fixture("db_user"),
+            pytest.lazy_fixture("auth_headers"),
+            status.HTTP_200_OK,
+        ),
+        (
+            pytest.lazy_fixture("db_staff_user"),
+            pytest.lazy_fixture("staff_auth_headers"),
+            status.HTTP_200_OK,
+        ),
+    ],
+)
+@pytest.mark.asyncio
+async def test_authenticated_user_can_get_all_racks_from_the_specified_section(
+    async_client: AsyncClient,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
+    user: UserOutputSchema,
+    user_headers: dict[str, str],
+    status_code: int,
+):
+    response = await async_client.get(f"sections/{db_sections.results[0].id}/racks", headers=user_headers)
+    assert response.status_code == status_code
+    assert response.json()["total"] == len(db_sections.results[0].racks)
 
 
 @pytest.mark.parametrize(
@@ -115,9 +142,37 @@ async def test_only_authenticated_user_get_single_section(
         f"sections/{db_sections.results[0].id}", headers=user_headers
     )
     assert response.status_code == status_code
+    assert response.json()["id"] == db_sections.results[0].id
 
-    if response.status_code == status.HTTP_200_OK:
-        assert response.json()["id"] == db_sections.results[0].id
+
+@pytest.mark.parametrize(
+    "user, user_headers, status_code",
+    [
+        (
+            pytest.lazy_fixture("db_user"),
+            pytest.lazy_fixture("auth_headers"),
+            status.HTTP_200_OK,
+        ),
+        (
+            pytest.lazy_fixture("db_staff_user"),
+            pytest.lazy_fixture("staff_auth_headers"),
+            status.HTTP_200_OK,
+        ),
+    ],
+)
+@pytest.mark.asyncio
+async def test_only_authenticated_user_get_rack_from_the_specified_section(
+    async_client: AsyncClient,
+    db_sections: PagedResponseSchema[SectionOutputSchema],
+    user: UserOutputSchema,
+    user_headers: dict[str, str],
+    status_code: int,
+):
+    response = await async_client.get(
+        f"sections/{db_sections.results[0].id}/racks/{db_sections.results[0].racks[0].id}", headers=user_headers
+    )
+    assert response.status_code == status_code
+    assert response.json()["id"] == db_sections.results[0].racks[0].id
 
 
 @pytest.mark.parametrize(

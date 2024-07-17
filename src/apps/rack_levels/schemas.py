@@ -66,6 +66,7 @@ class RackLevelBaseOutputSchema(RackLevelBaseSchema):
     active_slots: int
     inactive_slots: int
     created_at: Optional[datetime]
+    rack_id: str
 
     class Config:
         orm_mode = True

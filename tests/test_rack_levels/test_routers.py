@@ -114,6 +114,39 @@ async def test_authenticated_user_can_get_single_rack_level(
     ],
 )
 @pytest.mark.asyncio
+async def test_only_authenticated_user_get_single_rack_level_slot_from_the_specified_rack_level(
+    async_client: AsyncClient,
+    db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
+    user: UserOutputSchema,
+    user_headers: dict[str, str],
+    status_code: int,
+):
+    response = await async_client.get(
+        f"rack_levels/{db_rack_levels.results[0].id}/slots/{db_rack_levels.results[0].rack_level_slots[0].id}",
+        headers=user_headers
+    )
+    assert response.status_code == status_code
+    assert response.json()["id"] == db_rack_levels.results[0].rack_level_slots[0].id
+
+
+
+
+@pytest.mark.parametrize(
+    "user, user_headers, status_code",
+    [
+        (
+            pytest.lazy_fixture("db_user"),
+            pytest.lazy_fixture("auth_headers"),
+            status.HTTP_200_OK,
+        ),
+        (
+            pytest.lazy_fixture("db_staff_user"),
+            pytest.lazy_fixture("staff_auth_headers"),
+            status.HTTP_200_OK,
+        ),
+    ],
+)
+@pytest.mark.asyncio
 async def test_authenticated_user_can_get_all_rack_levels(
     async_client: AsyncClient,
     db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
@@ -124,6 +157,37 @@ async def test_authenticated_user_can_get_all_rack_levels(
     response = await async_client.get("rack_levels/", headers=user_headers)
     assert response.status_code == status_code
     assert response.json()["total"] == db_rack_levels.total
+
+
+@pytest.mark.parametrize(
+    "user, user_headers, status_code",
+    [
+        (
+            pytest.lazy_fixture("db_user"),
+            pytest.lazy_fixture("auth_headers"),
+            status.HTTP_200_OK,
+        ),
+        (
+            pytest.lazy_fixture("db_staff_user"),
+            pytest.lazy_fixture("staff_auth_headers"),
+            status.HTTP_200_OK,
+        ),
+    ],
+)
+@pytest.mark.asyncio
+async def test_authenticated_user_can_get_all_rack_level_slots_from_the_specified_rack_level(
+    async_client: AsyncClient,
+    db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
+    user: UserOutputSchema,
+    user_headers: dict[str, str],
+    status_code: int,
+):
+    response = await async_client.get(
+        f"rack_levels/{db_rack_levels.results[0].id}/slots",
+        headers=user_headers)
+    
+    assert response.status_code == status_code
+    assert response.json()["total"] == len(db_rack_levels.results[0].rack_level_slots)
 
 
 @pytest.mark.parametrize(

@@ -218,6 +218,22 @@ async def test_raise_exception_when_getting_nonexistent_rack_level_slot(
 
 
 @pytest.mark.asyncio
+async def test_check_if_requested_rack_level_slot_belongs_to_the_specified_rack_level(
+    async_session: AsyncSession,
+    db_rack_level_slots: PagedResponseSchema[RackLevelSlotOutputSchema],
+):
+    rack_level_slot = db_rack_level_slots.results[0]
+    rack_level_slot_object = await if_exists(
+        RackLevelSlot, "id", rack_level_slot.id, async_session
+    )
+    rack_level_slot_output = await get_single_rack_level_slot(
+        async_session, rack_level_slot_id=rack_level_slot.id, 
+        rack_level_id=rack_level_slot.rack_level_id
+    )
+    assert rack_level_slot_object.rack_level_id == rack_level_slot_output.rack_level_id
+
+
+@pytest.mark.asyncio
 async def test_if_multiple_rack_level_slots_are_returned(
     async_session: AsyncSession,
     db_rack_level_slots: PagedResponseSchema[RackLevelSlotOutputSchema],
@@ -225,6 +241,19 @@ async def test_if_multiple_rack_level_slots_are_returned(
     rack_level_slots = await get_all_rack_level_slots(async_session, PageParams())
 
     assert rack_level_slots.total == db_rack_level_slots.total
+
+
+@pytest.mark.asyncio
+async def test_check_if_all_rack_level_slots_belongs_to_the_same_rack_level(
+    async_session: AsyncSession,
+    db_rack_levels: PagedResponseSchema[RackLevelOutputSchema],
+    db_rack_level_slots: PagedResponseSchema[RackLevelSlotOutputSchema]
+):
+    rack_level_slots = await get_all_rack_level_slots(
+        async_session, PageParams(), rack_level_id=db_rack_levels.results[0].id
+    )
+    
+    assert {slot.rack_level_id for slot in rack_level_slots.results} == {db_rack_levels.results[0].id}
 
 
 @pytest.mark.asyncio
