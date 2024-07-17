@@ -35,6 +35,7 @@ class RackLevelSlotBaseOutputSchema(RackLevelSlotBaseSchema):
     rack_level_id: str
     stock: Optional[StockWithoutRackLevelSlotOutputSchema]
     created_at: Optional[datetime]
+    rack_level_id: str
 
     class Config:
         orm_mode = True
