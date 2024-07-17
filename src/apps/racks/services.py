@@ -75,9 +75,17 @@ async def get_single_rack(
     session: AsyncSession,
     rack_id: str,
     output_schema: BaseModel = RackOutputSchema,
+    section_id: str = None
 ) -> Union[RackOutputSchema, RackBaseOutputSchema]:
     if not (rack_object := await if_exists(Rack, "id", rack_id, session)):
         raise DoesNotExist(Rack.__name__, "id", rack_id)
+    
+    if section_id is not None:
+        if not (section_object := await if_exists(Section, "id", section_id, session)):
+            raise DoesNotExist(Section.__name__, "id", section_id)
+        
+        if rack_object.section_id != section_object.id:
+            raise ServiceException("Requested rack does not belong to the provided section! ")
 
     return output_schema.from_orm(rack_object)
 
@@ -86,11 +94,17 @@ async def get_all_racks(
     session: AsyncSession,
     page_params: PageParams,
     output_schema: BaseModel = RackBaseOutputSchema,
+    section_id: str = None
 ) -> Union[
     PagedResponseSchema[RackBaseOutputSchema],
     PagedResponseSchema[RackOutputSchema],
 ]:
     query = select(Rack)
+    if section_id is not None:
+        if not (section_object := await if_exists(Section, "id", section_id, session)):
+            raise DoesNotExist(Section.__name__, "id", section_id)
+        
+        query = query.filter(Rack.section_id == section_id)
 
     return await paginate(
         query=query,
