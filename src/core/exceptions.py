@@ -358,9 +358,16 @@ class NoAvailableWeightInRackLevelException(ServiceException):
 
 
 class UnavailableFilterFieldException(ServiceException):
-    def __init__(self, field: str) -> None:
+    def __init__(self) -> None:
         super().__init__(
-            f"One of the filter fields ({field}) is not available for filtering! "
+            f"One of the filter fields is not available for filtering! "
+        )
+
+
+class UnavailableSortFieldException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"One of the sort fields is not available for sorting! "
         )
 
 

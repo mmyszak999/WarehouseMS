@@ -52,7 +52,7 @@ class Filter(Select):
             key, self.field = field.split("__")
             self.current_model = get_model_from_key_name(self.main_model, key)
         if self.field in FORBIDDEN_FIELDS:
-            raise UnavailableFilterFieldException(field=self.field)
+            raise UnavailableFilterFieldException
         
         try:
             inst = getattr(operator, operation)(self, value)

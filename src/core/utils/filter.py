@@ -9,10 +9,11 @@ from src.core.utils.constants import (
     FORBIDDEN_FIELDS
 )
 from src.core.filter.main_filter import Filter
+from src.core.utils.sort import sort_instances
 from src.database.db_connection import Base
 
 
-def filter_query_param_values_extractor(params_list):
+def filter_query_param_values_extractor(params_list: list[str]):
     desired_params_list = [
         param for param in params_list if param[0] not in PARAM_HEADERS_WITHOUT_FILTERS
     ]
@@ -47,8 +48,8 @@ def filter_and_sort_instances(query_params: list[tuple], instances, model):
     if filter_keys:
         instances = filter_instances(query_params, instances, model)
 
-    """if check_if_sort_key:
-        instances = sort_instances(query_params, instances, model)"""
+    if check_if_sort_key:
+        instances = sort_instances(query_params, instances, model)
 
     return instances
 

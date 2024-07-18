@@ -71,7 +71,8 @@ from src.core.exceptions import (
     WarehouseIsNotEmptyException,
     WeightLimitExceededException,
     NoSuchFieldException,
-    UnavailableFilterFieldException
+    UnavailableFilterFieldException,
+    UnavailableSortFieldException
 )
 
 app = FastAPI(
@@ -595,6 +596,14 @@ async def no_such_field_exception(
 @app.exception_handler(UnavailableFilterFieldException)
 async def unavailable_filter_field_exception(
     request: Request, exception: UnavailableFilterFieldException
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
+    )
+
+@app.exception_handler(UnavailableSortFieldException)
+async def unavailable_sort_field_exception(
+    request: Request, exception: UnavailableSortFieldException
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
