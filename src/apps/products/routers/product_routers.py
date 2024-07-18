@@ -51,11 +51,12 @@ async def post_product(
     status_code=status.HTTP_200_OK,
 )
 async def get_available_products(
+    request: Request,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
     page_params: PageParams = Depends(),
 ) -> PagedResponseSchema[ProductBasicOutputSchema]:
-    return await get_all_available_products(session, page_params)
+    return await get_all_available_products(session, page_params, request.query_params.multi_items())
 
 
 @product_router.get(
@@ -64,12 +65,13 @@ async def get_available_products(
     status_code=status.HTTP_200_OK,
 )
 async def get_products(
+    request: Request,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
     page_params: PageParams = Depends(),
 ) -> PagedResponseSchema[ProductOutputSchema]:
     await check_if_staff(request_user)
-    return await get_all_products(session, page_params)
+    return await get_all_products(session, page_params, request.query_params.multi_items())
 
 
 @product_router.get(
