@@ -12,6 +12,7 @@ from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
 from src.core.utils.orm import if_exists
+from src.core.utils.filter import filter_and_sort_instances
 
 
 async def create_category(
@@ -43,9 +44,12 @@ async def get_single_category(
 
 
 async def get_all_categories(
-    session: AsyncSession, page_params: PageParams
+    session: AsyncSession, page_params: PageParams, query_params: list[tuple] = None
 ) -> PagedResponseSchema[CategoryOutputSchema]:
     query = select(Category)
+    
+    if query_params:
+        query = filter_and_sort_instances(query_params, query, Category)
 
     return await paginate(
         query=query,

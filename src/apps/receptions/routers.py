@@ -45,12 +45,13 @@ async def post_reception(
     status_code=status.HTTP_200_OK,
 )
 async def get_receptions(
+    request: Request,
     session: AsyncSession = Depends(get_db),
     page_params: PageParams = Depends(),
     request_user: User = Depends(authenticate_user),
 ) -> PagedResponseSchema[ReceptionBasicOutputSchema]:
     await check_if_staff_or_has_permission(request_user, "can_recept_stocks")
-    return await get_all_receptions(session, page_params)
+    return await get_all_receptions(session, page_params, query_params=request.query_params.multi_items())
 
 
 @reception_router.get(

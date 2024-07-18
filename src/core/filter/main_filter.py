@@ -1,6 +1,8 @@
 import operator
+from distutils.util import strtobool
 
 from sqlalchemy.sql.expression import Select
+from sqlalchemy import cast, Boolean, Integer
 
 from src.core.exceptions import UnavailableFilterFieldException, NoSuchFieldException
 
@@ -14,24 +16,71 @@ class Filter(Select):
         self.filter_params = None
 
     def __lt__(self, other):
+        attr_check = getattr(self.current_model, self.field)
+
+        if isinstance(attr_check.type, Boolean):
+            other = strtobool(other)
+            other = bool(other)
+        else:
+            other = cast(other, attr_check.type)
         return self.inst.filter(getattr(self.current_model, self.field) < other)
 
     def __gt__(self, other):
+        attr_check = getattr(self.current_model, self.field)
+
+        if isinstance(attr_check.type, Boolean):
+            other = strtobool(other)
+            other = bool(other)
+        else:
+            other = cast(other, attr_check.type)
         return self.inst.filter(getattr(self.current_model, self.field) > other)
 
     def __ge__(self, other):
+        attr_check = getattr(self.current_model, self.field)
+
+        if isinstance(attr_check.type, Boolean):
+            other = strtobool(other)
+            other = bool(other)
+        else:
+            other = cast(other, attr_check.type)
         return self.inst.filter(getattr(self.current_model, self.field) >= other)
 
     def __le__(self, other):
+        attr_check = getattr(self.current_model, self.field)
+
+        if isinstance(attr_check.type, Boolean):
+            other = strtobool(other)
+            other = bool(other)
+        else:
+            other = cast(other, attr_check.type)
         return self.inst.filter(getattr(self.current_model, self.field) <= other)
 
     def __eq__(self, other):
+        print(other, "xd")
         values = other.split(",")
+        attr_check = getattr(self.current_model, self.field)
+
+        if isinstance(attr_check.type, Boolean):
+            other = strtobool(other)
+            other = bool(other)
+        if isinstance(attr_check.type, Integer):
+            other = int(other)
+        else:
+            other = cast(other, attr_check.type)
+        
+        print(attr_check.type, "wd")
         if len(values) > 1:
             return self.inst.filter(getattr(self.current_model, self.field).in_(values))
         return self.inst.filter(getattr(self.current_model, self.field) == other)
 
     def __ne__(self, other):
+        attr_check = getattr(self.current_model, self.field)
+
+        if isinstance(attr_check.type, Boolean):
+            other = strtobool(other)
+            other = bool(other)
+        else:
+            other = cast(other, attr_check.type)
         return self.inst.filter(getattr(self.current_model, self.field) != other)
 
     def __setattr__(self, key, value):
@@ -51,6 +100,14 @@ class Filter(Select):
         else:
             key, self.field = field.split("__")
             self.current_model = get_model_from_key_name(self.main_model, key)
+        """attr_check = getattr(self.current_model, self.field)
+
+        if isinstance(attr_check.type, Boolean):
+            value = strtobool(value)
+            value = bool(value)
+        else:
+            value = cast(value, attr_check.type)"""
+       
         if self.field in FORBIDDEN_FIELDS:
             raise UnavailableFilterFieldException
         

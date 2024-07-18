@@ -32,6 +32,7 @@ from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
 from src.core.utils.orm import if_exists
+from src.core.utils.filter import filter_and_sort_instances
 
 
 async def create_section(
@@ -76,11 +77,15 @@ async def get_all_sections(
     session: AsyncSession,
     page_params: PageParams,
     output_schema: BaseModel = SectionBaseOutputSchema,
+    query_params: list[tuple] = None
 ) -> Union[
     PagedResponseSchema[SectionOutputSchema],
     PagedResponseSchema[SectionBaseOutputSchema],
 ]:
     query = select(Section)
+    
+    if query_params:
+        query = filter_and_sort_instances(query_params, query, Section)
 
     return await paginate(
         query=query,

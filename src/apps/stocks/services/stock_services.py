@@ -37,6 +37,7 @@ from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
 from src.core.utils.orm import if_exists
 from src.core.utils.time import get_current_time
+from src.core.utils.filter import filter_and_sort_instances
 
 
 async def create_stocks(
@@ -245,6 +246,7 @@ async def get_multiple_stocks(
     page_params: PageParams,
     schema: BaseModel = StockBasicOutputSchema,
     get_issued: bool = False,
+    query_params: list[tuple] = None
 ) -> Union[
     PagedResponseSchema[StockBasicOutputSchema],
     PagedResponseSchema[StockOutputSchema],
@@ -252,6 +254,9 @@ async def get_multiple_stocks(
     query = select(Stock)
     if not get_issued:
         query = query.filter(Stock.is_issued == False)
+    
+    if query_params:
+        query = filter_and_sort_instances(query_params, query, Stock)
 
     return await paginate(
         query=query,
@@ -263,17 +268,17 @@ async def get_multiple_stocks(
 
 
 async def get_all_stocks(
-    session: AsyncSession, page_params: PageParams
+    session: AsyncSession, page_params: PageParams, query_params: list[tuple] = None
 ) -> PagedResponseSchema[StockOutputSchema]:
     return await get_multiple_stocks(
-        session, page_params, schema=StockOutputSchema, get_issued=True
+        session, page_params, schema=StockOutputSchema, get_issued=True, query_params=query_params
     )
 
 
 async def get_all_available_stocks(
-    session: AsyncSession, page_params: PageParams
+    session: AsyncSession, page_params: PageParams, query_params: list[tuple] = None
 ) -> PagedResponseSchema[StockBasicOutputSchema]:
-    return await get_multiple_stocks(session, page_params)
+    return await get_multiple_stocks(session, page_params, query_params=query_params)
 
 
 async def issue_stocks(

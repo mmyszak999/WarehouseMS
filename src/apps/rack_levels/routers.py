@@ -35,6 +35,7 @@ from src.core.permissions import check_if_staff, check_if_staff_or_has_permissio
 from src.dependencies.get_db import get_db
 from src.dependencies.user import authenticate_user
 
+
 rack_level_router = APIRouter(prefix="/rack_levels", tags=["rack_level"])
 
 
@@ -61,6 +62,7 @@ async def post_rack_level(
     status_code=status.HTTP_200_OK,
 )
 async def get_rack_levels(
+    request: Request,
     session: AsyncSession = Depends(get_db),
     page_params: PageParams = Depends(),
     request_user: User = Depends(authenticate_user),
@@ -68,7 +70,7 @@ async def get_rack_levels(
     PagedResponseSchema[RackLevelBaseOutputSchema],
     PagedResponseSchema[RackLevelOutputSchema],
 ]:
-    return await get_all_rack_levels(session, page_params)
+    return await get_all_rack_levels(session, page_params, query_params=request.query_params.multi_items())
 
 
 @rack_level_router.get(

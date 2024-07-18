@@ -30,7 +30,7 @@ class UserStock(Base):
         "User",
         back_populates="stock_user_history",
         foreign_keys=[user_id],
-        lazy="selectin",
+        lazy="joined",
     )
 
     stock_id = Column(

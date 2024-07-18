@@ -32,11 +32,12 @@ stock_router = APIRouter(prefix="/stocks", tags=["stock"])
     status_code=status.HTTP_200_OK,
 )
 async def get_available_stocks(
+    request: Request,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
     page_params: PageParams = Depends(),
 ) -> PagedResponseSchema[StockBasicOutputSchema]:
-    return await get_all_available_stocks(session, page_params)
+    return await get_all_available_stocks(session, page_params, query_params=request.query_params.multi_items())
 
 
 @stock_router.get(
@@ -45,12 +46,13 @@ async def get_available_stocks(
     status_code=status.HTTP_200_OK,
 )
 async def get_stocks(
+    request: Request,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
     page_params: PageParams = Depends(),
 ) -> PagedResponseSchema[StockOutputSchema]:
     await check_if_staff(request_user)
-    return await get_all_stocks(session, page_params)
+    return await get_all_stocks(session, page_params, query_params=request.query_params.multi_items())
 
 
 @stock_router.get(
@@ -73,6 +75,7 @@ async def get_stock_as_staff(
     status_code=status.HTTP_200_OK,
 )
 async def get_stock_history(
+    request: Request,
     stock_id: str,
     session: AsyncSession = Depends(get_db),
     page_params: PageParams = Depends(),
@@ -80,7 +83,7 @@ async def get_stock_history(
 ) -> PagedResponseSchema[UserStockOutputSchema]:
     await check_if_staff(request_user)
     return await get_all_user_stock_history_for_single_stock(
-        session, page_params, stock_id=stock_id
+        session, page_params, stock_id, query_params=request.query_params.multi_items()
     )
 
 

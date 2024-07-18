@@ -32,6 +32,7 @@ from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
 from src.core.utils.crypt import hash_user_password, passwd_context
 from src.core.utils.orm import if_exists
+from src.core.utils.filter import filter_and_sort_instances
 
 
 async def create_user_base(session: AsyncSession, user_input: UserInputSchema) -> User:
@@ -118,12 +119,17 @@ async def get_all_users(
     page_params: PageParams,
     output_schema: BaseModel = UserOutputSchema,
     only_active: bool = True,
+    query_params: list[tuple] = None
 ) -> Union[
     PagedResponseSchema[UserInfoOutputSchema], PagedResponseSchema[UserOutputSchema]
 ]:
     query = select(User)
     if only_active:
         query = query.filter(User.is_active == True)
+        
+    if query_params:
+        query = filter_and_sort_instances(query_params, query, User)
+        
     return await paginate(
         query=query,
         response_schema=output_schema,
