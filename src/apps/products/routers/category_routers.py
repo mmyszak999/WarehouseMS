@@ -44,11 +44,12 @@ async def post_category(
     status_code=status.HTTP_200_OK,
 )
 async def get_categories(
+    request: Request,
     session: AsyncSession = Depends(get_db),
     page_params: PageParams = Depends(),
     request_user: User = Depends(authenticate_user),
 ) -> PagedResponseSchema[CategoryOutputSchema]:
-    return await get_all_categories(session, page_params)
+    return await get_all_categories(session, page_params, query_params=request.query_params.multi_items())
 
 
 @category_router.get(

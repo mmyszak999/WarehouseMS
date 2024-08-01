@@ -39,6 +39,6 @@ class User(Base):
         "UserStock",
         back_populates="user",
         foreign_keys="UserStock.user_id",
-        lazy="selectin",
+        lazy="joined",
     )
     created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

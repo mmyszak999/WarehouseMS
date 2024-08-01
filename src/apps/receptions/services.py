@@ -22,6 +22,7 @@ from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
 from src.core.utils.orm import if_exists
+from src.core.utils.filter import filter_and_sort_instances
 
 
 async def base_create_reception(
@@ -120,9 +121,12 @@ async def get_single_reception(
 
 
 async def get_all_receptions(
-    session: AsyncSession, page_params: PageParams
+    session: AsyncSession, page_params: PageParams, query_params: list[tuple] = None
 ) -> PagedResponseSchema[ReceptionBasicOutputSchema]:
     query = select(Reception)
+    
+    if query_params:
+        query = filter_and_sort_instances(query_params, query, Reception)
 
     return await paginate(
         query=query,

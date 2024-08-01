@@ -59,6 +59,6 @@ class RackLevel(Base):
     )
     rack = relationship("Rack", back_populates="rack_levels", lazy="selectin")
     rack_level_slots = relationship(
-        "RackLevelSlot", back_populates="rack_level", lazy="selectin"
+        "RackLevelSlot", back_populates="rack_level", lazy="joined"
     )
     created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

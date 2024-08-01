@@ -41,6 +41,7 @@ from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
 from src.core.utils.orm import if_exists
+from src.core.utils.filter import filter_and_sort_instances
 
 
 async def create_rack_level_slot(
@@ -121,7 +122,8 @@ async def get_all_rack_level_slots(
     session: AsyncSession,
     page_params: PageParams,
     output_schema: BaseModel = RackLevelSlotBaseOutputSchema,
-    rack_level_id: str = None
+    rack_level_id: str = None,
+    query_params: list[tuple] = None
 ) -> Union[
     PagedResponseSchema[RackLevelSlotBaseOutputSchema],
     PagedResponseSchema[RackLevelSlotOutputSchema],
@@ -133,6 +135,9 @@ async def get_all_rack_level_slots(
             raise DoesNotExist(RackLevel.__name__, "id", rack_level_id)
         
         query = query.filter(RackLevelSlot.rack_level_id == rack_level_id)
+    
+    if query_params:
+        query = filter_and_sort_instances(query_params, query, RackLevelSlot)
 
     return await paginate(
         query=query,

@@ -45,12 +45,13 @@ async def post_issue(
     status_code=status.HTTP_200_OK,
 )
 async def get_issues(
+    request: Request,
     session: AsyncSession = Depends(get_db),
     page_params: PageParams = Depends(),
     request_user: User = Depends(authenticate_user),
 ) -> PagedResponseSchema[IssueBasicOutputSchema]:
     await check_if_staff_or_has_permission(request_user, "can_issue_stocks")
-    return await get_all_issues(session, page_params)
+    return await get_all_issues(session, page_params, query_params=request.query_params.multi_items())
 
 
 @issue_router.get(

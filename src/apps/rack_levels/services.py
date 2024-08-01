@@ -48,6 +48,7 @@ from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
 from src.core.utils.orm import if_exists
+from src.core.utils.filter import filter_and_sort_instances
 
 
 async def create_rack_level(
@@ -150,18 +151,23 @@ async def get_all_rack_levels(
     session: AsyncSession,
     page_params: PageParams,
     output_schema: BaseModel = RackLevelBaseOutputSchema,
-    rack_id: str = None
+    rack_id: str = None,
+    query_params: list[tuple] = None
 ) -> Union[
     PagedResponseSchema[RackLevelBaseOutputSchema],
     PagedResponseSchema[RackLevelOutputSchema],
 ]:
     query = select(RackLevel)
     
+    
     if rack_id is not None:
         if not (rack_object := await if_exists(Rack, "id", rack_id, session)):
             raise DoesNotExist(Rack.__name__, "id", rack_id)
         
         query = query.filter(RackLevel.rack_id == rack_id)
+    
+    if query_params:
+        query = filter_and_sort_instances(query_params, query, RackLevel)
 
     return await paginate(
         query=query,

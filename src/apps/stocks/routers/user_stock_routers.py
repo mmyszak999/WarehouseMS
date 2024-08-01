@@ -27,12 +27,13 @@ user_stock_router = APIRouter(prefix="/user-stocks", tags=["user-stock"])
     status_code=status.HTTP_200_OK,
 )
 async def get_user_stocks(
+    request: Request,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
     page_params: PageParams = Depends(),
 ) -> PagedResponseSchema[UserStockOutputSchema]:
     await check_if_staff_or_has_permission(request_user, "can_move_stocks")
-    return await get_all_user_stocks(session, page_params)
+    return await get_all_user_stocks(session, page_params, query_params=request.query_params.multi_items())
 
 
 @user_stock_router.get(

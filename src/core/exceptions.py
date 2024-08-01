@@ -355,3 +355,24 @@ class NoAvailableWeightInRackLevelException(ServiceException):
         super().__init__(
             f"This rack level has no more available weight to store the stocks! "
         )
+
+
+class UnavailableFilterFieldException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"One of the filter fields is not available for filtering! "
+        )
+
+
+class UnavailableSortFieldException(ServiceException):
+    def __init__(self) -> None:
+        super().__init__(
+            f"One of the sort fields is not available for sorting! "
+        )
+
+
+class NoSuchFieldException(ServiceException):
+    def __init__(self, model_name: str, field: str) -> None:
+        super().__init__(
+            f"Object {model_name} does not have field={field} ! "
+        )

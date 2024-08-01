@@ -58,6 +58,7 @@ async def post_rack(
     status_code=status.HTTP_200_OK,
 )
 async def get_racks(
+    request: Request,
     session: AsyncSession = Depends(get_db),
     page_params: PageParams = Depends(),
     request_user: User = Depends(authenticate_user),
@@ -65,7 +66,7 @@ async def get_racks(
     PagedResponseSchema[RackBaseOutputSchema],
     PagedResponseSchema[RackOutputSchema],
 ]:
-    return await get_all_racks(session, page_params)
+    return await get_all_racks(session, page_params, query_params=request.query_params.multi_items())
 
 
 @rack_router.get(

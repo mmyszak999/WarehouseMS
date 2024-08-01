@@ -53,6 +53,7 @@ async def post_waiting_room(
     status_code=status.HTTP_200_OK,
 )
 async def get_waiting_rooms(
+    request: Request,
     session: AsyncSession = Depends(get_db),
     page_params: PageParams = Depends(),
     request_user: User = Depends(authenticate_user),
@@ -60,7 +61,7 @@ async def get_waiting_rooms(
     PagedResponseSchema[WaitingRoomBasicOutputSchema],
     PagedResponseSchema[WaitingRoomOutputSchema],
 ]:
-    return await get_all_waiting_rooms(session, page_params)
+    return await get_all_waiting_rooms(session, page_params, query_params=request.query_params.multi_items())
 
 
 @waiting_room_router.get(

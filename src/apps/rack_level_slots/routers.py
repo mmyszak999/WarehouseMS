@@ -40,6 +40,7 @@ rack_level_slot_router = APIRouter(prefix="/rack-level-slots", tags=["rack_level
     status_code=status.HTTP_200_OK,
 )
 async def get_rack_level_slots(
+    request: Request,
     session: AsyncSession = Depends(get_db),
     page_params: PageParams = Depends(),
     request_user: User = Depends(authenticate_user),
@@ -47,7 +48,7 @@ async def get_rack_level_slots(
     PagedResponseSchema[RackLevelSlotBaseOutputSchema],
     PagedResponseSchema[RackLevelSlotOutputSchema],
 ]:
-    return await get_all_rack_level_slots(session, page_params)
+    return await get_all_rack_level_slots(session, page_params, query_params=request.query_params.multi_items())
 
 
 @rack_level_slot_router.get(

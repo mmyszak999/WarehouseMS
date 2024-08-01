@@ -33,6 +33,7 @@ from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
 from src.core.utils.orm import if_exists
+from src.core.utils.filter import filter_and_sort_instances
 
 
 async def create_rack(
@@ -94,7 +95,8 @@ async def get_all_racks(
     session: AsyncSession,
     page_params: PageParams,
     output_schema: BaseModel = RackBaseOutputSchema,
-    section_id: str = None
+    section_id: str = None,
+    query_params: list[tuple] = None
 ) -> Union[
     PagedResponseSchema[RackBaseOutputSchema],
     PagedResponseSchema[RackOutputSchema],
@@ -105,6 +107,9 @@ async def get_all_racks(
             raise DoesNotExist(Section.__name__, "id", section_id)
         
         query = query.filter(Rack.section_id == section_id)
+    
+    if query_params:
+        query = filter_and_sort_instances(query_params, query, Rack)
 
     return await paginate(
         query=query,
