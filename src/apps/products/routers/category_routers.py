@@ -49,7 +49,9 @@ async def get_categories(
     page_params: PageParams = Depends(),
     request_user: User = Depends(authenticate_user),
 ) -> PagedResponseSchema[CategoryOutputSchema]:
-    return await get_all_categories(session, page_params, query_params=request.query_params.multi_items())
+    return await get_all_categories(
+        session, page_params, query_params=request.query_params.multi_items()
+    )
 
 
 @category_router.get(

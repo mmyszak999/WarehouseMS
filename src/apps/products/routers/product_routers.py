@@ -56,7 +56,9 @@ async def get_available_products(
     request_user: User = Depends(authenticate_user),
     page_params: PageParams = Depends(),
 ) -> PagedResponseSchema[ProductBasicOutputSchema]:
-    return await get_all_available_products(session, page_params, request.query_params.multi_items())
+    return await get_all_available_products(
+        session, page_params, request.query_params.multi_items()
+    )
 
 
 @product_router.get(
@@ -71,7 +73,9 @@ async def get_products(
     page_params: PageParams = Depends(),
 ) -> PagedResponseSchema[ProductOutputSchema]:
     await check_if_staff(request_user)
-    return await get_all_products(session, page_params, query_params=request.query_params.multi_items())
+    return await get_all_products(
+        session, page_params, query_params=request.query_params.multi_items()
+    )
 
 
 @product_router.get(

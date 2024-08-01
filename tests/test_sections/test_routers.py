@@ -110,7 +110,9 @@ async def test_authenticated_user_can_get_all_racks_from_the_specified_section(
     user_headers: dict[str, str],
     status_code: int,
 ):
-    response = await async_client.get(f"sections/{db_sections.results[0].id}/racks", headers=user_headers)
+    response = await async_client.get(
+        f"sections/{db_sections.results[0].id}/racks", headers=user_headers
+    )
     assert response.status_code == status_code
     assert response.json()["total"] == len(db_sections.results[0].racks)
 
@@ -169,7 +171,8 @@ async def test_only_authenticated_user_get_rack_from_the_specified_section(
     status_code: int,
 ):
     response = await async_client.get(
-        f"sections/{db_sections.results[0].id}/racks/{db_sections.results[0].racks[0].id}", headers=user_headers
+        f"sections/{db_sections.results[0].id}/racks/{db_sections.results[0].racks[0].id}",
+        headers=user_headers,
     )
     assert response.status_code == status_code
     assert response.json()["id"] == db_sections.results[0].racks[0].id

@@ -51,7 +51,9 @@ async def get_receptions(
     request_user: User = Depends(authenticate_user),
 ) -> PagedResponseSchema[ReceptionBasicOutputSchema]:
     await check_if_staff_or_has_permission(request_user, "can_recept_stocks")
-    return await get_all_receptions(session, page_params, query_params=request.query_params.multi_items())
+    return await get_all_receptions(
+        session, page_params, query_params=request.query_params.multi_items()
+    )
 
 
 @reception_router.get(

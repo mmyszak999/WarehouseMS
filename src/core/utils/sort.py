@@ -1,12 +1,13 @@
 from typing import Any
 
+from sqlalchemy import Table
+
 from src.core.sort.main_sort import Sort
 from src.core.utils.constants import (
     PAGINATION_PARAMS_HEADERS,
     PARAM_HEADERS_WITHOUT_FILTERS,
     SORT_PARAMS_HEADER,
 )
-from sqlalchemy import Table
 
 
 def sort_query_param_values_extractor(

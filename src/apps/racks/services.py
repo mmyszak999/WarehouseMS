@@ -32,8 +32,8 @@ from src.core.exceptions import (
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
-from src.core.utils.orm import if_exists
 from src.core.utils.filter import filter_and_sort_instances
+from src.core.utils.orm import if_exists
 
 
 async def create_rack(
@@ -76,17 +76,19 @@ async def get_single_rack(
     session: AsyncSession,
     rack_id: str,
     output_schema: BaseModel = RackOutputSchema,
-    section_id: str = None
+    section_id: str = None,
 ) -> Union[RackOutputSchema, RackBaseOutputSchema]:
     if not (rack_object := await if_exists(Rack, "id", rack_id, session)):
         raise DoesNotExist(Rack.__name__, "id", rack_id)
-    
+
     if section_id is not None:
         if not (section_object := await if_exists(Section, "id", section_id, session)):
             raise DoesNotExist(Section.__name__, "id", section_id)
-        
+
         if rack_object.section_id != section_object.id:
-            raise ServiceException("Requested rack does not belong to the provided section! ")
+            raise ServiceException(
+                "Requested rack does not belong to the provided section! "
+            )
 
     return output_schema.from_orm(rack_object)
 
@@ -96,7 +98,7 @@ async def get_all_racks(
     page_params: PageParams,
     output_schema: BaseModel = RackBaseOutputSchema,
     section_id: str = None,
-    query_params: list[tuple] = None
+    query_params: list[tuple] = None,
 ) -> Union[
     PagedResponseSchema[RackBaseOutputSchema],
     PagedResponseSchema[RackOutputSchema],
@@ -105,9 +107,9 @@ async def get_all_racks(
     if section_id is not None:
         if not (section_object := await if_exists(Section, "id", section_id, session)):
             raise DoesNotExist(Section.__name__, "id", section_id)
-        
+
         query = query.filter(Rack.section_id == section_id)
-    
+
     if query_params:
         query = filter_and_sort_instances(query_params, query, Rack)
 

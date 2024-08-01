@@ -47,8 +47,8 @@ from src.core.exceptions import (
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
-from src.core.utils.orm import if_exists
 from src.core.utils.filter import filter_and_sort_instances
+from src.core.utils.orm import if_exists
 
 
 async def create_rack_level(
@@ -130,20 +130,22 @@ async def get_single_rack_level(
     session: AsyncSession,
     rack_level_id: str,
     output_schema: BaseModel = RackLevelOutputSchema,
-    rack_id: str = None
+    rack_id: str = None,
 ) -> Union[RackLevelBaseOutputSchema, RackLevelOutputSchema]:
     if not (
         rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)
     ):
         raise DoesNotExist(RackLevel.__name__, "id", rack_level_id)
-    
+
     if rack_id is not None:
         if not (rack_object := await if_exists(Rack, "id", rack_id, session)):
             raise DoesNotExist(Rack.__name__, "id", rack_id)
-        
+
         if rack_level_object.rack_id != rack_object.id:
-            raise ServiceException("Requested rack_level does not belong to the provided rack! ")
-        
+            raise ServiceException(
+                "Requested rack_level does not belong to the provided rack! "
+            )
+
     return output_schema.from_orm(rack_level_object)
 
 
@@ -152,20 +154,19 @@ async def get_all_rack_levels(
     page_params: PageParams,
     output_schema: BaseModel = RackLevelBaseOutputSchema,
     rack_id: str = None,
-    query_params: list[tuple] = None
+    query_params: list[tuple] = None,
 ) -> Union[
     PagedResponseSchema[RackLevelBaseOutputSchema],
     PagedResponseSchema[RackLevelOutputSchema],
 ]:
     query = select(RackLevel)
-    
-    
+
     if rack_id is not None:
         if not (rack_object := await if_exists(Rack, "id", rack_id, session)):
             raise DoesNotExist(Rack.__name__, "id", rack_id)
-        
+
         query = query.filter(RackLevel.rack_id == rack_id)
-    
+
     if query_params:
         query = filter_and_sort_instances(query_params, query, RackLevel)
 
@@ -176,6 +177,7 @@ async def get_all_rack_levels(
         page_params=page_params,
         session=session,
     )
+
 
 async def manage_rack_level_state(
     rack_level_object: RackLevel = None,

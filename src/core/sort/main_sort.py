@@ -1,6 +1,7 @@
 from src.core.exceptions import NoSuchFieldException, UnavailableSortFieldException
 from src.core.utils.constants import FORBIDDEN_FIELDS
 
+
 class Sort:
     def __init__(self, main_model, inst, current_model=None):
         self.main_model = main_model
@@ -27,13 +28,12 @@ class Sort:
                     self.current_model = get_model_from_key_name(self.main_model, key)
                 if field in FORBIDDEN_FIELDS:
                     raise UnavailableSortFieldException
-                try: 
+                try:
                     field = getattr(self.current_model, field)
                     statement = field.asc() if sort_order == "asc" else field.desc()
                     self.inst = self.inst.order_by(statement)
                 except AttributeError:
                     raise NoSuchFieldException(
-                        model_name=self.current_model.__name__,
-                        field=field
-                    ) 
+                        model_name=self.current_model.__name__, field=field
+                    )
         return self.inst

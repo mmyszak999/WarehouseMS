@@ -61,7 +61,9 @@ async def get_waiting_rooms(
     PagedResponseSchema[WaitingRoomBasicOutputSchema],
     PagedResponseSchema[WaitingRoomOutputSchema],
 ]:
-    return await get_all_waiting_rooms(session, page_params, query_params=request.query_params.multi_items())
+    return await get_all_waiting_rooms(
+        session, page_params, query_params=request.query_params.multi_items()
+    )
 
 
 @waiting_room_router.get(

@@ -115,7 +115,8 @@ async def test_only_authenticated_user_get_single_rack_level_from_the_specified_
     status_code: int,
 ):
     response = await async_client.get(
-        f"racks/{db_racks.results[0].id}/rack_levels/{db_racks.results[0].rack_levels[0].id}", headers=user_headers
+        f"racks/{db_racks.results[0].id}/rack_levels/{db_racks.results[0].rack_levels[0].id}",
+        headers=user_headers,
     )
     assert response.status_code == status_code
     assert response.json()["id"] == db_racks.results[0].rack_levels[0].id
@@ -171,8 +172,10 @@ async def test_authenticated_user_can_get_all_rack_levels_from_the_specified_rac
     user_headers: dict[str, str],
     status_code: int,
 ):
-    response = await async_client.get(f"racks/{db_racks.results[0].id}/rack_levels", headers=user_headers)
-    
+    response = await async_client.get(
+        f"racks/{db_racks.results[0].id}/rack_levels", headers=user_headers
+    )
+
     assert response.status_code == status_code
     assert response.json()["total"] == len(db_racks.results[0].rack_levels)
 

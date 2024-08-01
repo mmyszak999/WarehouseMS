@@ -40,8 +40,8 @@ from src.core.exceptions import (
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
-from src.core.utils.orm import if_exists
 from src.core.utils.filter import filter_and_sort_instances
+from src.core.utils.orm import if_exists
 
 
 async def create_rack_level_slot(
@@ -99,7 +99,7 @@ async def get_single_rack_level_slot(
     session: AsyncSession,
     rack_level_slot_id: str,
     output_schema: BaseModel = RackLevelSlotOutputSchema,
-    rack_level_id: str = None
+    rack_level_id: str = None,
 ) -> Union[RackLevelSlotOutputSchema, RackLevelSlotBaseOutputSchema]:
     if not (
         rack_level_slot_object := await if_exists(
@@ -107,13 +107,19 @@ async def get_single_rack_level_slot(
         )
     ):
         raise DoesNotExist(RackLevelSlot.__name__, "id", rack_level_slot_id)
-    
+
     if rack_level_id is not None:
-        if not (rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)):
+        if not (
+            rack_level_object := await if_exists(
+                RackLevel, "id", rack_level_id, session
+            )
+        ):
             raise DoesNotExist(RackLevel.__name__, "id", rack_level_id)
-        
+
         if rack_level_slot_object.rack_level_id != rack_level_object.id:
-            raise ServiceException("Requested rack level slot does not belong to the provided rack level! ")
+            raise ServiceException(
+                "Requested rack level slot does not belong to the provided rack level! "
+            )
 
     return output_schema.from_orm(rack_level_slot_object)
 
@@ -123,19 +129,23 @@ async def get_all_rack_level_slots(
     page_params: PageParams,
     output_schema: BaseModel = RackLevelSlotBaseOutputSchema,
     rack_level_id: str = None,
-    query_params: list[tuple] = None
+    query_params: list[tuple] = None,
 ) -> Union[
     PagedResponseSchema[RackLevelSlotBaseOutputSchema],
     PagedResponseSchema[RackLevelSlotOutputSchema],
 ]:
     query = select(RackLevelSlot)
-    
+
     if rack_level_id is not None:
-        if not (rack_level_object := await if_exists(RackLevel, "id", rack_level_id, session)):
+        if not (
+            rack_level_object := await if_exists(
+                RackLevel, "id", rack_level_id, session
+            )
+        ):
             raise DoesNotExist(RackLevel.__name__, "id", rack_level_id)
-        
+
         query = query.filter(RackLevelSlot.rack_level_id == rack_level_id)
-    
+
     if query_params:
         query = filter_and_sort_instances(query_params, query, RackLevelSlot)
 

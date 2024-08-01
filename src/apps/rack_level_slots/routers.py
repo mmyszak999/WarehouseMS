@@ -48,7 +48,9 @@ async def get_rack_level_slots(
     PagedResponseSchema[RackLevelSlotBaseOutputSchema],
     PagedResponseSchema[RackLevelSlotOutputSchema],
 ]:
-    return await get_all_rack_level_slots(session, page_params, query_params=request.query_params.multi_items())
+    return await get_all_rack_level_slots(
+        session, page_params, query_params=request.query_params.multi_items()
+    )
 
 
 @rack_level_slot_router.get(

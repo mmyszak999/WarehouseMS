@@ -4,19 +4,13 @@ from fastapi import Depends, Request, Response, status
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.apps.racks.schemas import RackBaseOutputSchema, RackOutputSchema
+from src.apps.racks.services import get_all_racks, get_single_rack
 from src.apps.sections.schemas import (
     SectionBaseOutputSchema,
     SectionInputSchema,
     SectionOutputSchema,
     SectionUpdateSchema,
-)
-from src.apps.racks.schemas import (
-    RackBaseOutputSchema,
-    RackOutputSchema,
-)
-from src.apps.racks.services import (
-    get_all_racks,
-    get_single_rack,
 )
 from src.apps.sections.services import (
     create_section,
@@ -66,7 +60,9 @@ async def get_sections(
     PagedResponseSchema[SectionOutputSchema],
     PagedResponseSchema[SectionBaseOutputSchema],
 ]:
-    return await get_all_sections(session, page_params, query_params=request.query_params.multi_items())
+    return await get_all_sections(
+        session, page_params, query_params=request.query_params.multi_items()
+    )
 
 
 @section_router.get(
@@ -84,6 +80,7 @@ async def get_section(
     return await get_single_section(
         session, section_id, output_schema=SectionBaseOutputSchema
     )
+
 
 @section_router.get(
     "/{section_id}/racks",

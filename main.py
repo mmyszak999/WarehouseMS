@@ -40,6 +40,7 @@ from src.core.exceptions import (
     NoAvailableWaitingRoomsException,
     NoAvailableWeightInRackLevelException,
     NoAvailableWeightInWaitingRoomException,
+    NoSuchFieldException,
     NotEnoughRackLevelResourcesException,
     NotEnoughRackResourcesException,
     NotEnoughSectionResourcesException,
@@ -63,6 +64,8 @@ from src.core.exceptions import (
     TooLittleWaitingRoomWeightException,
     TooLittleWeightAmountException,
     TooSmallInactiveSlotsQuantityException,
+    UnavailableFilterFieldException,
+    UnavailableSortFieldException,
     UserCantActivateTheirAccountException,
     UserCantDeactivateTheirAccountException,
     WaitingRoomIsNotEmptyException,
@@ -70,9 +73,6 @@ from src.core.exceptions import (
     WarehouseDoesNotExistException,
     WarehouseIsNotEmptyException,
     WeightLimitExceededException,
-    NoSuchFieldException,
-    UnavailableFilterFieldException,
-    UnavailableSortFieldException
 )
 
 app = FastAPI(
@@ -600,6 +600,7 @@ async def unavailable_filter_field_exception(
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST, content={"detail": str(exception)}
     )
+
 
 @app.exception_handler(UnavailableSortFieldException)
 async def unavailable_sort_field_exception(

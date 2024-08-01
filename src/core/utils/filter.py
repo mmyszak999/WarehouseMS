@@ -1,14 +1,13 @@
-
 from sqlalchemy.orm import class_mapper
 from sqlalchemy.orm.properties import RelationshipProperty
 
+from src.core.filter.main_filter import Filter
 from src.core.utils.constants import (
+    FORBIDDEN_FIELDS,
     PAGINATION_PARAMS_HEADERS,
     PARAM_HEADERS_WITHOUT_FILTERS,
     SORT_PARAMS_HEADER,
-    FORBIDDEN_FIELDS
 )
-from src.core.filter.main_filter import Filter
 from src.core.utils.sort import sort_instances
 from src.database.db_connection import Base
 
@@ -52,6 +51,7 @@ def filter_and_sort_instances(query_params: list[tuple], instances, model):
         instances = sort_instances(query_params, instances, model)
 
     return instances
+
 
 def get_model_from_key_name(model, relationship_key: str):
     mapper = class_mapper(model)

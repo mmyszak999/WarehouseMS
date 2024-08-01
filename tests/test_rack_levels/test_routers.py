@@ -123,12 +123,10 @@ async def test_only_authenticated_user_get_single_rack_level_slot_from_the_speci
 ):
     response = await async_client.get(
         f"rack_levels/{db_rack_levels.results[0].id}/slots/{db_rack_levels.results[0].rack_level_slots[0].id}",
-        headers=user_headers
+        headers=user_headers,
     )
     assert response.status_code == status_code
     assert response.json()["id"] == db_rack_levels.results[0].rack_level_slots[0].id
-
-
 
 
 @pytest.mark.parametrize(
@@ -183,9 +181,9 @@ async def test_authenticated_user_can_get_all_rack_level_slots_from_the_specifie
     status_code: int,
 ):
     response = await async_client.get(
-        f"rack_levels/{db_rack_levels.results[0].id}/slots",
-        headers=user_headers)
-    
+        f"rack_levels/{db_rack_levels.results[0].id}/slots", headers=user_headers
+    )
+
     assert response.status_code == status_code
     assert response.json()["total"] == len(db_rack_levels.results[0].rack_level_slots)
 

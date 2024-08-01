@@ -33,7 +33,9 @@ async def get_user_stocks(
     page_params: PageParams = Depends(),
 ) -> PagedResponseSchema[UserStockOutputSchema]:
     await check_if_staff_or_has_permission(request_user, "can_move_stocks")
-    return await get_all_user_stocks(session, page_params, query_params=request.query_params.multi_items())
+    return await get_all_user_stocks(
+        session, page_params, query_params=request.query_params.multi_items()
+    )
 
 
 @user_stock_router.get(
