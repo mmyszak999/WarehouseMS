@@ -27,9 +27,9 @@ from src.core.exceptions import (
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
+from src.core.utils.filter import filter_and_sort_instances
 from src.core.utils.orm import if_exists
 from src.core.utils.time import get_current_time
-from src.core.utils.filter import filter_and_sort_instances
 
 
 async def create_user_stock_object(
@@ -117,7 +117,7 @@ async def get_multiple_user_stocks(
     page_params: PageParams,
     stock_id: str = None,
     user_id: str = None,
-    query_params: list[tuple] = None
+    query_params: list[tuple] = None,
 ) -> PagedResponseSchema[UserStockOutputSchema]:
     query = select(UserStock)
     if stock_id is not None:
@@ -129,7 +129,7 @@ async def get_multiple_user_stocks(
         if not (user_object := await if_exists(User, "id", user_id, session)):
             raise DoesNotExist(User.__name__, "id", user_id)
         query = query.filter(UserStock.user_id == user_id)
-    
+
     if query_params:
         query = filter_and_sort_instances(query_params, query, UserStock)
 
@@ -145,16 +145,28 @@ async def get_multiple_user_stocks(
 async def get_all_user_stocks(
     session: AsyncSession, page_params: PageParams, query_params: list[tuple] = None
 ) -> PagedResponseSchema[UserStockOutputSchema]:
-    return await get_multiple_user_stocks(session, page_params, query_params=query_params)
+    return await get_multiple_user_stocks(
+        session, page_params, query_params=query_params
+    )
 
 
 async def get_all_user_stocks_with_single_user_involvement(
-    session: AsyncSession, page_params: PageParams, user_id: str, query_params: list[tuple] = None
+    session: AsyncSession,
+    page_params: PageParams,
+    user_id: str,
+    query_params: list[tuple] = None,
 ) -> PagedResponseSchema[UserStockOutputSchema]:
-    return await get_multiple_user_stocks(session, page_params, user_id=user_id, query_params=query_params)
+    return await get_multiple_user_stocks(
+        session, page_params, user_id=user_id, query_params=query_params
+    )
 
 
 async def get_all_user_stock_history_for_single_stock(
-    session: AsyncSession, page_params: PageParams, stock_id: str, query_params: list[tuple] = None
+    session: AsyncSession,
+    page_params: PageParams,
+    stock_id: str,
+    query_params: list[tuple] = None,
 ) -> PagedResponseSchema[UserStockOutputSchema]:
-    return await get_multiple_user_stocks(session, page_params, stock_id=stock_id, query_params=query_params)
+    return await get_multiple_user_stocks(
+        session, page_params, stock_id=stock_id, query_params=query_params
+    )

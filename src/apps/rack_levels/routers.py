@@ -5,6 +5,14 @@ from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.apps.rack_level_slots.schemas import (
+    RackLevelSlotBaseOutputSchema,
+    RackLevelSlotOutputSchema,
+)
+from src.apps.rack_level_slots.services import (
+    get_all_rack_level_slots,
+    get_single_rack_level_slot,
+)
 from src.apps.rack_levels.schemas import (
     RackLevelBaseOutputSchema,
     RackLevelInputSchema,
@@ -19,14 +27,6 @@ from src.apps.rack_levels.services import (
     get_single_rack_level,
     update_single_rack_level,
 )
-from src.apps.rack_level_slots.schemas import (
-    RackLevelSlotBaseOutputSchema,
-    RackLevelSlotOutputSchema,
-)
-from src.apps.rack_level_slots.services import (
-    get_all_rack_level_slots,
-    get_single_rack_level_slot,
-)
 from src.apps.stocks.schemas.stock_schemas import StockRackLevelInputSchema
 from src.apps.users.models import User
 from src.core.pagination.models import PageParams
@@ -34,7 +34,6 @@ from src.core.pagination.schemas import PagedResponseSchema
 from src.core.permissions import check_if_staff, check_if_staff_or_has_permission
 from src.dependencies.get_db import get_db
 from src.dependencies.user import authenticate_user
-
 
 rack_level_router = APIRouter(prefix="/rack_levels", tags=["rack_level"])
 
@@ -70,7 +69,9 @@ async def get_rack_levels(
     PagedResponseSchema[RackLevelBaseOutputSchema],
     PagedResponseSchema[RackLevelOutputSchema],
 ]:
-    return await get_all_rack_levels(session, page_params, query_params=request.query_params.multi_items())
+    return await get_all_rack_levels(
+        session, page_params, query_params=request.query_params.multi_items()
+    )
 
 
 @rack_level_router.get(
@@ -88,7 +89,8 @@ async def get_rack_level(
     return await get_single_rack_level(
         session, rack_level_id, output_schema=RackLevelBaseOutputSchema
     )
-    
+
+
 @rack_level_router.get(
     "/{rack_level_id}/slots",
     response_model=Union[
@@ -106,7 +108,9 @@ async def get_slots_in_the_rack_level(
     PagedResponseSchema[RackLevelSlotBaseOutputSchema],
     PagedResponseSchema[RackLevelSlotOutputSchema],
 ]:
-    return await get_all_rack_level_slots(session, page_params, rack_level_id=rack_level_id)
+    return await get_all_rack_level_slots(
+        session, page_params, rack_level_id=rack_level_id
+    )
 
 
 @rack_level_router.get(
@@ -121,9 +125,14 @@ async def get_slot_from_the_rack_level(
     request_user: User = Depends(authenticate_user),
 ) -> Union[RackLevelSlotOutputSchema, RackLevelSlotBaseOutputSchema]:
     if request_user.is_staff or request_user.can_move_stocks:
-        return await get_single_rack_level_slot(session, rack_level_slot_id, rack_level_id=rack_level_id)
+        return await get_single_rack_level_slot(
+            session, rack_level_slot_id, rack_level_id=rack_level_id
+        )
     return await get_single_rack_level_slot(
-        session, rack_level_slot_id, output_schema=RackLevelSlotBaseOutputSchema, rack_level_id=rack_level_id
+        session,
+        rack_level_slot_id,
+        output_schema=RackLevelSlotBaseOutputSchema,
+        rack_level_id=rack_level_id,
     )
 
 

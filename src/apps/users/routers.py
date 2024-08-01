@@ -93,11 +93,15 @@ async def get_users(
     PagedResponseSchema[UserInfoOutputSchema],
 ]:
     if request_user.is_staff:
-        return await get_all_users(session, page_params, query_params=request.query_params.multi_items())
-    return await get_all_users(
-        session, page_params, output_schema=UserInfoOutputSchema,
-        query_params=request.query_params.multi_items()
+        return await get_all_users(
+            session, page_params, query_params=request.query_params.multi_items()
         )
+    return await get_all_users(
+        session,
+        page_params,
+        output_schema=UserInfoOutputSchema,
+        query_params=request.query_params.multi_items(),
+    )
 
 
 @user_router.get(
@@ -113,7 +117,10 @@ async def get_every_user(
 ) -> PagedResponseSchema[UserOutputSchema]:
     await check_if_staff(request_user)
     return await get_all_users(
-        session, page_params, only_active=False, query_params=request.query_params.multi_items()
+        session,
+        page_params,
+        only_active=False,
+        query_params=request.query_params.multi_items(),
     )
 
 
@@ -146,7 +153,10 @@ async def get_user_stocks_involvement_history(
     user = await get_single_user(session, user_id)
     await check_if_staff_or_owner(request_user, "id", user.id)
     return await get_all_user_stocks_with_single_user_involvement(
-        session, page_params, user_id=user_id, query_params=request.query_params.multi_items()
+        session,
+        page_params,
+        user_id=user_id,
+        query_params=request.query_params.multi_items(),
     )
 
 

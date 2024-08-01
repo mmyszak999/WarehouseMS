@@ -28,8 +28,8 @@ from src.core.exceptions import (
 from src.core.pagination.models import PageParams
 from src.core.pagination.schemas import PagedResponseSchema
 from src.core.pagination.services import paginate
-from src.core.utils.orm import if_exists
 from src.core.utils.filter import filter_and_sort_instances
+from src.core.utils.orm import if_exists
 
 
 async def create_product(
@@ -89,7 +89,7 @@ async def get_multiple_products(
     page_params: PageParams,
     schema: BaseModel = ProductBasicOutputSchema,
     get_legacy: bool = False,
-    query_params: list[tuple] = None
+    query_params: list[tuple] = None,
 ) -> Union[
     PagedResponseSchema[ProductBasicOutputSchema],
     PagedResponseSchema[ProductOutputSchema],
@@ -107,8 +107,9 @@ async def get_multiple_products(
         category_product_association_table.c.category_id == Category.id,
         isouter=True,
     )
-    
+
     if query_params:
+        print(query_params, "ww")
         query = filter_and_sort_instances(query_params, query, Product)
 
     return await paginate(
@@ -124,7 +125,11 @@ async def get_all_products(
     session: AsyncSession, page_params: PageParams, query_params: list[tuple] = None
 ) -> PagedResponseSchema[ProductOutputSchema]:
     return await get_multiple_products(
-        session, page_params, schema=ProductOutputSchema, get_legacy=True, query_params=query_params
+        session,
+        page_params,
+        schema=ProductOutputSchema,
+        get_legacy=True,
+        query_params=query_params,
     )
 
 

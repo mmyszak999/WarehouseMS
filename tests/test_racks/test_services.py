@@ -129,9 +129,7 @@ async def test_if_requested_rack_belongs_to_the_specified_section(
     db_racks: PagedResponseSchema[RackOutputSchema],
 ):
     rack = db_racks.results[0]
-    rack_object = await if_exists(
-        Rack, "id", rack.id, async_session
-    )
+    rack_object = await if_exists(Rack, "id", rack.id, async_session)
     rack_output = await get_single_rack(
         async_session, rack_id=rack.id, section_id=rack_object.section_id
     )
@@ -146,8 +144,8 @@ async def test_if_multiple_racks_are_returned(
     racks = await get_all_racks(async_session, PageParams())
 
     assert racks.total == db_racks.total
-    
-    
+
+
 @pytest.mark.asyncio
 async def test_check_if_all_racks_belongs_to_the_same_section(
     async_session: AsyncSession,
@@ -157,7 +155,7 @@ async def test_check_if_all_racks_belongs_to_the_same_section(
     racks = await get_all_racks(
         async_session, PageParams(), section_id=db_sections.results[0].id
     )
-    
+
     assert {rack.section_id for rack in racks.results} == {db_sections.results[0].id}
 
 

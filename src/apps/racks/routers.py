@@ -4,6 +4,11 @@ from fastapi import Depends, Request, Response, status
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.apps.rack_levels.schemas import (
+    RackLevelBaseOutputSchema,
+    RackLevelOutputSchema,
+)
+from src.apps.rack_levels.services import get_all_rack_levels, get_single_rack_level
 from src.apps.racks.schemas import (
     RackBaseOutputSchema,
     RackInputSchema,
@@ -16,14 +21,6 @@ from src.apps.racks.services import (
     get_all_racks,
     get_single_rack,
     update_single_rack,
-)
-from src.apps.rack_levels.schemas import (
-    RackLevelBaseOutputSchema,
-    RackLevelOutputSchema,
-)
-from src.apps.rack_levels.services import (
-    get_all_rack_levels,
-    get_single_rack_level
 )
 from src.apps.users.models import User
 from src.core.pagination.models import PageParams
@@ -66,7 +63,9 @@ async def get_racks(
     PagedResponseSchema[RackBaseOutputSchema],
     PagedResponseSchema[RackOutputSchema],
 ]:
-    return await get_all_racks(session, page_params, query_params=request.query_params.multi_items())
+    return await get_all_racks(
+        session, page_params, query_params=request.query_params.multi_items()
+    )
 
 
 @rack_router.get(
