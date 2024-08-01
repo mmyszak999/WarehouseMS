@@ -2,7 +2,7 @@ import operator
 from distutils.util import strtobool
 
 from sqlalchemy.sql.expression import Select
-from sqlalchemy import cast, Boolean, Integer
+from sqlalchemy import cast, Boolean, Integer, String
 from sqlalchemy.orm import aliased
 
 from src.core.exceptions import UnavailableFilterFieldException, NoSuchFieldException
@@ -29,17 +29,28 @@ class Filter(Select):
         return self._apply_operator(operator.le, other)
 
     def __eq__(self, other):
+        values = other.split(",")
+        if len(values) > 1:
+            values = [self._apply_operator_base(value) for value in values]
+            return self.inst.filter(getattr(self.current_model, self.field).in_(values))
         return self._apply_operator(operator.eq, other)
+    
 
     def __ne__(self, other):
         return self._apply_operator(operator.ne, other)
 
-    def _apply_operator(self, op, other):
+    def _apply_operator_base(self, other):
         attr_check = getattr(self.current_model, self.field)
         if isinstance(attr_check.type, Boolean):
             other = bool(strtobool(other))
+        if isinstance(attr_check.type, Integer):
+            other = int(other)
         else:
             other = cast(other, attr_check.type)
+        return other
+    
+    def _apply_operator(self, op, other):
+        other = self._apply_operator_base(other)
         return self.inst.filter(op(getattr(self.current_model, self.field), other))
 
     def set_filter_params(self, query_params: list[tuple]) -> None:
