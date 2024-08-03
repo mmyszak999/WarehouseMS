@@ -1,6 +1,7 @@
 // src/components/ProductsList.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Typography, Card, CardContent, CardHeader, CircularProgress, Grid } from '@mui/material';
 
 const ProductsList = () => {
     const [products, setProducts] = useState([]);
@@ -28,36 +29,38 @@ const ProductsList = () => {
     }, []);
 
     if (loading) {
-        return <div className="container">Loading...</div>;
+        return <CircularProgress />;
     }
 
     if (error) {
-        return <div className="container">{error}</div>;
+        return <Typography variant="h6" color="error">{error}</Typography>;
     }
 
     return (
-        <div className="container">
-            <h1>Products</h1>
-            <ul className="products">
-                {products.map(product => (
-                    <li key={product.id}>
-                        <h2>{product.name}</h2>
-                        <p>{product.description}</p>
-                        <p>Weight: {product.weight}</p>
-                        <p>Wholesale Price: {product.wholesale_price}</p>
-                        <p>Amount in Goods: {product.amount_in_goods}</p>
-                        <p>Legacy Product: {product.legacy_product ? 'Yes' : 'No'}</p>
-                        <p>Created At: {new Date(product.created_at).toLocaleString()}</p>
-                        <p>Categories:</p>
-                        <ul>
-                            {product.categories.map(category => (
-                                <li key={category.id}>{category.name}</li>
-                            ))}
-                        </ul>
-                    </li>
-                ))}
-            </ul>
-        </div>
+        <Grid container spacing={3} sx={{ mt: 3 }}>
+            {products.map(product => (
+                <Grid item xs={12} key={product.id}>
+                    <Card>
+                        <CardHeader title={product.name} />
+                        <CardContent>
+                            <Typography variant="body1">{product.description}</Typography>
+                            <Typography variant="body2">Weight: {product.weight}</Typography>
+                            <Typography variant="body2">Wholesale Price: {product.wholesale_price}</Typography>
+                            <Typography variant="body2">Amount in Goods: {product.amount_in_goods}</Typography>
+                            <Typography variant="body2">Legacy Product: {product.legacy_product ? 'Yes' : 'No'}</Typography>
+                            <Typography variant="body2">Categories:</Typography>
+                            <ul>
+                                {product.categories.map(category => (
+                                    <li key={category.id}>
+                                        <Typography variant="body2">{category.name}</Typography>
+                                    </li>
+                                ))}
+                            </ul>
+                        </CardContent>
+                    </Card>
+                </Grid>
+            ))}
+        </Grid>
     );
 };
 
