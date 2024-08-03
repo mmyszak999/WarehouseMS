@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 52d925bdf4aa
+Revision ID: 3168ffa94de0
 Revises: 
-Create Date: 2024-07-11 08:26:00.331236
+Create Date: 2024-08-03 19:00:40.788818
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '52d925bdf4aa'
+revision = '3168ffa94de0'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,6 +21,7 @@ def upgrade() -> None:
     op.create_table('category',
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('name', sa.String(length=75), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
@@ -33,6 +34,7 @@ def upgrade() -> None:
     sa.Column('description', sa.String(length=300), nullable=True),
     sa.Column('weight', sa.DECIMAL(), nullable=False),
     sa.Column('legacy_product', sa.Boolean(), server_default='false', nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('name')
     )
@@ -52,6 +54,7 @@ def upgrade() -> None:
     sa.Column('can_move_stocks', sa.Boolean(), server_default='false', nullable=False),
     sa.Column('can_recept_stocks', sa.Boolean(), server_default='false', nullable=False),
     sa.Column('can_issue_stocks', sa.Boolean(), server_default='false', nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
@@ -65,6 +68,7 @@ def upgrade() -> None:
     sa.Column('max_waiting_rooms', sa.Integer(), nullable=False),
     sa.Column('available_waiting_rooms', sa.Integer(), nullable=False),
     sa.Column('occupied_waiting_rooms', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_warehouse_id'), 'warehouse', ['id'], unique=True)
@@ -79,6 +83,7 @@ def upgrade() -> None:
     sa.Column('issue_date', sa.DateTime(), nullable=False),
     sa.Column('description', sa.String(length=400), nullable=True),
     sa.Column('user_id', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='cascade', ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -88,6 +93,7 @@ def upgrade() -> None:
     sa.Column('reception_date', sa.DateTime(), nullable=False),
     sa.Column('description', sa.String(length=400), nullable=True),
     sa.Column('user_id', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], onupdate='cascade', ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id')
@@ -104,6 +110,7 @@ def upgrade() -> None:
     sa.Column('available_racks', sa.DECIMAL(), nullable=False),
     sa.Column('occupied_racks', sa.Integer(), nullable=False),
     sa.Column('warehouse_id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['warehouse_id'], ['warehouse.id'], onupdate='SET NULL'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -118,6 +125,7 @@ def upgrade() -> None:
     sa.Column('current_stock_weight', sa.DECIMAL(), nullable=False),
     sa.Column('available_stock_weight', sa.DECIMAL(), nullable=False),
     sa.Column('warehouse_id', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['warehouse_id'], ['warehouse.id'], onupdate='cascade', ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -134,6 +142,7 @@ def upgrade() -> None:
     sa.Column('reserved_weight', sa.DECIMAL(), nullable=False),
     sa.Column('weight_to_reserve', sa.DECIMAL(), nullable=False),
     sa.Column('section_id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['section_id'], ['section.id'], onupdate='SET NULL'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -151,6 +160,7 @@ def upgrade() -> None:
     sa.Column('active_slots', sa.Integer(), nullable=False),
     sa.Column('inactive_slots', sa.Integer(), nullable=False),
     sa.Column('rack_id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['rack_id'], ['rack.id'], onupdate='SET NULL'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -161,6 +171,7 @@ def upgrade() -> None:
     sa.Column('description', sa.String(length=200), nullable=True),
     sa.Column('is_active', sa.Boolean(), server_default='true', nullable=False),
     sa.Column('rack_level_id', sa.String(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['rack_level_id'], ['rack_level.id'], onupdate='SET NULL', ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
@@ -176,6 +187,7 @@ def upgrade() -> None:
     sa.Column('is_issued', sa.Boolean(), server_default='false', nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('rack_level_slot_id', sa.String(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['issue_id'], ['issue.id'], onupdate='cascade', ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['product_id'], ['product.id'], onupdate='cascade', ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['rack_level_slot_id'], ['rack_level_slot.id'], onupdate='cascade', ondelete='SET NULL'),
@@ -188,7 +200,7 @@ def upgrade() -> None:
     sa.Column('id', sa.String(), nullable=False),
     sa.Column('user_id', sa.String(), nullable=False),
     sa.Column('stock_id', sa.String(), nullable=False),
-    sa.Column('moved_at', sa.DateTime(), nullable=False),
+    sa.Column('moved_at', sa.DateTime(), nullable=True),
     sa.Column('from_waiting_room_id', sa.String(), nullable=True),
     sa.Column('to_waiting_room_id', sa.String(), nullable=True),
     sa.Column('issue_id', sa.String(), nullable=True),

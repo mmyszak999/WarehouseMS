@@ -40,7 +40,7 @@ class ProductUpdateSchema(BaseModel):
 class ProductBasicOutputSchema(ProductBaseSchema):
     id: str
     categories: list[CategoryOutputSchema]
-    created_at: Optional[datetime.datetime]
+    created_at: Optional[datetime.date]
 
     class Config:
         orm_mode = True
@@ -48,7 +48,6 @@ class ProductBasicOutputSchema(ProductBaseSchema):
 
 class ProductOutputSchema(ProductBasicOutputSchema):
     wholesale_price: Decimal
-    amount_in_goods: int
     legacy_product: bool
 
     class Config:

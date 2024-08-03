@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from typing import Optional
 
 from pydantic import BaseModel, Field, validator
@@ -32,7 +32,7 @@ class IssueBasicOutputSchema(BaseModel):
     user: UserInfoOutputSchema
     issue_date: datetime
     description: Optional[str]
-    created_at: Optional[datetime]
+    created_at: Optional[date]
 
     class Config:
         orm_mode = True

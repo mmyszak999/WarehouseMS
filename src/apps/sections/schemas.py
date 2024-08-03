@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 from typing import Optional
 
@@ -58,7 +58,7 @@ class SectionBaseOutputSchema(SectionBaseSchema):
     weight_to_reserve: Decimal
     available_racks: int
     occupied_racks: int
-    created_at: Optional[datetime]
+    created_at: Optional[date]
 
     class Config:
         orm_mode = True

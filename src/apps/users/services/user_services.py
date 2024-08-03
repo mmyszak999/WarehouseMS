@@ -82,10 +82,7 @@ async def authenticate(
         .filter(User.email == login_data["email"])
         .limit(1)
     )
-    if not (
-        user.is_superuser
-        or (user and passwd_context.verify(login_data["password"], user.password))
-    ):
+    if not (user and passwd_context.verify(login_data["password"], user.password)):
         raise AuthenticationException("Invalid Credentials")
     if not user.is_active:
         raise AccountNotActivatedException("email", login_data["email"])

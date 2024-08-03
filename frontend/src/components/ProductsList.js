@@ -5,6 +5,7 @@ import axios from 'axios';
 const ProductsList = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -16,6 +17,7 @@ const ProductsList = () => {
                 });
                 setProducts(response.data.results);
             } catch (error) {
+                setError('Error fetching products');
                 console.error('Error fetching products:', error);
             } finally {
                 setLoading(false);
@@ -26,13 +28,17 @@ const ProductsList = () => {
     }, []);
 
     if (loading) {
-        return <div>Loading...</div>;
+        return <div className="container">Loading...</div>;
+    }
+
+    if (error) {
+        return <div className="container">{error}</div>;
     }
 
     return (
-        <div>
+        <div className="container">
             <h1>Products</h1>
-            <ul>
+            <ul className="products">
                 {products.map(product => (
                     <li key={product.id}>
                         <h2>{product.name}</h2>

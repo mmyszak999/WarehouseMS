@@ -27,7 +27,7 @@ class CategoryUpdateSchema(BaseModel):
 
 class CategoryOutputSchema(CategoryBaseSchema):
     id: str
-    created_at: Optional[datetime.datetime]
+    created_at: Optional[datetime.date]
 
     class Config:
         orm_mode = True

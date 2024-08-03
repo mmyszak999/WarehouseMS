@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 from typing import Optional
 
@@ -48,7 +48,7 @@ class ReceptionBasicOutputSchema(BaseModel):
     user: UserInfoOutputSchema
     reception_date: datetime
     description: Optional[str]
-    created_at: Optional[datetime]
+    created_at: Optional[date]
 
     class Config:
         orm_mode = True

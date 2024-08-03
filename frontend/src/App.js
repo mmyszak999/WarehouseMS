@@ -1,16 +1,17 @@
 // src/App.js
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import ProductsList from './components/ProductsList';
 import AuthService from './services/AuthService';
+import Login from './components/Login';
+import './App.css';
 
 const App = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(!!AuthService.getCurrentUser());
 
-    const handleLogin = async (event) => {
-        event.preventDefault();
-        const { email, password } = event.target.elements;
+    const handleLogin = async (email, password) => {
         try {
-            await AuthService.login(email.value, password.value);
+            await AuthService.login(email, password);
             setIsLoggedIn(true);
         } catch (error) {
             console.error('Login failed:', error);
@@ -22,30 +23,17 @@ const App = () => {
         setIsLoggedIn(false);
     };
 
-    if (!isLoggedIn) {
-        return (
-            <div>
-                <h1>Login</h1>
-                <form onSubmit={handleLogin}>
-                    <div>
-                        <label>Email:</label>
-                        <input type="text" name="email" required />
-                    </div>
-                    <div>
-                        <label>Password:</label>
-                        <input type="password" name="password" required />
-                    </div>
-                    <button type="submit">Login</button>
-                </form>
-            </div>
-        );
-    }
-
     return (
-        <div>
-            <button onClick={handleLogout}>Logout</button>
-            <ProductsList />
-        </div>
+        <Router>
+            <div className="container">
+                {isLoggedIn && <button className="logout-button" onClick={handleLogout}>Logout</button>}
+                <Routes>
+                    <Route path="/" element={isLoggedIn ? <Navigate to="/products" /> : <Login handleLogin={handleLogin} />} />
+                    <Route path="/login" element={isLoggedIn ? <Navigate to="/products" /> : <Login handleLogin={handleLogin} />} />
+                    <Route path="/products" element={isLoggedIn ? <ProductsList /> : <Navigate to="/login" />} />
+                </Routes>
+            </div>
+        </Router>
     );
 };
 

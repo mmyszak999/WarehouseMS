@@ -76,7 +76,7 @@ class StockWithoutRackLevelSlotOutputSchema(StockWithoutWaitingRoomOutputSchema)
 class StockBasicOutputSchema(StockWithoutWaitingRoomOutputSchema):
     waiting_room: Optional[StockWaitingRoomBasicOutputSchema]
     rack_level_slot: Optional[StockRackLevelSlotBasicOutputSchema]
-    created_at: Optional[datetime]
+    created_at: Optional[date]
     waiting_room_id: Optional[str]
     rack_level_slot_id: Optional[str]
 

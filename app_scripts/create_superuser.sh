@@ -11,6 +11,9 @@ import asyncio
 import uuid
 
 import asyncpg
+from passlib.context import CryptContext
+
+passwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 async def run():
     try:
@@ -23,14 +26,16 @@ async def run():
         )
 
         user_id = uuid.uuid4()
+        unhashed_password = '${SUPERUSER_PASSWORD}'
+        hashed_password = passwd_context.hash(unhashed_password)
 
         user_insert_query = """INSERT INTO "user"
             (ID, FIRST_NAME, LAST_NAME, EMAIL, PASSWORD, BIRTH_DATE, EMPLOYMENT_DATE,
             IS_SUPERUSER, IS_STAFF, IS_ACTIVE, CAN_MOVE_STOCKS, CAN_RECEPT_STOCKS, CAN_ISSUE_STOCKS,
             HAS_PASSWORD_SET)
             VALUES ('{user_id}', '${SUPERUSER_FIRST_NAME}', '${SUPERUSER_LAST_NAME}', '${SUPERUSER_EMAIL}',
-        '${SUPERUSER_PASSWORD}', '${SUPERUSER_BIRTHDATE}', '${SUPERUSER_EMPLOYMENT_DATE}', 
-        TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)""".format(user_id=user_id)
+        '{hashed_password}', '${SUPERUSER_BIRTHDATE}', '${SUPERUSER_EMPLOYMENT_DATE}', 
+        TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)""".format(user_id=user_id, hashed_password=hashed_password)
         await connection.execute(user_insert_query)
 
         print("successfully created superuser")
