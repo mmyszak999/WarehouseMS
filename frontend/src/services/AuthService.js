@@ -1,4 +1,3 @@
-// src/services/AuthService.js
 import axios from 'axios';
 import * as jwt from 'jwt-decode'; // Import wszystkiego jako jwt
 
@@ -10,6 +9,7 @@ class AuthService {
             const response = await axios.post(`${API_URL}/login`, { email, password });
             if (response.data.access_token) {
                 localStorage.setItem('token', response.data.access_token);
+                localStorage.setItem('is_staff', response.data.is_staff);
             }
             return response.data;
         } catch (error) {
@@ -28,6 +28,7 @@ class AuthService {
 
     logout() {
         localStorage.removeItem('token');
+        localStorage.removeItem('is_staff');
     }
 
     getCurrentUser() {
@@ -36,6 +37,10 @@ class AuthService {
             return jwt.jwtDecode(token);
         }
         return null;
+    }
+
+    getUserRole() {
+        return localStorage.getItem('is_staff') === 'True';
     }
 }
 

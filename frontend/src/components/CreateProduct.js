@@ -1,6 +1,7 @@
 // src/components/CreateProduct.js
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Box, Typography, Container, MenuItem } from '@mui/material';
+import { TextField, Button, Box, Typography, Container, MenuItem, AppBar, Toolbar } from '@mui/material';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const CreateProduct = () => {
@@ -19,7 +20,7 @@ const CreateProduct = () => {
         const fetchCategories = async () => {
             try {
                 const response = await axios.get('http://localhost:8000/api/categories');
-                setCategories(response.data.results || []); // Use response.data.results for paginated data
+                setCategories(response.data.results || []);
                 setLoading(false);
             } catch (error) {
                 console.error('Error fetching categories:', error);
@@ -61,6 +62,13 @@ const CreateProduct = () => {
 
     return (
         <Container component="main" maxWidth="xs">
+            <AppBar position="static">
+                <Toolbar>
+                    <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }}>
+                        My App
+                    </Typography>
+                </Toolbar>
+            </AppBar>
             <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                 <Typography component="h1" variant="h5">Create Product</Typography>
                 <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
