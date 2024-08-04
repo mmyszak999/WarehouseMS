@@ -1,50 +1,67 @@
 // src/components/Login.js
-import React from 'react';
-import { TextField, Button, Typography, Box } from '@mui/material';
+import React, { useState } from 'react';
+import { TextField, Button, Box, Typography, Container, Alert } from '@mui/material';
 
 const Login = ({ handleLogin }) => {
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        const { email, password } = event.target.elements;
-        handleLogin(email.value, password.value);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError(''); // Reset error before attempting login
+        try {
+            await handleLogin(email, password);
+        } catch (err) {
+            console.error('Login error:', err.message); // Debugging log
+            setError(err.message);
+        }
     };
 
     return (
-        <Box component="div" sx={{ mt: 8 }}>
-            <Typography component="h1" variant="h5" align="center">
-                Login
-            </Typography>
-            <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
-                <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                    autoFocus
-                />
-                <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="password"
-                    label="Password"
-                    type="password"
-                    id="password"
-                    autoComplete="current-password"
-                />
-                <Button
-                    type="submit"
-                    fullWidth
-                    variant="contained"
-                    sx={{ mt: 3, mb: 2 }}
-                >
-                    Login
-                </Button>
+        <Container component="main" maxWidth="xs">
+            <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography component="h1" variant="h5">Login</Typography>
+                {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+                <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        autoComplete="email"
+                        autoFocus
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <TextField
+                        variant="outlined"
+                        margin="normal"
+                        required
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                        autoComplete="current-password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <Button
+                        type="submit"
+                        fullWidth
+                        variant="contained"
+                        color="primary"
+                        sx={{ mt: 3, mb: 2 }}
+                    >
+                        Sign In
+                    </Button>
+                </Box>
             </Box>
-        </Box>
+        </Container>
     );
 };
 

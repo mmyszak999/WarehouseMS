@@ -1,7 +1,7 @@
 // src/App.js
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { Button, Container, CssBaseline } from '@mui/material';
+import { BrowserRouter as Router, Route, Routes, Navigate, Link } from 'react-router-dom';
+import { Button, Container, CssBaseline, AppBar, Toolbar, Typography } from '@mui/material';
 import ProductsList from './components/ProductsList';
 import AuthService from './services/AuthService';
 import Login from './components/Login';
@@ -15,7 +15,7 @@ const App = () => {
             await AuthService.login(email, password);
             setIsLoggedIn(true);
         } catch (error) {
-            console.error('Login failed:', error);
+            throw new Error(error.message);
         }
     };
 
@@ -27,11 +27,26 @@ const App = () => {
     return (
         <Router>
             <CssBaseline />
-            <Container maxWidth="sm">
-                {isLoggedIn && <Button variant="contained" color="secondary" onClick={handleLogout} style={{ marginTop: '20px', marginBottom: '20px' }}>Logout</Button>}
+            <AppBar position="static">
+                <Toolbar>
+                    <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+                        My App
+                    </Typography>
+                    {isLoggedIn ? (
+                        <>
+                            <Button color="inherit" component={Link} to="/products">Products</Button>
+                            <Button color="inherit" component={Link} to="/create-product">Create Product</Button>
+                            <Button color="inherit" onClick={handleLogout}>Logout</Button>
+                        </>
+                    ) : (
+                        <Button color="inherit" component={Link} to="/login">Login</Button>
+                    )}
+                </Toolbar>
+            </AppBar>
+            <Container maxWidth="sm" sx={{ mt: 4 }}>
                 <Routes>
-                    <Route path="/" element={isLoggedIn ? <Navigate to="/products" /> : <Login handleLogin={handleLogin} />} />
-                    <Route path="/login" element={isLoggedIn ? <Navigate to="/products" /> : <Login handleLogin={handleLogin} />} />
+                    <Route path="/" element={isLoggedIn ? <Navigate to="/" /> : <Login handleLogin={handleLogin} />} />
+                    <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login handleLogin={handleLogin} />} />
                     <Route path="/products" element={isLoggedIn ? <ProductsList /> : <Navigate to="/login" />} />
                     <Route path="/create-product" element={isLoggedIn ? <CreateProduct /> : <Navigate to="/login" />} />
                 </Routes>
