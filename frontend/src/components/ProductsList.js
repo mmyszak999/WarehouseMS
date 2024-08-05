@@ -14,6 +14,12 @@ const operatorOptions = [
     { value: 'le', label: 'Less or Equal (<=)' }
 ];
 
+const sortOptions = [
+    { value: '', label: 'No Sort' },
+    { value: 'asc', label: 'Ascending' },
+    { value: 'desc', label: 'Descending' }
+];
+
 const ProductsList = ({ themeMode }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -22,11 +28,12 @@ const ProductsList = ({ themeMode }) => {
     const [totalPages, setTotalPages] = useState(1);
     const [size, setSize] = useState(10);
     const [filters, setFilters] = useState({
-        name: { value: '', operator: 'eq' },
-        weight: { value: '', operator: 'eq' },
-        created_at: { value: '', operator: 'eq' }
+        name: { value: '', operator: 'eq', sort: '' },
+        weight: { value: '', operator: 'eq', sort: '' },
+        created_at: { value: '', operator: 'eq', sort: '' },
+        description: { value: '', operator: 'eq', sort: '' },
+        category__name: { value: '', operator: 'eq', sort: '' }
     });
-    const [sort, setSort] = useState(''); // e.g., "weight__asc,created_at__desc"
 
     const userRole = AuthService.getUserRole();
 
@@ -40,11 +47,9 @@ const ProductsList = ({ themeMode }) => {
                 if (filter.value) {
                     endpoint += `&${key}__${filter.operator}=${filter.value}`;
                 }
-            }
-
-            // Append sort params
-            if (sort) {
-                endpoint += `&sort=${sort}`;
+                if (filter.sort) {
+                    endpoint += `&sort=${key}__${filter.sort}`;
+                }
             }
 
             const response = await axios.get(endpoint, {
@@ -64,7 +69,7 @@ const ProductsList = ({ themeMode }) => {
 
     useEffect(() => {
         fetchProducts(page);
-    }, [userRole, page, filters, sort]);
+    }, [userRole, page, filters]);
 
     const handlePageChange = (event, value) => {
         setPage(value);
@@ -77,10 +82,6 @@ const ProductsList = ({ themeMode }) => {
             ...prevFilters,
             [field]: { ...prevFilters[field], [type]: value }
         }));
-    };
-
-    const handleSortChange = (event) => {
-        setSort(event.target.value);
     };
 
     if (loading) {
@@ -102,106 +103,70 @@ const ProductsList = ({ themeMode }) => {
                 </Toolbar>
             </AppBar>
             <Grid container spacing={3} sx={{ mt: 3 }}>
-                <Grid item xs={12} md={3}>
+                <Grid item xs={12} md={4}>
                     <Box sx={{ padding: 2, borderRight: '1px solid #ddd' }}>
                         <Typography variant="h6" gutterBottom>Filters</Typography>
                         <Divider sx={{ mb: 2 }} />
-                        
-                        <Box sx={{ mb: 2 }}>
-                            <TextField
-                                label="Name Filter"
-                                name="name.value"
-                                value={filters.name.value}
-                                onChange={handleFilterChange}
-                                fullWidth
-                                sx={{ mb: 2 }}
-                            />
-                            <FormControl fullWidth>
-                                <InputLabel>Operator</InputLabel>
-                                <Select
-                                    name="name.operator"
-                                    value={filters.name.operator}
-                                    onChange={handleFilterChange}
-                                    label="Operator"
-                                >
-                                    {operatorOptions.map(option => (
-                                        <MenuItem key={option.value} value={option.value}>
-                                            {option.label}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Box>
-                        
-                        <Box sx={{ mb: 2 }}>
-                            <TextField
-                                label="Weight Filter"
-                                name="weight.value"
-                                value={filters.weight.value}
-                                onChange={handleFilterChange}
-                                fullWidth
-                                sx={{ mb: 2 }}
-                            />
-                            <FormControl fullWidth>
-                                <InputLabel>Operator</InputLabel>
-                                <Select
-                                    name="weight.operator"
-                                    value={filters.weight.operator}
-                                    onChange={handleFilterChange}
-                                    label="Operator"
-                                >
-                                    {operatorOptions.map(option => (
-                                        <MenuItem key={option.value} value={option.value}>
-                                            {option.label}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Box>
 
-                        <Box sx={{ mb: 2 }}>
-                            <TextField
-                                label="Creation Date Filter"
-                                name="created_at.value"
-                                value={filters.created_at.value}
-                                onChange={handleFilterChange}
-                                fullWidth
-                                sx={{ mb: 2 }}
-                            />
-                            <FormControl fullWidth>
-                                <InputLabel>Operator</InputLabel>
-                                <Select
-                                    name="created_at.operator"
-                                    value={filters.created_at.operator}
-                                    onChange={handleFilterChange}
-                                    label="Operator"
-                                >
-                                    {operatorOptions.map(option => (
-                                        <MenuItem key={option.value} value={option.value}>
-                                            {option.label}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Box>
-                        
-                        <FormControl fullWidth>
-                            <InputLabel>Sort By</InputLabel>
-                            <Select
-                                value={sort}
-                                onChange={handleSortChange}
-                                label="Sort By"
-                            >
-                                <MenuItem value="">None</MenuItem>
-                                <MenuItem value="weight__asc">Weight Ascending</MenuItem>
-                                <MenuItem value="weight__desc">Weight Descending</MenuItem>
-                                <MenuItem value="created_at__asc">Creation Date Ascending</MenuItem>
-                                <MenuItem value="created_at__desc">Creation Date Descending</MenuItem>
-                            </Select>
-                        </FormControl>
+                        {/* Filter Inputs */}
+                        {Object.entries(filters).map(([key, filter]) => (
+                            <Box key={key} sx={{ mb: 3 }}>
+                                <Typography variant="subtitle1" gutterBottom>
+                                    {key.replace(/_/g, ' ')}
+                                </Typography>
+                                <Grid container spacing={2}>
+                                    {/* Value Input */}
+                                    <Grid item xs={12} md={12}>
+                                        <TextField
+                                            label={`${key.replace(/_/g, ' ')}`}
+                                            name={`${key}.value`}
+                                            value={filter.value}
+                                            onChange={handleFilterChange}
+                                            fullWidth
+                                        />
+                                    </Grid>
+                                    {/* Operator Select */}
+                                    <Grid item xs={12} md={12}>
+                                        <FormControl fullWidth>
+                                            <InputLabel>Operator</InputLabel>
+                                            <Select
+                                                name={`${key}.operator`}
+                                                value={filter.operator}
+                                                onChange={handleFilterChange}
+                                                label="Operator"
+                                            >
+                                                {operatorOptions.map(option => (
+                                                    <MenuItem key={option.value} value={option.value}>
+                                                        {option.label}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                    {/* Sort By Select */}
+                                    <Grid item xs={12} md={12}>
+                                        <FormControl fullWidth>
+                                            <InputLabel>Sort By</InputLabel>
+                                            <Select
+                                                name={`${key}.sort`}
+                                                value={filter.sort}
+                                                onChange={handleFilterChange}
+                                                label="Sort By"
+                                            >
+                                                {sortOptions.map(option => (
+                                                    <MenuItem key={option.value} value={option.value}>
+                                                        {option.label}
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                    </Grid>
+                                </Grid>
+                            </Box>
+                        ))}
                     </Box>
                 </Grid>
-                <Grid item xs={12} md={9}>
+                <Grid item xs={12} md={8}>
                     <Grid container spacing={3}>
                         {products.map(product => (
                             <Grid item xs={12} key={product.id}>
@@ -209,24 +174,24 @@ const ProductsList = ({ themeMode }) => {
                                     <CardHeader
                                         title={
                                             <Link to={`/product/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                                                {product.name}
+                                                <Typography variant="h6" fontWeight="bold">{product.name}</Typography>
                                             </Link>
                                         }
                                     />
                                     <CardContent>
-                                        <Typography variant="body1">{product.description}</Typography>
-                                        <Typography variant="body2">Weight: {product.weight}</Typography>
+                                        <Typography variant="body1" fontFamily="Arial, sans-serif">{product.description}</Typography>
+                                        <Typography variant="body2" fontFamily="Arial, sans-serif">Weight: {product.weight}</Typography>
                                         {userRole && (
                                             <>
-                                                <Typography variant="body2">Wholesale Price: {product.wholesale_price}</Typography>
+                                                <Typography variant="body2" fontFamily="Arial, sans-serif">Wholesale Price: {product.wholesale_price}</Typography>
                                             </>
                                         )}
-                                        <Typography variant="body2">Legacy Product: {product.legacy_product ? 'Yes' : 'No'}</Typography>
-                                        <Typography variant="body2">Categories:</Typography>
+                                        <Typography variant="body2" fontFamily="Arial, sans-serif">Legacy Product: {product.legacy_product ? 'Yes' : 'No'}</Typography>
+                                        <Typography variant="body2" fontFamily="Arial, sans-serif">Categories:</Typography>
                                         <ul>
                                             {product.categories.map(category => (
                                                 <li key={category.name} className={`list-item ${themeMode}`}>
-                                                    <Typography variant="body2">{category.name}</Typography>
+                                                    <Typography variant="body2" fontFamily="Arial, sans-serif">{category.name}</Typography>
                                                 </li>
                                             ))}
                                         </ul>

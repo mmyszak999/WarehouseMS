@@ -1,55 +1,55 @@
 /* src/App.css */
 
-/* Ogólne style dla jasnego motywu */
+/* General styles for light and dark themes */
 body.light {
-  background-color: #f0f2f5; /* Jasne tło dla jasnego motywu */
+  background-color: #f0f2f5; /* Light background for light theme */
   color: #333;
 }
 
 body.dark {
-  background-color: #121212; /* Ciemne tło dla ciemnego motywu */
+  background-color: #121212; /* Dark background for dark theme */
   color: #e0e0e0;
 }
 
-/* Style dla paska aplikacji */
+/* Styles for the app bar */
 .app-bar.light {
   background-color: #ffffff;
   color: #000000;
 }
 
 .app-bar.dark {
-  background-color: #1f1f1f; /* Ciemniejsze tło paska aplikacji */
+  background-color: #1f1f1f; /* Darker background for app bar */
   color: #ffffff;
 }
 
-/* Style dla kontenera */
+/* Styles for the container */
 .container.light {
-  background-color: #ffffff; /* Jasne tło dla kontenera */
+  background-color: #ffffff; /* Light background for container */
   color: #333333;
 }
 
 .container.dark {
-  background-color: #1e1e1e; /* Ciemne tło dla kontenera */
+  background-color: #1e1e1e; /* Dark background for container */
   color: #e0e0e0;
 }
 
 .container {
-  width: 80%;
+  width: 98%;
   margin: auto;
 }
 
-/* Style dla kart i innych elementów */
+/* Styles for cards and other elements */
 .card.light {
-  background-color: #ffffff; /* Jasne tło dla kart */
+  background-color: #ffffff; /* Light background for cards */
   color: #333333;
 }
 
 .card.dark {
-  background-color: #2c2c2c; /* Ciemniejsze tło dla kart */
+  background-color: #2c2c2c; /* Darker background for cards */
   color: #e0e0e0;
 }
 
-/* Style dla przycisków */
+/* Styles for buttons */
 button {
   border: none;
   border-radius: 5px;
@@ -61,18 +61,27 @@ button:hover {
   opacity: 0.8;
 }
 
-/* Style dla komunikatów i list */
+/* Styles for product details */
 .products li {
-  background-color: #ffffff; /* Jasne tło dla elementów listy */
+  background-color: #ffffff; /* Light background for list items */
   margin-bottom: 10px;
   padding: 10px;
   border-radius: 5px;
 }
 
 .list-item.light {
-  background-color: #f0f0f0; /* Jasne tło dla elementów listy w jasnym motywie */
+  background-color: #f0f0f0; /* Light background for list items in light theme */
 }
 
 .list-item.dark {
-  background-color: #333333; /* Ciemne tło dla elementów listy w ciemnym motywie */
+  background-color: #333333; /* Dark background for list items in dark theme */
+}
+
+/* Additional styles for product details */
+.product-details {
+  font-family: 'Arial, sans-serif';
+}
+
+.product-name {
+  font-weight: bold;
 }
