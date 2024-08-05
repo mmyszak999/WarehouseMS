@@ -33,6 +33,11 @@ body.dark {
   color: #e0e0e0;
 }
 
+.container {
+  width: 80%;
+  margin: auto;
+}
+
 /* Style dla kart i innych elementów */
 .card.light {
   background-color: #ffffff; /* Jasne tło dla kart */

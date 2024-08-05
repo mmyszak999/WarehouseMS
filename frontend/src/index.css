@@ -15,6 +15,8 @@ body {
 body.dark-mode {
   background-color: #121212; /* Ciemne tło dla ciemnego motywu */
   color: #e0e0e0; /* Jasny kolor tekstu w ciemnym motywie */
+  width: 80%;
+  margin: auto;
 }
 
 /* Style dla kart i kontenerów */

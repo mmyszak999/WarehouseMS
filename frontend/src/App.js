@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, Link } from 'react-router-dom';
 import { Button, Container, AppBar, Toolbar, Typography, Box, IconButton, CssBaseline, ThemeProvider } from '@mui/material';
@@ -52,7 +51,7 @@ const App = () => {
             {isLoggedIn && <Button color="inherit" onClick={handleLogout}>Logout</Button>}
           </Toolbar>
         </AppBar>
-        <Container maxWidth="sm" sx={{ mt: 4 }} className={`container ${themeMode}`}>
+        <Container maxWidth="false" sx={{ mt: 4 }} className={`container ${themeMode}`}>
           <Routes>
             <Route
               path="/"
