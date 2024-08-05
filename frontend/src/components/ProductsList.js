@@ -20,6 +20,12 @@ const sortOptions = [
     { value: 'desc', label: 'Descending' }
 ];
 
+const legacyProductOptions = [
+    { value: '', label: 'No Filter' },
+    { value: 'true', label: 'Yes' },
+    { value: 'false', label: 'No' }
+];
+
 const ProductsList = ({ themeMode }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -30,9 +36,9 @@ const ProductsList = ({ themeMode }) => {
     const [filters, setFilters] = useState({
         name: { value: '', operator: 'eq', sort: '' },
         weight: { value: '', operator: 'eq', sort: '' },
-        created_at: { value: '', operator: 'eq', sort: '' },
         description: { value: '', operator: 'eq', sort: '' },
-        category__name: { value: '', operator: 'eq', sort: '' }
+        category__name: { value: '', operator: 'eq', sort: '' },
+        legacy_product: { value: '', operator: 'eq', sort: '' }  // Added legacy_product filter
     });
 
     const userRole = AuthService.getUserRole();
@@ -123,26 +129,29 @@ const ProductsList = ({ themeMode }) => {
                                             value={filter.value}
                                             onChange={handleFilterChange}
                                             fullWidth
+                                            disabled={key === 'legacy_product'}
                                         />
                                     </Grid>
                                     {/* Operator Select */}
-                                    <Grid item xs={12} md={12}>
-                                        <FormControl fullWidth>
-                                            <InputLabel>Operator</InputLabel>
-                                            <Select
-                                                name={`${key}.operator`}
-                                                value={filter.operator}
-                                                onChange={handleFilterChange}
-                                                label="Operator"
-                                            >
-                                                {operatorOptions.map(option => (
-                                                    <MenuItem key={option.value} value={option.value}>
-                                                        {option.label}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
+                                    {key !== 'legacy_product' && (
+                                        <Grid item xs={12} md={12}>
+                                            <FormControl fullWidth>
+                                                <InputLabel>Operator</InputLabel>
+                                                <Select
+                                                    name={`${key}.operator`}
+                                                    value={filter.operator}
+                                                    onChange={handleFilterChange}
+                                                    label="Operator"
+                                                >
+                                                    {operatorOptions.map(option => (
+                                                        <MenuItem key={option.value} value={option.value}>
+                                                            {option.label}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                    )}
                                     {/* Sort By Select */}
                                     <Grid item xs={12} md={12}>
                                         <FormControl fullWidth>
@@ -161,6 +170,26 @@ const ProductsList = ({ themeMode }) => {
                                             </Select>
                                         </FormControl>
                                     </Grid>
+                                    {/* Legacy Product Filter */}
+                                    {key === 'legacy_product' && (
+                                        <Grid item xs={12} md={12}>
+                                            <FormControl fullWidth>
+                                                <InputLabel>Legacy Product</InputLabel>
+                                                <Select
+                                                    name={`${key}.value`}
+                                                    value={filter.value}
+                                                    onChange={handleFilterChange}
+                                                    label="Legacy Product"
+                                                >
+                                                    {legacyProductOptions.map(option => (
+                                                        <MenuItem key={option.value} value={option.value}>
+                                                            {option.label}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                    )}
                                 </Grid>
                             </Box>
                         ))}
