@@ -77,6 +77,7 @@ async def authenticate(
                 User.password,
                 User.is_active,
                 User.has_password_set,
+                User.is_staff
             )
         )
         .filter(User.email == login_data["email"])
@@ -98,8 +99,10 @@ async def get_access_token_schema(
     user = await authenticate(user_login_schema, session=session)
     email = user.email
     access_token = auth_jwt.create_access_token(subject=email, algorithm="HS256")
-
-    return AccessTokenOutputSchema(access_token=access_token)
+    return AccessTokenOutputSchema(
+        access_token=access_token,
+        is_staff=user.is_staff
+        )
 
 
 async def get_single_user(

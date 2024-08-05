@@ -67,7 +67,7 @@ class Filter(Select):
         else:
             key, self.field = field.split("__")
             self.current_model = get_model_from_key_name(self.main_model, key)
-            alias = self.current_model
+            alias = aliased(self.current_model)
             self.inst = self.inst.join(alias, getattr(self.main_model, key))
 
         if self.field in FORBIDDEN_FIELDS:

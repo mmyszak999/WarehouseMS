@@ -35,7 +35,8 @@ from src.core.utils.orm import if_exists
 async def create_product(
     session: AsyncSession, product_input: ProductInputSchema
 ) -> ProductOutputSchema:
-    product_data = product_input.dict()
+    product_data = product_input.dict(exclude_none=True, exclude_unset=True)
+    print(product_data, "sd")
 
     if product_data.get("name"):
         name_check = await session.scalar(
@@ -44,7 +45,8 @@ async def create_product(
         if name_check:
             raise AlreadyExists(Product.__name__, "name", product_data["name"])
 
-    if category_ids := product_data["category_ids"]["id"]:
+    if category_ids := product_data.get("category_ids"):
+        category_ids = category_ids.get("id")
         categories = await session.scalars(
             select(Category).where(Category.id.in_(category_ids))
         )
@@ -53,7 +55,9 @@ async def create_product(
             raise ServiceException("Wrong categories!")
 
         product_data["categories"] = categories
-    product_data.pop("category_ids")
+        
+    if category_ids:
+        product_data.pop("category_ids")
 
     new_product = Product(**product_data)
 

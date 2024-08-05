@@ -3,8 +3,9 @@ import axios from 'axios';
 import { Typography, Card, CardContent, CardHeader, CircularProgress, Grid, AppBar, Toolbar, Button, Box, Pagination } from '@mui/material';
 import { Link } from 'react-router-dom';
 import AuthService from '../services/AuthService';
+import '../App.css'; // Import your CSS file
 
-const ProductsList = () => {
+const ProductsList = ({ themeMode }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -54,7 +55,7 @@ const ProductsList = () => {
 
     return (
         <Box>
-            <AppBar position="static">
+            <AppBar position="static" className={`app-bar ${themeMode}`}>
                 <Toolbar>
                     <Button color="inherit" component={Link} to="/">Home</Button>
                     {userRole && (
@@ -65,7 +66,7 @@ const ProductsList = () => {
             <Grid container spacing={3} sx={{ mt: 3 }}>
                 {products.map(product => (
                     <Grid item xs={12} key={product.id}>
-                        <Card>
+                        <Card className={`card ${themeMode}`}>
                             <CardHeader
                                 title={
                                     <Link to={`/product/${product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -85,7 +86,7 @@ const ProductsList = () => {
                                 <Typography variant="body2">Categories:</Typography>
                                 <ul>
                                     {product.categories.map(category => (
-                                        <li key={category.id}>
+                                        <li key={category.id} className={`list-item ${themeMode}`}>
                                             <Typography variant="body2">{category.name}</Typography>
                                         </li>
                                     ))}

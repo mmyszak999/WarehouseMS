@@ -12,7 +12,7 @@ from src.apps.products.schemas.category_schemas import (
 
 class ProductBaseSchema(BaseModel):
     name: str = Field(max_length=75)
-    description: str
+    description: Optional[str]
     weight: Decimal
 
     class Config:
@@ -21,7 +21,7 @@ class ProductBaseSchema(BaseModel):
 
 class ProductInputSchema(ProductBaseSchema):
     wholesale_price: Decimal
-    category_ids: CategoryIdListSchema
+    category_ids: Optional[CategoryIdListSchema]
 
     class Config:
         orm_mode = True
