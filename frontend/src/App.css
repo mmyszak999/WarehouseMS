@@ -85,3 +85,12 @@ button:hover {
 .product-name {
   font-weight: bold;
 }
+
+.product-description,
+.product-weight,
+.product-wholesale-price,
+.product-legacy,
+.product-categories,
+.product-category-name {
+  font-family: 'Arial, sans-serif';
+}

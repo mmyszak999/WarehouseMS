@@ -3,6 +3,7 @@ import axios from 'axios';
 import { Typography, CircularProgress, Box } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import AuthService from '../services/AuthService';
+import '../App.css'; // Import your CSS file
 
 const ProductDetail = () => {
     const { productId } = useParams();
@@ -11,7 +12,7 @@ const ProductDetail = () => {
     const [error, setError] = useState(null);
 
     const userRole = AuthService.getUserRole();
-    console.log(userRole, "wwa");
+
     useEffect(() => {
         const fetchProduct = async () => {
             try {
@@ -24,7 +25,6 @@ const ProductDetail = () => {
                         'Authorization': `Bearer ${localStorage.getItem('token')}`
                     }
                 });
-                console.log(response.data, "ww");
                 setProduct(response.data);
             } catch (error) {
                 setError('Error fetching product details');
@@ -50,21 +50,21 @@ const ProductDetail = () => {
     }
 
     return (
-        <Box>
-            <Typography variant="h4">{product.name}</Typography>
-            <Typography variant="body1">{product.description}</Typography>
-            <Typography variant="body2">Weight: {product.weight}</Typography>
+        <Box className="product-details">
+            <Typography variant="h4" className="product-name">{product.name}</Typography>
+            <Typography variant="body1" className="product-description">Description: {product.description}</Typography>
+            <Typography variant="body2" className="product-weight">Weight: {product.weight}</Typography>
             {userRole && (
                 <>
-                    <Typography variant="body2">Wholesale Price: {product.wholesale_price}</Typography>
+                    <Typography variant="body2" className="product-wholesale-price">Wholesale Price: {product.wholesale_price}</Typography>
                 </>
             )}
-            <Typography variant="body2">Legacy Product: {product.legacy_product ? 'Yes' : 'No'}</Typography>
-            <Typography variant="body2">Categories:</Typography>
+            <Typography variant="body2" className="product-legacy">Legacy Product: {product.legacy_product ? 'Yes' : 'No'}</Typography>
+            <Typography variant="body2" className="product-categories">Categories:</Typography>
             <ul>
                 {product.categories.map(category => (
-                    <li key={category.id}>
-                        <Typography variant="body2">{category.name}</Typography>
+                    <li key={category.id} className="list-item">
+                        <Typography variant="body2" className="product-category-name">{category.name}</Typography>
                     </li>
                 ))}
             </ul>

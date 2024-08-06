@@ -48,7 +48,11 @@ const App = () => {
             <IconButton color="inherit" onClick={toggleTheme}>
               <i className={`fa fa-${themeMode === 'light' ? 'moon' : 'sun'}`} />
             </IconButton>
-            {isLoggedIn && <Button color="inherit" onClick={handleLogout}>Logout</Button>}
+            {isLoggedIn ? (
+              <Button color="inherit" onClick={handleLogout}>Logout</Button>
+            ) : (
+              <Button color="inherit" component={Link} to="/login">Login</Button>
+            )}
           </Toolbar>
         </AppBar>
         <Container maxWidth="false" sx={{ mt: 4 }} className={`container ${themeMode}`}>

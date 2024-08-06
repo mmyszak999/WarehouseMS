@@ -26,6 +26,8 @@ const legacyProductOptions = [
     { value: 'false', label: 'No' }
 ];
 
+const pageSizeOptions = [5, 10, 15, 20, 25, 50, 100];
+
 const ProductsList = ({ themeMode }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -43,7 +45,7 @@ const ProductsList = ({ themeMode }) => {
 
     const userRole = AuthService.getUserRole();
 
-    const fetchProducts = async (page) => {
+    const fetchProducts = async (page, size) => {
         try {
             setLoading(true);
             let endpoint = `http://localhost:8000/api/products?page=${page}&size=${size}`;
@@ -74,11 +76,16 @@ const ProductsList = ({ themeMode }) => {
     };
 
     useEffect(() => {
-        fetchProducts(page);
-    }, [userRole, page, filters]);
+        fetchProducts(page, size);
+    }, [userRole, page, size, filters]);
 
     const handlePageChange = (event, value) => {
         setPage(value);
+    };
+
+    const handleSizeChange = (event) => {
+        setSize(event.target.value);
+        setPage(1); // Reset to first page whenever size changes
     };
 
     const handleFilterChange = (event) => {
@@ -229,7 +236,21 @@ const ProductsList = ({ themeMode }) => {
                             </Grid>
                         ))}
                     </Grid>
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
+                        <FormControl sx={{ minWidth: 120 }}>
+                            <InputLabel>Items per page</InputLabel>
+                            <Select
+                                value={size}
+                                onChange={handleSizeChange}
+                                label="Items per page"
+                            >
+                                {pageSizeOptions.map(option => (
+                                    <MenuItem key={option} value={option}>
+                                        {option}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                         <Pagination
                             count={totalPages}
                             page={page}
