@@ -1,3 +1,4 @@
+// src/components/Login.js
 import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Container, Alert, AppBar, Toolbar } from '@mui/material';
 import { Link } from 'react-router-dom';
@@ -14,7 +15,7 @@ const Login = ({ handleLogin }) => {
         try {
             await handleLogin(email, password);
         } catch (err) {
-            console.error('Login error:', err.message);
+            console.error('Login error:', err.message); // Logowanie błędu
             setError(err.message);
         }
     };

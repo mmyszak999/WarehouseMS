@@ -1,8 +1,10 @@
+// src/App.js
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, Link } from 'react-router-dom';
 import { Button, Container, AppBar, Toolbar, Typography, Box, IconButton, CssBaseline, ThemeProvider } from '@mui/material';
 import ProductsList from './components/ProductsList';
 import ProductDetail from './components/ProductDetail';
+import StaffProductsList from './components/StaffProductsList';
 import AuthService from './services/AuthService';
 import Login from './components/Login';
 import CreateProduct from './components/CreateProduct';
@@ -49,7 +51,9 @@ const App = () => {
               <i className={`fa fa-${themeMode === 'light' ? 'moon' : 'sun'}`} />
             </IconButton>
             {isLoggedIn ? (
-              <Button color="inherit" onClick={handleLogout}>Logout</Button>
+              <>
+                <Button color="inherit" onClick={handleLogout}>Logout</Button>
+              </>
             ) : (
               <Button color="inherit" component={Link} to="/login">Login</Button>
             )}
@@ -63,8 +67,13 @@ const App = () => {
                 isLoggedIn ? (
                   <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4 }}>
                     <Button variant="contained" color="primary" component={Link} to="/products" sx={{ mb: 2 }}>
-                      View Products
+                      View Available Products
                     </Button>
+                    {AuthService.getUserRole() && (
+                      <Button variant="contained" color="secondary" component={Link} to="/products/all">
+                        Get All Products (Staff Only)
+                      </Button>
+                    )}
                   </Box>
                 ) : (
                   <Login handleLogin={handleLogin} />
@@ -75,6 +84,16 @@ const App = () => {
             <Route path="/products" element={isLoggedIn ? <ProductsList themeMode={themeMode} /> : <Navigate to="/login" />} />
             <Route path="/product/:productId" element={isLoggedIn ? <ProductDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
             <Route path="/product/create" element={isLoggedIn ? <CreateProduct themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route
+              path="/products/all"
+              element={
+                isLoggedIn && AuthService.getUserRole() ? (
+                  <StaffProductsList themeMode={themeMode} />
+                ) : (
+                  <Navigate to={isLoggedIn ? "/" : "/login"} />
+                )
+              }
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Container>

@@ -1,6 +1,25 @@
+// src/components/StaffProductsList.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Typography, Card, CardContent, CardHeader, CircularProgress, Grid, AppBar, Toolbar, Button, Box, Pagination, TextField, MenuItem, Select, InputLabel, FormControl, Divider } from '@mui/material';
+import {
+    Typography,
+    Card,
+    CardContent,
+    CardHeader,
+    CircularProgress,
+    Grid,
+    AppBar,
+    Toolbar,
+    Button,
+    Box,
+    Pagination,
+    TextField,
+    MenuItem,
+    Select,
+    InputLabel,
+    FormControl,
+    Divider
+} from '@mui/material';
 import { Link } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 import '../App.css'; // Import your CSS file
@@ -20,9 +39,15 @@ const sortOptions = [
     { value: 'desc', label: 'Descending' }
 ];
 
+const legacyProductOptions = [
+    { value: '', label: 'No Filter' },
+    { value: 'true', label: 'Yes' },
+    { value: 'false', label: 'No' }
+];
+
 const pageSizeOptions = [5, 10, 15, 20, 25, 50, 100];
 
-const ProductsList = ({ themeMode }) => {
+const StaffProductsList = ({ themeMode }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -34,6 +59,8 @@ const ProductsList = ({ themeMode }) => {
         weight: { value: '', operator: 'eq', sort: '' },
         description: { value: '', operator: 'eq', sort: '' },
         category__name: { value: '', operator: 'eq', sort: '' },
+        wholesale_price: { value: '', operator: 'eq', sort: '' },
+        legacy_product: { value: '', operator: 'eq', sort: '' }
     });
 
     const [isStaff, setIsStaff] = useState(false);
@@ -50,7 +77,7 @@ const ProductsList = ({ themeMode }) => {
     const fetchProducts = async (page, size) => {
         try {
             setLoading(true);
-            let endpoint = `http://localhost:8000/api/products?page=${page}&size=${size}`;
+            let endpoint = `http://localhost:8000/api/products/all?page=${page}&size=${size}`;
 
             // Append filter params
             for (const [key, filter] of Object.entries(filters)) {
@@ -131,54 +158,75 @@ const ProductsList = ({ themeMode }) => {
                                 </Typography>
                                 <Grid container spacing={2}>
                                     {/* Value Input */}
-                                    <Grid item xs={12} md={12}>
-                                        <TextField
-                                            label={key.replace(/_/g, ' ')}
-                                            name={`${key}.value`}
-                                            value={filter.value}
-                                            onChange={handleFilterChange}
-                                            fullWidth
-                                        />
-                                    </Grid>
+                                    {key !== 'legacy_product' && (
+                                        <Grid item xs={12} md={12}>
+                                            <TextField
+                                                label={key.replace(/_/g, ' ')}
+                                                name={`${key}.value`}
+                                                value={filter.value}
+                                                onChange={handleFilterChange}
+                                                fullWidth
+                                            />
+                                        </Grid>
+                                    )}
                                     {/* Operator Select */}
-                                    <Grid item xs={12} md={12}>
-                                        <FormControl fullWidth>
-                                            <InputLabel>Operator</InputLabel>
-                                            <Select
-                                                name={`${key}.operator`}
-                                                value={filter.operator}
-                                                onChange={handleFilterChange}
-                                                label="Operator"
-                                            >
-                                                {operatorOptions.map(option => (
-                                                    <MenuItem key={option.value} value={option.value}>
-                                                        {option.label}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
+                                    {key !== 'legacy_product' && (
+                                        <Grid item xs={12} md={12}>
+                                            <FormControl fullWidth>
+                                                <InputLabel>Operator</InputLabel>
+                                                <Select
+                                                    name={`${key}.operator`}
+                                                    value={filter.operator}
+                                                    onChange={handleFilterChange}
+                                                    label="Operator"
+                                                >
+                                                    {operatorOptions.map(option => (
+                                                        <MenuItem key={option.value} value={option.value}>
+                                                            {option.label}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                    )}
                                     {/* Sort By Select */}
-                                    <Grid item xs={12} md={12}>
-                                        <FormControl fullWidth>
-                                            <InputLabel>Sort By</InputLabel>
-                                            <Select
-                                                name={`${key}.sort`}
-                                                value={filter.sort}
-                                                onChange={handleFilterChange}
-                                                label="Sort By"
-                                            >
-                                                {sortOptions.map(option => (
-                                                    <MenuItem key={option.value} value={option.value}>
-                                                        {option.label}
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-                                    </Grid>
+                                    {key !== 'legacy_product' && (
+                                        <Grid item xs={12} md={12}>
+                                            <FormControl fullWidth>
+                                                <InputLabel>Sort By</InputLabel>
+                                                <Select
+                                                    name={`${key}.sort`}
+                                                    value={filter.sort}
+                                                    onChange={handleFilterChange}
+                                                    label="Sort By"
+                                                >
+                                                    {sortOptions.map(option => (
+                                                        <MenuItem key={option.value} value={option.value}>
+                                                            {option.label}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        </Grid>
+                                    )}
                                 </Grid>
                             </Box>
                         ))}
+
+                        {/* Legacy Product Filter */}
+                        <FormControl fullWidth sx={{ mb: 2 }}>
+                            <InputLabel>Legacy Product</InputLabel>
+                            <Select
+                                value={filters.legacy_product.value}
+                                onChange={(e) => handleFilterChange({ target: { name: 'legacy_product.value', value: e.target.value } })}
+                            >
+                                {legacyProductOptions.map(option => (
+                                    <MenuItem key={option.value} value={option.value}>
+                                        {option.label}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                     </Box>
                 </Grid>
                 <Grid item xs={12} md={8}>
@@ -194,12 +242,17 @@ const ProductsList = ({ themeMode }) => {
                                         }
                                     />
                                     <CardContent>
-                                        <Typography variant="body1" fontFamily="Arial, sans-serif">Description: {product.description}</Typography>
+                                        <Typography variant="body1" fontFamily="Arial, sans-serif">{product.description}</Typography>
                                         <Typography variant="body2" fontFamily="Arial, sans-serif">Weight: {product.weight}</Typography>
+                                        {isStaff && (
+                                            <>
+                                                <Typography variant="body2" fontFamily="Arial, sans-serif">Wholesale Price: {product.wholesale_price}</Typography>
+                                            </>
+                                        )}
                                         <Typography variant="body2" fontFamily="Arial, sans-serif">Categories:</Typography>
                                         <ul>
                                             {product.categories.map(category => (
-                                                <li key={category.name} className={`list-item ${themeMode}`}>
+                                                <li key={category.id} className={`list-item ${themeMode}`}>
                                                     <Typography variant="body2" fontFamily="Arial, sans-serif">{category.name}</Typography>
                                                 </li>
                                             ))}
@@ -237,4 +290,4 @@ const ProductsList = ({ themeMode }) => {
     );
 };
 
-export default ProductsList;
+export default StaffProductsList;

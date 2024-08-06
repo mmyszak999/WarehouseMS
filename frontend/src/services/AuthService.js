@@ -1,5 +1,6 @@
+// src/services/AuthService.js
 import axios from 'axios';
-import * as jwt from 'jwt-decode'; // Import wszystkiego jako jwt
+import {jwtDecode} from 'jwt-decode'; // Poprawiony import
 
 const API_URL = 'http://localhost:8000/api/users';
 
@@ -9,18 +10,17 @@ class AuthService {
             const response = await axios.post(`${API_URL}/login`, { email, password });
             if (response.data.access_token) {
                 localStorage.setItem('token', response.data.access_token);
-                localStorage.setItem('is_staff', response.data.is_staff);
+                localStorage.setItem('is_staff', response.data.is_staff); // Ensure it's a string
             }
+            console.log(localStorage.getItem('is_staff'), "ww")
             return response.data;
         } catch (error) {
+            console.error('Login error details:', error);
             if (error.response) {
-                // Serwer odpowiedział z kodem stanu innym niż 2xx
                 throw new Error(error.response.data.detail || 'Login failed');
             } else if (error.request) {
-                // Żądanie zostało wysłane, ale nie otrzymano odpowiedzi
                 throw new Error('No response from server');
             } else {
-                // Coś innego poszło nie tak
                 throw new Error('An unexpected error occurred');
             }
         }
@@ -34,13 +34,13 @@ class AuthService {
     getCurrentUser() {
         const token = localStorage.getItem('token');
         if (token) {
-            return jwt.jwtDecode(token);
+            return jwtDecode(token);
         }
         return null;
     }
 
     getUserRole() {
-        return localStorage.getItem('is_staff') === 'True';
+        return localStorage.getItem('is_staff') === 'True'; // Ensure it's a string comparison
     }
 }
 
