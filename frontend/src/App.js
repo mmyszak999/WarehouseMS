@@ -6,6 +6,8 @@ import ProductsList from './components/ProductsList';
 import ProductDetail from './components/ProductDetail';
 import StaffProductsList from './components/StaffProductsList';
 import UpdateProduct from './components/UpdateProduct';
+import CategoriesList from './components/CategoriesList';
+import CategoryDetail from './components/CategoryDetail';
 import AuthService from './services/AuthService';
 import Login from './components/Login';
 import CreateProduct from './components/CreateProduct';
@@ -70,6 +72,9 @@ const App = () => {
                     <Button variant="contained" color="primary" component={Link} to="/products" sx={{ mb: 2 }}>
                       View Available Products
                     </Button>
+                    <Button variant="contained" color="primary" component={Link} to="/categories" sx={{ mb: 2 }}>
+                      View Categories
+                    </Button>
                     {AuthService.getUserRole() && (
                       <Button variant="contained" color="secondary" component={Link} to="/products/all">
                         Get All Products (Staff Only)
@@ -105,6 +110,8 @@ const App = () => {
                 )
               }
             />
+            <Route path="/categories" element={isLoggedIn ? <CategoriesList themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route path="/category/:categoryId" element={isLoggedIn ? <CategoryDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Container>

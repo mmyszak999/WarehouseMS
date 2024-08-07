@@ -68,7 +68,21 @@ const ProductDetail = ({ themeMode }) => {
             <ul>
                 {product.categories.map(category => (
                     <li key={category.id} className="list-item">
-                        <Typography variant="body2" className="product-category-name">{category.name}</Typography>
+                        {userRole ? (
+                            <Typography
+                                variant="body2"
+                                className="product-category-name"
+                                component={Link}
+                                to={`/category/${category.id}`}
+                                style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                                {category.name}
+                            </Typography>
+                        ) : (
+                            <Typography variant="body2" className="product-category-name">
+                                {category.name}
+                            </Typography>
+                        )}
                     </li>
                 ))}
             </ul>
