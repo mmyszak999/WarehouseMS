@@ -36,16 +36,19 @@ const UpdateProduct = ({ themeMode }) => {
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }
                     }),
-                    axios.get('http://localhost:8000/api/categories', {
+                    axios.get('http://localhost:8000/api/categories?size=100&page=1', {
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('token')}`
                         }
                     })
                 ]);
 
+                // Extract categories from the `results` key
                 const productCategories = productResponse.data.category_ids?.id || [];
+                const categoriesData = categoriesResponse.data.results || [];
+
                 setProduct(productResponse.data);
-                setCategories(categoriesResponse.data);
+                setCategories(categoriesData);
                 setFormData({
                     name: productResponse.data.name || '',
                     wholesale_price: productResponse.data.wholesale_price || '',
@@ -152,11 +155,17 @@ const UpdateProduct = ({ themeMode }) => {
                         onChange={handleCategoryChange}
                         renderValue={(selected) => selected.join(', ')}
                     >
-                        {Array.isArray(categories) && categories.map(category => (
-                            <MenuItem key={category.id} value={category.id}>
-                                {category.name}
-                            </MenuItem>
-                        ))}
+                        {loading ? (
+                            <MenuItem disabled>Loading categories...</MenuItem>
+                        ) : categories.length > 0 ? (
+                            categories.map(category => (
+                                <MenuItem key={category.id} value={category.id}>
+                                    {category.name}
+                                </MenuItem>
+                            ))
+                        ) : (
+                            <MenuItem disabled>No categories available</MenuItem>
+                        )}
                     </Select>
                 </FormControl>
                 <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
