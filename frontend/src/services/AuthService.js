@@ -12,7 +12,6 @@ class AuthService {
                 localStorage.setItem('token', response.data.access_token);
                 localStorage.setItem('is_staff', response.data.is_staff); // Ensure it's a string
             }
-            console.log(localStorage.getItem('is_staff'), "ww")
             return response.data;
         } catch (error) {
             console.error('Login error details:', error);

@@ -1,5 +1,4 @@
-// src/components/StaffProductsList.js
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import {
     Typography,
@@ -23,6 +22,7 @@ import {
 import { Link } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 import '../App.css'; // Import your CSS file
+import { debounce } from 'lodash';
 
 const operatorOptions = [
     { value: 'eq', label: 'Equals (=)' },
@@ -58,7 +58,7 @@ const StaffProductsList = ({ themeMode }) => {
         name: { value: '', operator: 'eq', sort: '' },
         weight: { value: '', operator: 'eq', sort: '' },
         description: { value: '', operator: 'eq', sort: '' },
-        category__name: { value: '', operator: 'eq', sort: '' },
+        categories__name: { value: '', operator: 'eq', sort: '' },
         wholesale_price: { value: '', operator: 'eq', sort: '' },
         legacy_product: { value: '', operator: 'eq', sort: '' }
     });
@@ -74,13 +74,13 @@ const StaffProductsList = ({ themeMode }) => {
         fetchUserRole();
     }, []);
 
-    const fetchProducts = async (page, size) => {
+    const fetchProducts = async (page, size, appliedFilters) => {
         try {
             setLoading(true);
             let endpoint = `http://localhost:8000/api/products/all?page=${page}&size=${size}`;
 
             // Append filter params
-            for (const [key, filter] of Object.entries(filters)) {
+            for (const [key, filter] of Object.entries(appliedFilters)) {
                 if (filter.value) {
                     endpoint += `&${key}__${filter.operator}=${filter.value}`;
                 }
@@ -105,8 +105,8 @@ const StaffProductsList = ({ themeMode }) => {
     };
 
     useEffect(() => {
-        fetchProducts(page, size);
-    }, [page, size, filters]);
+        fetchProducts(page, size, filters);
+    }, [page, size]);
 
     const handlePageChange = (event, value) => {
         setPage(value);
@@ -124,6 +124,17 @@ const StaffProductsList = ({ themeMode }) => {
             ...prevFilters,
             [field]: { ...prevFilters[field], [type]: value }
         }));
+    };
+
+    const debounceFetchProducts = useCallback(
+        debounce((updatedFilters) => {
+            fetchProducts(page, size, updatedFilters);
+        }, 500), // Adjust debounce delay as needed
+        [page, size]
+    );
+
+    const handleFilterApply = () => {
+        debounceFetchProducts(filters);
     };
 
     if (loading) {
@@ -227,6 +238,9 @@ const StaffProductsList = ({ themeMode }) => {
                                 ))}
                             </Select>
                         </FormControl>
+                        <Button variant="contained" color="primary" onClick={handleFilterApply}>
+                            Apply Filters
+                        </Button>
                     </Box>
                 </Grid>
                 <Grid item xs={12} md={8}>

@@ -5,6 +5,7 @@ import { Button, Container, AppBar, Toolbar, Typography, Box, IconButton, CssBas
 import ProductsList from './components/ProductsList';
 import ProductDetail from './components/ProductDetail';
 import StaffProductsList from './components/StaffProductsList';
+import UpdateProduct from './components/UpdateProduct';
 import AuthService from './services/AuthService';
 import Login from './components/Login';
 import CreateProduct from './components/CreateProduct';
@@ -89,6 +90,16 @@ const App = () => {
               element={
                 isLoggedIn && AuthService.getUserRole() ? (
                   <StaffProductsList themeMode={themeMode} />
+                ) : (
+                  <Navigate to={isLoggedIn ? "/" : "/login"} />
+                )
+              }
+            />
+            <Route
+              path="/product/update/:productId"
+              element={
+                isLoggedIn && AuthService.getUserRole() ? (
+                  <UpdateProduct themeMode={themeMode} />
                 ) : (
                   <Navigate to={isLoggedIn ? "/" : "/login"} />
                 )

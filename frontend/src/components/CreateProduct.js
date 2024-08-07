@@ -1,6 +1,5 @@
-// src/components/CreateProduct.js
 import React, { useState, useEffect } from 'react';
-import { TextField, Button, Box, Typography, Container, MenuItem, AppBar, Toolbar } from '@mui/material';
+import { TextField, Button, Box, Typography, Container, MenuItem, AppBar, Toolbar, FormControl, InputLabel, Select } from '@mui/material';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
@@ -10,7 +9,7 @@ const CreateProduct = () => {
         description: '',
         weight: '',
         wholesale_price: '',
-        category_id: '',
+        category_ids: { id: [] }, // Update to hold category ids within an id array
     });
 
     const [categories, setCategories] = useState([]);
@@ -19,7 +18,12 @@ const CreateProduct = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/categories');
+                const response = await axios.get('http://localhost:8000/api/categories?size=100', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
                 setCategories(response.data.results || []);
                 setLoading(false);
             } catch (error) {
@@ -32,21 +36,27 @@ const CreateProduct = () => {
     }, []);
 
     const handleChange = (e) => {
-        setProductData({
-            ...productData,
-            [e.target.name]: e.target.value,
-        });
+        const { name, value } = e.target;
+        if (name === 'category_ids') {
+            setProductData(prevState => ({
+                ...prevState,
+                category_ids: { id: value }
+            }));
+        } else {
+            setProductData(prevState => ({
+                ...prevState,
+                [name]: value,
+            }));
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formattedData = {
             ...productData,
-            category_id: productData.category_id.trim(),
             weight: parseFloat(productData.weight),
             wholesale_price: parseFloat(productData.wholesale_price),
         };
-
         try {
             const response = await axios.post('http://localhost:8000/api/products', formattedData, {
                 headers: {
@@ -120,30 +130,29 @@ const CreateProduct = () => {
                         value={productData.wholesale_price}
                         onChange={handleChange}
                     />
-                    <TextField
-                        select
-                        variant="outlined"
-                        margin="normal"
-                        fullWidth
-                        id="category_id"
-                        label="Category"
-                        name="category_id"
-                        value={productData.category_id}
-                        onChange={handleChange}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <MenuItem disabled>Loading categories...</MenuItem>
-                        ) : categories.length > 0 ? (
-                            categories.map(category => (
-                                <MenuItem key={category.id} value={category.id}>
-                                    {category.name}
-                                </MenuItem>
-                            ))
-                        ) : (
-                            <MenuItem disabled>No categories available</MenuItem>
-                        )}
-                    </TextField>
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel>Categories</InputLabel>
+                        <Select
+                            multiple
+                            value={productData.category_ids.id}
+                            onChange={handleChange}
+                            name="category_ids"
+                            renderValue={(selected) => selected.map(id => categories.find(cat => cat.id === id)?.name).join(', ')}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <MenuItem disabled>Loading categories...</MenuItem>
+                            ) : categories.length > 0 ? (
+                                categories.map(category => (
+                                    <MenuItem key={category.id} value={category.id}>
+                                        {category.name}
+                                    </MenuItem>
+                                ))
+                            ) : (
+                                <MenuItem disabled>No categories available</MenuItem>
+                            )}
+                        </Select>
+                    </FormControl>
                     <Button
                         type="submit"
                         fullWidth

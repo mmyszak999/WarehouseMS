@@ -1,11 +1,12 @@
+// src/components/ProductDetail.js
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Typography, CircularProgress, Box } from '@mui/material';
-import { useParams } from 'react-router-dom';
+import { Typography, CircularProgress, Box, Button } from '@mui/material';
+import { useParams, Link } from 'react-router-dom';
 import AuthService from '../services/AuthService';
 import '../App.css'; // Import your CSS file
 
-const ProductDetail = () => {
+const ProductDetail = ({ themeMode }) => {
     const { productId } = useParams();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -57,6 +58,9 @@ const ProductDetail = () => {
             {userRole && (
                 <>
                     <Typography variant="body2" className="product-wholesale-price">Wholesale Price: {product.wholesale_price}</Typography>
+                    <Button variant="contained" color="primary" component={Link} to={`/product/update/${product.id}`} sx={{ mt: 2 }}>
+                        Update Product
+                    </Button>
                 </>
             )}
             <Typography variant="body2" className="product-legacy">Legacy Product: {product.legacy_product ? 'Yes' : 'No'}</Typography>
