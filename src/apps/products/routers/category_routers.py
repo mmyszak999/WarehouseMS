@@ -6,6 +6,7 @@ from src.apps.products.schemas.category_schemas import (
     CategoryInputSchema,
     CategoryOutputSchema,
     CategoryUpdateSchema,
+    CategoryBaseSchema
 )
 from src.apps.products.services.category_services import (
     create_category,
