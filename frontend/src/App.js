@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, Link } from 'react-router-dom';
 import { Button, Container, AppBar, Toolbar, Typography, Box, IconButton, CssBaseline, ThemeProvider } from '@mui/material';
@@ -8,6 +7,7 @@ import StaffProductsList from './components/StaffProductsList';
 import UpdateProduct from './components/UpdateProduct';
 import CategoriesList from './components/CategoriesList';
 import CategoryDetail from './components/CategoryDetail';
+import CreateCategory from './components/CreateCategory'; // Import CreateCategory component
 import AuthService from './services/AuthService';
 import Login from './components/Login';
 import CreateProduct from './components/CreateProduct';
@@ -112,6 +112,7 @@ const App = () => {
             />
             <Route path="/categories" element={isLoggedIn ? <CategoriesList themeMode={themeMode} /> : <Navigate to="/login" />} />
             <Route path="/category/:categoryId" element={isLoggedIn ? <CategoryDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route path="/category/create" element={isLoggedIn ? <CreateCategory themeMode={themeMode} /> : <Navigate to="/login" />} /> {/* Add this route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Container>
