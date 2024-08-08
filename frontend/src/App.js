@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, Link } from 'react-router-dom';
 import { Button, Container, AppBar, Toolbar, Typography, Box, IconButton, CssBaseline, ThemeProvider } from '@mui/material';
-import ProductsList from './components/ProductsList';
-import ProductDetail from './components/ProductDetail';
-import StaffProductsList from './components/StaffProductsList';
-import UpdateProduct from './components/UpdateProduct';
-import CategoriesList from './components/CategoriesList';
-import CategoryDetail from './components/CategoryDetail';
-import CreateCategory from './components/CreateCategory'; // Import CreateCategory component
+import ProductsList from './components/Product/ProductsList';
+import ProductDetail from './components/Product/ProductDetail';
+import StaffProductsList from './components/Product/StaffProductsList';
+import UpdateProduct from './components/Product/UpdateProduct';
+import CategoriesList from './components/Category/CategoriesList';
+import CategoryDetail from './components/Category/CategoryDetail';
+import CreateCategory from './components/Category/CreateCategory'; // Import CreateCategory component
 import AuthService from './services/AuthService';
 import Login from './components/Login';
-import CreateProduct from './components/CreateProduct';
+import CreateProduct from './components/Product/CreateProduct';
 import NotFound from './components/NotFound';
 import './App.css';
 import getTheme from './theme';

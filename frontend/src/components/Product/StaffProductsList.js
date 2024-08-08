@@ -20,8 +20,8 @@ import {
     Divider
 } from '@mui/material';
 import { Link } from 'react-router-dom';
-import AuthService from '../services/AuthService';
-import '../App.css'; // Import your CSS file
+import AuthService from '../../services/AuthService';
+import '../../App.css'; // Import your CSS file
 import { debounce } from 'lodash';
 
 const operatorOptions = [

@@ -2,8 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { Typography, Card, CardContent, CardHeader, CircularProgress, Grid, AppBar, Toolbar, Button, Box, Pagination, TextField, MenuItem, Select, InputLabel, FormControl, Divider } from '@mui/material';
 import { Link } from 'react-router-dom';
-import AuthService from '../services/AuthService';
-import '../App.css'; // Import your CSS file
+import AuthService from '../../services/AuthService';
+import '../../App.css'; // Import your CSS file
 import { debounce } from 'lodash';
 
 const operatorOptions = [

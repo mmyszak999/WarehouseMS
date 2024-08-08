@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Container, AppBar, Toolbar } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import AuthService from '../services/AuthService';
+import AuthService from '../../services/AuthService';
 
 const CreateCategory = () => {
     const [categoryName, setCategoryName] = useState('');

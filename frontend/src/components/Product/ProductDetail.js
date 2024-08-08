@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material';
 import axios from 'axios';
-import { Typography, CircularProgress, Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import { useParams, Link } from 'react-router-dom';
-import AuthService from '../services/AuthService';
-import '../App.css'; // Import your CSS file
+import React, { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import '../../App.css'; // Import your CSS file
+import AuthService from '../../services/AuthService';
 
 const ProductDetail = ({ themeMode }) => {
     const { productId } = useParams();

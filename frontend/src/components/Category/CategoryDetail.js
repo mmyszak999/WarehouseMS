@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CircularProgress, Typography, Box, TextField, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import AuthService from '../services/AuthService';
+import AuthService from '../../services/AuthService';
 
 const CategoryDetail = ({ themeMode }) => {
   const { categoryId } = useParams();
