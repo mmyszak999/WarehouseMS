@@ -68,7 +68,7 @@ async def update_single_category(
 
     category_data = category_input.dict(exclude_unset=True)
 
-    if category_data:
+    if category_data and (category_data.get('name') != category_object.name):
         category_name_check = await session.scalar(
             select(Category).filter(Category.name == category_input.name).limit(1)
         )

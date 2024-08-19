@@ -54,8 +54,9 @@ async def create_product(
             raise ServiceException("Wrong categories!")
 
         product_data["categories"] = categories
+        print(category_ids, "ww")
         
-    if category_ids:
+    if category_ids is not None:
         product_data.pop("category_ids")
 
     new_product = Product(**product_data)
