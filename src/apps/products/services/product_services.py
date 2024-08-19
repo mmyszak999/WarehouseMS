@@ -35,7 +35,7 @@ from src.core.utils.orm import if_exists
 async def create_product(
     session: AsyncSession, product_input: ProductInputSchema
 ) -> ProductOutputSchema:
-    product_data = product_input.dict()
+    product_data = product_input.dict(exclude_none=True, exclude_unset=True)
 
     if product_data.get("name"):
         name_check = await session.scalar(
@@ -44,7 +44,8 @@ async def create_product(
         if name_check:
             raise AlreadyExists(Product.__name__, "name", product_data["name"])
 
-    if category_ids := product_data["category_ids"]["id"]:
+    if category_ids := product_data.get("category_ids"):
+        category_ids = category_ids.get("id")
         categories = await session.scalars(
             select(Category).where(Category.id.in_(category_ids))
         )
@@ -53,7 +54,10 @@ async def create_product(
             raise ServiceException("Wrong categories!")
 
         product_data["categories"] = categories
-    product_data.pop("category_ids")
+        print(category_ids, "ww")
+        
+    if category_ids is not None:
+        product_data.pop("category_ids")
 
     new_product = Product(**product_data)
 
@@ -109,7 +113,6 @@ async def get_multiple_products(
     )
 
     if query_params:
-        print(query_params, "ww")
         query = filter_and_sort_instances(query_params, query, Product)
 
     return await paginate(
@@ -152,7 +155,7 @@ async def update_single_product(
 
     product_data = product_input.dict(exclude_none=True, exclude_unset=True)
 
-    if product_data.get("name"):
+    if product_data.get("name") and (product_object.name != product_input.name):
         product_name_check = await session.scalar(
             select(Product).filter(Product.name == product_input.name).limit(1)
         )
@@ -162,7 +165,6 @@ async def update_single_product(
     if category_ids := product_data.get("category_ids"):
         incoming_categories = set(category_ids["id"])
         current_categories = set(category.id for category in product_object.categories)
-
         if to_delete := (current_categories - incoming_categories):
             await session.execute(
                 delete(category_product_association_table).where(
@@ -170,8 +172,9 @@ async def update_single_product(
                 )
             )
             product_was_updated += 1
+        
 
-        if to_insert := (incoming_categories - current_categories):
+        if to_insert := incoming_categories:
             rows = [
                 {"product_id": product_id, "category_id": category_id}
                 for category_id in to_insert
@@ -187,7 +190,6 @@ async def update_single_product(
         statement = (
             update(Product).filter(Product.id == product_id).values(**product_data)
         )
-
         await session.execute(statement)
         product_was_updated += 1
 

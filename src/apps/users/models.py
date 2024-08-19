@@ -33,8 +33,8 @@ class User(Base):
     can_move_stocks = Column(Boolean, nullable=False, server_default="false")
     can_recept_stocks = Column(Boolean, nullable=False, server_default="false")
     can_issue_stocks = Column(Boolean, nullable=False, server_default="false")
-    issues = relationship("Issue", back_populates="user", lazy="raise")
-    receptions = relationship("Reception", back_populates="user", lazy="raise")
+    issues = relationship("Issue", back_populates="user", lazy="joined")
+    receptions = relationship("Reception", back_populates="user", lazy="joined")
     stock_user_history = relationship(
         "UserStock",
         back_populates="user",

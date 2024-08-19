@@ -26,6 +26,23 @@ services:
       - .:/code
     depends_on:
       - db
+  
+  frontend:
+    build:
+      context: .
+      dockerfile: ./docker/frontend/Dockerfile
+    restart: always
+    container_name: fastapi_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    env_file:
+      - .env
+    volumes:
+      - ./frontend:/frontend-code
+    depends_on:
+      - web
 
 volumes:
   postgres_data:

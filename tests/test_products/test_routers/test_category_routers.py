@@ -84,7 +84,7 @@ async def test_staff_and_authenticated_user_can_get_all_categories(
         (
             pytest.lazy_fixture("db_user"),
             pytest.lazy_fixture("auth_headers"),
-            status.HTTP_403_FORBIDDEN,
+            status.HTTP_200_OK,
         ),
         (
             pytest.lazy_fixture("db_staff_user"),
@@ -99,7 +99,7 @@ async def test_staff_and_authenticated_user_can_get_all_categories(
     ],
 )
 @pytest.mark.asyncio
-async def test_only_staff_user_can_get_single_category(
+async def test_staff_and_authenticated_user_can_get_single_category(
     async_client: AsyncClient,
     db_categories: PagedResponseSchema[CategoryOutputSchema],
     user: UserOutputSchema,

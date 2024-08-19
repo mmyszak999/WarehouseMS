@@ -12,7 +12,7 @@ from src.apps.products.schemas.category_schemas import (
 
 class ProductBaseSchema(BaseModel):
     name: str = Field(max_length=75)
-    description: str
+    description: Optional[str]
     weight: Decimal
 
     class Config:
@@ -21,7 +21,7 @@ class ProductBaseSchema(BaseModel):
 
 class ProductInputSchema(ProductBaseSchema):
     wholesale_price: Decimal
-    category_ids: CategoryIdListSchema
+    category_ids: Optional[CategoryIdListSchema]
 
     class Config:
         orm_mode = True
@@ -40,7 +40,7 @@ class ProductUpdateSchema(BaseModel):
 class ProductBasicOutputSchema(ProductBaseSchema):
     id: str
     categories: list[CategoryOutputSchema]
-    created_at: Optional[datetime.datetime]
+    created_at: Optional[datetime.date]
 
     class Config:
         orm_mode = True
@@ -48,7 +48,6 @@ class ProductBasicOutputSchema(ProductBaseSchema):
 
 class ProductOutputSchema(ProductBasicOutputSchema):
     wholesale_price: Decimal
-    amount_in_goods: int
     legacy_product: bool
 
     class Config:

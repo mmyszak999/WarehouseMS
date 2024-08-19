@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 from typing import Optional
 
@@ -34,7 +34,7 @@ class RackLevelSlotBaseOutputSchema(RackLevelSlotBaseSchema):
     is_active: bool
     rack_level_id: str
     stock: Optional[StockWithoutRackLevelSlotOutputSchema]
-    created_at: Optional[datetime]
+    created_at: Optional[date]
     rack_level_id: str
 
     class Config:

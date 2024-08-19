@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 from typing import Optional
 
@@ -68,7 +68,7 @@ class WaitingRoomBasicOutputSchema(WaitingRoomBaseSchema):
     current_stock_weight: Decimal
     available_slots: int
     available_stock_weight: Decimal
-    created_at: Optional[datetime]
+    created_at: Optional[date]
 
     class Config:
         orm_mode = True

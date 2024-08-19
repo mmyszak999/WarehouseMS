@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 from typing import Optional
 
@@ -59,7 +59,7 @@ class WarehouseBaseOutputSchema(WarehouseBaseSchema):
     available_waiting_rooms: int
     occupied_sections: int
     occupied_waiting_rooms: int
-    created_at: Optional[datetime]
+    created_at: Optional[date]
 
     class Config:
         orm_mode = True

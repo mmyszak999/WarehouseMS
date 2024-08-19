@@ -1,6 +1,7 @@
 from fastapi import APIRouter, FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi_jwt_auth.exceptions import AuthJWTException
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.apps.emails.routers import email_router
 from src.apps.issues.routers import issue_router
@@ -77,6 +78,19 @@ from src.core.exceptions import (
 
 app = FastAPI(
     title="WarehouseMS", description="Warehouse Management System", version="1.0"
+)
+
+origins = [
+    "http://localhost:3000",
+    "http://localhost:8000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
