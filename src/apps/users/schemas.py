@@ -61,6 +61,7 @@ class UserUpdateSchema(BaseModel):
     last_name: Optional[str]
     employment_date: Optional[datetime.date]
     birth_date: Optional[datetime.date]
+    is_staff: Optional[bool]
     can_move_stocks: Optional[bool]
     can_recept_stocks: Optional[bool]
     can_issue_stocks: Optional[bool]
