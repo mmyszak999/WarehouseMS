@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TextField, Button, Box, Typography, Container, MenuItem, AppBar, Toolbar, FormControl, InputLabel, Select } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const CreateProduct = () => {
@@ -9,11 +9,12 @@ const CreateProduct = () => {
         description: '',
         weight: '',
         wholesale_price: '',
-        category_ids: { id: [] }, // Update to hold category ids within an id array
+        category_ids: { id: [] },
     });
 
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate(); // Use navigate to programmatically navigate
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -65,6 +66,7 @@ const CreateProduct = () => {
                 }
             });
             console.log('Product created:', response.data);
+            navigate('/products'); // Redirect to /products after creation
         } catch (error) {
             console.error('Error creating product:', error);
         }
