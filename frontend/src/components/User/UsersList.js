@@ -22,7 +22,7 @@ import {
 import { Link } from 'react-router-dom';
 import AuthService from '../../services/AuthService';
 import '../../App.css';
-import { format } from 'date-fns';  // Importing date-fns for date formatting
+import { format } from 'date-fns';
 
 const operatorOptions = [
     { value: 'eq', label: 'Equals (=)' },
@@ -72,7 +72,6 @@ const UsersList = ({ themeMode }) => {
             for (const [key, filter] of Object.entries(appliedFilters)) {
                 if (filter.value) {
                     if (key === 'employment_date') {
-                        // Format the date value to match the backend's expected format
                         const formattedDate = format(new Date(filter.value), 'yyyy-MM-dd');
                         endpoint += `&${key}__${filter.operator}=${formattedDate}`;
                     } else {
@@ -92,7 +91,30 @@ const UsersList = ({ themeMode }) => {
             setUsers(response.data.results);
             setTotalPages(Math.ceil(response.data.total / size));
         } catch (error) {
-            setError('Error fetching users');
+            if (error.response) {
+                switch (error.response.status) {
+                    case 422:
+                        const schema_error = JSON.parse(error.request.response)
+                        setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
+                        break;
+                    case 500:
+                        setError('Server Error: Please try again later');
+                        break;
+                    case 401:
+                        setError('Error: ' + (error.response.statusText || 'You were logged out! '));
+                        break;
+                    default:
+                        const default_error = JSON.parse(error.request.response)
+                        setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
+                        break;
+                }
+            } else if (error.request) {
+                // Handle network errors
+                setError('Network Error: No response received from server');
+            } else {
+                // Handle other errors
+                setError('Error: ' + error.message);
+            }
             console.error('Error fetching users:', error);
         } finally {
             setLoading(false);
@@ -101,7 +123,7 @@ const UsersList = ({ themeMode }) => {
 
     useEffect(() => {
         fetchUsers(page, size, filters);
-    }, [page, size]);  // Now only fetches on page or size change
+    }, [page, size, filters]);
 
     const handlePageChange = (event, value) => {
         setPage(value);
@@ -109,7 +131,7 @@ const UsersList = ({ themeMode }) => {
 
     const handleSizeChange = (event) => {
         setSize(event.target.value);
-        setPage(1); // Reset to first page whenever size changes
+        setPage(1);
     };
 
     const handleFilterChange = (event) => {
@@ -122,8 +144,7 @@ const UsersList = ({ themeMode }) => {
     };
 
     const handleFilterApply = () => {
-        // This will only be called when the user clicks the "Apply Filters" button
-        setPage(1);  // Reset to first page when applying new filters
+        setPage(1);
         fetchUsers(1, size, filters);
     };
 
@@ -190,7 +211,6 @@ const UsersList = ({ themeMode }) => {
                         <Typography variant="h6" gutterBottom>Filters</Typography>
                         <Divider sx={{ mb: 2 }} />
 
-                        {/* Filter Inputs */}
                         {Object.entries(filters).map(([key, filter]) => (
                             (isStaff || key !== 'is_staff') && (
                                 <Box key={key} sx={{ mb: 3 }}>
@@ -198,7 +218,6 @@ const UsersList = ({ themeMode }) => {
                                         <strong>{key.replace(/_/g, ' ')}</strong>
                                     </Typography>
                                     <Grid container spacing={2}>
-                                        {/* Value Input */}
                                         <Grid item xs={12} md={12}>
                                             {key === 'employment_date' ? (
                                                 <TextField
@@ -222,7 +241,6 @@ const UsersList = ({ themeMode }) => {
                                                 />
                                             )}
                                         </Grid>
-                                        {/* Operator Select */}
                                         <Grid item xs={12} md={12}>
                                             <FormControl fullWidth>
                                                 <InputLabel>Operator</InputLabel>
@@ -230,9 +248,9 @@ const UsersList = ({ themeMode }) => {
                                                     name={`${key}.operator`}
                                                     value={filter.operator}
                                                     onChange={handleFilterChange}
-                                                    label="Operator"
+                                                    fullWidth
                                                 >
-                                                    {operatorOptions.map(option => (
+                                                    {operatorOptions.map((option) => (
                                                         <MenuItem key={option.value} value={option.value}>
                                                             {option.label}
                                                         </MenuItem>
@@ -240,17 +258,16 @@ const UsersList = ({ themeMode }) => {
                                                 </Select>
                                             </FormControl>
                                         </Grid>
-                                        {/* Sort By Select */}
                                         <Grid item xs={12} md={12}>
                                             <FormControl fullWidth>
-                                                <InputLabel>Sort By</InputLabel>
+                                                <InputLabel>Sort Order</InputLabel>
                                                 <Select
                                                     name={`${key}.sort`}
                                                     value={filter.sort}
                                                     onChange={handleFilterChange}
-                                                    label="Sort By"
+                                                    fullWidth
                                                 >
-                                                    {sortOptions.map(option => (
+                                                    {sortOptions.map((option) => (
                                                         <MenuItem key={option.value} value={option.value}>
                                                             {option.label}
                                                         </MenuItem>
@@ -262,61 +279,36 @@ const UsersList = ({ themeMode }) => {
                                 </Box>
                             )
                         ))}
-                        {isStaff && (
-                            <Box sx={{ mb: 3 }}>
-                                <Typography variant="subtitle1" gutterBottom>
-                                    <strong>Staff Filter</strong>
-                                </Typography>
-                                <FormControl fullWidth>
-                                    <InputLabel>Is Staff</InputLabel>
-                                    <Select
-                                        name="is_staff.value"
-                                        value={filters.is_staff?.value || ''}
-                                        onChange={handleFilterChange}
-                                        label="Is Staff"
-                                    >
-                                        <MenuItem value="">No Filter</MenuItem>
-                                        <MenuItem value="true">Yes</MenuItem>
-                                        <MenuItem value="false">No</MenuItem>
-                                    </Select>
-                                </FormControl>
-                            </Box>
-                        )}
-                        {isStaff && (
-                            <Button variant="contained" color="primary" onClick={handleFilterApply}>
-                                Apply Filters
-                            </Button>
-                        )}
+                        <Button variant="contained" onClick={handleFilterApply} fullWidth>Apply Filters</Button>
                     </Box>
                 </Grid>
                 <Grid item xs={12} md={8}>
-                    <Grid container spacing={3}>
-                        {users.map(user => (
-                            <Grid item xs={12} key={user.id}>
-                                {renderUserCard(user)}
-                            </Grid>
-                        ))}
-                    </Grid>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-                        <FormControl sx={{ minWidth: 120 }}>
-                            <InputLabel>Items per page</InputLabel>
-                            <Select
-                                value={size}
-                                onChange={handleSizeChange}
-                                label="Items per page"
-                            >
-                                {pageSizeOptions.map(option => (
+                    <Typography variant="h6" gutterBottom>
+                        Users
+                    </Typography>
+                    <Divider sx={{ mb: 2 }} />
+                    <Box>
+                        {users.map(renderUserCard)}
+                    </Box>
+                    <Box sx={{ mt: 3 }}>
+                        <FormControl fullWidth>
+                            <InputLabel>Page Size</InputLabel>
+                            <Select value={size} onChange={handleSizeChange}>
+                                {pageSizeOptions.map((option) => (
                                     <MenuItem key={option} value={option}>
                                         {option}
                                     </MenuItem>
                                 ))}
                             </Select>
                         </FormControl>
+                    </Box>
+                    <Box sx={{ mt: 2 }}>
                         <Pagination
                             count={totalPages}
                             page={page}
                             onChange={handlePageChange}
                             color="primary"
+                            sx={{ justifyContent: 'center' }}
                         />
                     </Box>
                 </Grid>

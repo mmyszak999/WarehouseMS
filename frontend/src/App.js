@@ -10,6 +10,7 @@ import CategoryDetail from './components/Category/CategoryDetail';
 import CreateCategory from './components/Category/CreateCategory';
 import UsersList from './components/User/UsersList';
 import CreateUser from './components/User/CreateUser';
+import UserDetail from './components/User/UserDetail';  // Nowy import
 import AuthService from './services/AuthService';
 import Login from './components/Login';
 import CreateProduct from './components/Product/CreateProduct';
@@ -155,6 +156,7 @@ const App = () => {
               }
             />
             <Route path="/user/create" element={isLoggedIn && AuthService.getUserRole() ? <CreateUser themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
+            <Route path="/user/:userId" element={isLoggedIn ? <UserDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Container>

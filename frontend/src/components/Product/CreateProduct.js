@@ -14,6 +14,7 @@ const CreateProduct = () => {
 
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const navigate = useNavigate(); // Use navigate to programmatically navigate
 
     useEffect(() => {
@@ -27,9 +28,32 @@ const CreateProduct = () => {
                 });
                 setCategories(response.data.results || []);
                 setLoading(false);
-            } catch (error) {
+            }  catch (error) {
+                if (error.response) {
+                    switch (error.response.status) {
+                        case 422:
+                            const schema_error = JSON.parse(error.request.response);
+                            setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
+                            break;
+                        case 500:
+                            setError('Server Error: Please try again later');
+                            break;
+                        case 401:
+                            setError('Error: ' + (error.response.statusText || 'You were logged out!'));
+                            break;
+                        default:
+                            const default_error = JSON.parse(error.request.response);
+                            setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
+                            break;
+                    }
+                } else if (error.request) {
+                    // Handle network errors
+                    setError('Network Error: No response received from server');
+                } else {
+                    // Handle other errors
+                    setError('Error: ' + error.message);
+                }
                 console.error('Error fetching categories:', error);
-                setLoading(false);
             }
         };
 
@@ -68,6 +92,30 @@ const CreateProduct = () => {
             console.log('Product created:', response.data);
             navigate('/products'); // Redirect to /products after creation
         } catch (error) {
+            if (error.response) {
+                switch (error.response.status) {
+                    case 422:
+                        const schema_error = JSON.parse(error.request.response);
+                        setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
+                        break;
+                    case 500:
+                        setError('Server Error: Please try again later');
+                        break;
+                    case 401:
+                        setError('Error: ' + (error.response.statusText || 'You were logged out!'));
+                        break;
+                    default:
+                        const default_error = JSON.parse(error.request.response);
+                        setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
+                        break;
+                }
+            } else if (error.request) {
+                // Handle network errors
+                setError('Network Error: No response received from server');
+            } else {
+                // Handle other errors
+                setError('Error: ' + error.message);
+            }
             console.error('Error creating product:', error);
         }
     };
@@ -155,6 +203,11 @@ const CreateProduct = () => {
                             )}
                         </Select>
                     </FormControl>
+                    {error && (
+                        <Typography variant="body2" color="error" sx={{ mt: 2 }}>
+                            {error}
+                        </Typography>
+                    )}
                     <Button
                         type="submit"
                         fullWidth

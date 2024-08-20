@@ -28,8 +28,31 @@ const ProductDetail = ({ themeMode }) => {
                 });
                 setProduct(response.data);
             } catch (error) {
-                setError('Error fetching product details');
-                console.error('Error fetching product details:', error);
+                if (error.response) {
+                    switch (error.response.status) {
+                        case 422:
+                            const schema_error = JSON.parse(error.request.response)
+                            setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
+                            break;
+                        case 500:
+                            setError('Server Error: Please try again later');
+                            break;
+                        case 401:
+                            setError('Error: ' + (error.response.statusText || 'You were logged out! '));
+                            break;
+                        default:
+                            const default_error = JSON.parse(error.request.response)
+                            setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
+                            break;
+                    }
+                } else if (error.request) {
+                    // Handle network errors
+                    setError('Network Error: No response received from server');
+                } else {
+                    // Handle other errors
+                    setError('Error: ' + error.message);
+                }
+                console.error('Error fetching users:', error);
             } finally {
                 setLoading(false);
             }
@@ -48,8 +71,31 @@ const ProductDetail = ({ themeMode }) => {
             setProduct(prevProduct => ({ ...prevProduct, legacy_product: true }));
             setLegacyDialogOpen(false);
         } catch (error) {
-            setError('Error making product legacy');
-            console.error('Error making product legacy:', error);
+            if (error.response) {
+                switch (error.response.status) {
+                    case 422:
+                        const schema_error = JSON.parse(error.request.response)
+                        setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
+                        break;
+                    case 500:
+                        setError('Server Error: Please try again later');
+                        break;
+                    case 401:
+                        setError('Error: ' + (error.response.statusText || 'You were logged out! '));
+                        break;
+                    default:
+                        const default_error = JSON.parse(error.request.response)
+                        setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
+                        break;
+                }
+            } else if (error.request) {
+                // Handle network errors
+                setError('Network Error: No response received from server');
+            } else {
+                // Handle other errors
+                setError('Error: ' + error.message);
+            }
+            console.error('Error fetching users:', error);
         }
     };
 
