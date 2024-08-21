@@ -14,7 +14,9 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogTitle
+    DialogTitle,
+    FormControlLabel,
+    Checkbox
 } from '@mui/material';
 import AuthService from '../../services/AuthService';
 import '../../App.css';
@@ -66,39 +68,40 @@ const UserDetail = ({ themeMode }) => {
                     can_issue_stocks: response.data.can_issue_stocks
                 });
             } catch (error) {
-                if (error.response) {
-                    switch (error.response.status) {
-                        case 422:
-                            const schema_error = JSON.parse(error.request.response)
-                            setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
-                            break;
-                        case 500:
-                            setError('Server Error: Please try again later');
-                            break;
-                        case 401:
-                            setError('Error: ' + (error.response.statusText || 'You were logged out! '));
-                            break;
-                        default:
-                            const default_error = JSON.parse(error.request.response)
-                            setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
-                            break;
-                    }
-                } else if (error.request) {
-                    // Handle network errors
-                    setError('Network Error: No response received from server');
-                } else {
-                    // Handle other errors
-                    setError('Error: ' + error.message);
-                }
-                console.error('Error fetching users:', error);
-            }
-            finally {
+                handleError(error);
+            } finally {
                 setLoading(false);
             }
         };
 
         fetchUserDetails();
     }, [userId]);
+
+    const handleError = (error) => {
+        if (error.response) {
+            switch (error.response.status) {
+                case 422:
+                    const schema_error = JSON.parse(error.request.response);
+                    setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
+                    break;
+                case 500:
+                    setError('Server Error: Please try again later');
+                    break;
+                case 401:
+                    setError('Error: ' + (error.response.statusText || 'You were logged out!'));
+                    break;
+                default:
+                    const default_error = JSON.parse(error.request.response);
+                    setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
+                    break;
+            }
+        } else if (error.request) {
+            setError('Network Error: No response received from server');
+        } else {
+            setError('Error: ' + error.message);
+        }
+        console.error('Error:', error);
+    };
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -130,31 +133,33 @@ const UserDetail = ({ themeMode }) => {
                 ...formData
             }));
         } catch (error) {
-            if (error.response) {
-                switch (error.response.status) {
-                    case 422:
-                        const schema_error = JSON.parse(error.request.response)
-                        setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
-                        break;
-                    case 500:
-                        setError('Server Error: Please try again later');
-                        break;
-                    case 401:
-                        setError('Error: ' + (error.response.statusText || 'You were logged out! '));
-                        break;
-                    default:
-                        const default_error = JSON.parse(error.request.response)
-                        setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
-                        break;
+            handleError(error);
+        }
+    };
+
+    const handleActivate = async () => {
+        try {
+            await axios.patch(`http://localhost:8000/api/users/${userId}/activate`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
                 }
-            } else if (error.request) {
-                // Handle network errors
-                setError('Network Error: No response received from server');
-            } else {
-                // Handle other errors
-                setError('Error: ' + error.message);
-            }
-            console.error('Error fetching users:', error);
+            });
+            setUser(prevUser => ({ ...prevUser, is_active: true }));
+        } catch (error) {
+            handleError(error);
+        }
+    };
+
+    const handleDeactivate = async () => {
+        try {
+            await axios.patch(`http://localhost:8000/api/users/${userId}/deactivate`, {}, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            setUser(prevUser => ({ ...prevUser, is_active: false }));
+        } catch (error) {
+            handleError(error);
         }
     };
 
@@ -193,6 +198,21 @@ const UserDetail = ({ themeMode }) => {
                             <Typography variant="body2">Superuser: {user.is_superuser ? 'Yes' : 'No'}</Typography>
                             <Typography variant="body2">Password Set: {user.has_password_set ? 'Yes' : 'No'}</Typography>
                             <Typography variant="body2">Created At: {user.created_at}</Typography>
+                            <Typography variant="body2">Active: {user.is_active ? 'Yes' : 'No'}</Typography>
+
+                            {user.has_password_set && (
+                                <>
+                                    {user.is_active ? (
+                                        <Button variant="contained" color="secondary" onClick={handleDeactivate} sx={{ mt: 2 }}>
+                                            Deactivate User
+                                        </Button>
+                                    ) : (
+                                        <Button variant="contained" color="primary" onClick={handleActivate} sx={{ mt: 2 }}>
+                                            Activate User
+                                        </Button>
+                                    )}
+                                </>
+                            )}
                         </>
                     ) : (
                         <Typography variant="body2">Active: {user.is_active ? 'Yes' : 'No'}</Typography>
@@ -243,26 +263,35 @@ const UserDetail = ({ themeMode }) => {
                                 shrink: true,
                             }}
                         />
-                        <TextField
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    name="can_move_stocks"
+                                    checked={formData.can_move_stocks}
+                                    onChange={handleInputChange}
+                                />
+                            }
                             label="Can Move Stocks"
-                            name="can_move_stocks"
-                            type="checkbox"
-                            checked={formData.can_move_stocks}
-                            onChange={handleInputChange}
                         />
-                        <TextField
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    name="can_recept_stocks"
+                                    checked={formData.can_recept_stocks}
+                                    onChange={handleInputChange}
+                                />
+                            }
                             label="Can Recept Stocks"
-                            name="can_recept_stocks"
-                            type="checkbox"
-                            checked={formData.can_recept_stocks}
-                            onChange={handleInputChange}
                         />
-                        <TextField
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    name="can_issue_stocks"
+                                    checked={formData.can_issue_stocks}
+                                    onChange={handleInputChange}
+                                />
+                            }
                             label="Can Issue Stocks"
-                            name="can_issue_stocks"
-                            type="checkbox"
-                            checked={formData.can_issue_stocks}
-                            onChange={handleInputChange}
                         />
                         <Button type="submit" variant="contained" color="primary" sx={{ mt: 2 }}>
                             Update User

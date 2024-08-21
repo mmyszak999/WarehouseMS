@@ -9,8 +9,9 @@ import CategoriesList from './components/Category/CategoriesList';
 import CategoryDetail from './components/Category/CategoryDetail';
 import CreateCategory from './components/Category/CreateCategory';
 import UsersList from './components/User/UsersList';
+import AllUsersList from './components/User/AllUsersList';
 import CreateUser from './components/User/CreateUser';
-import UserDetail from './components/User/UserDetail';  // Nowy import
+import UserDetail from './components/User/UserDetail';
 import AuthService from './services/AuthService';
 import Login from './components/Login';
 import CreateProduct from './components/Product/CreateProduct';
@@ -80,6 +81,7 @@ const App = () => {
                   {AuthService.getUserRole() && (
                     <>
                       <MenuItem component={Link} to="/products/all">Get All Products (Staff Only)</MenuItem>
+                      <MenuItem component={Link} to="/users/all">Get All Users (Staff Only)</MenuItem>
                     </>
                   )}
                 </Menu>
@@ -103,12 +105,15 @@ const App = () => {
                       View Categories
                     </Button>
                     <Button variant="contained" color="secondary" component={Link} to="/users">
-                          View Users
-                        </Button>
+                      View Users
+                    </Button>
                     {AuthService.getUserRole() && (
                       <>
                         <Button variant="contained" color="secondary" component={Link} to="/products/all">
                           Get All Products (Staff Only)
+                        </Button>
+                        <Button variant="contained" color="secondary" component={Link} to="/users/all">
+                          Get All Users (Staff Only)
                         </Button>
                       </>
                     )}
@@ -157,6 +162,7 @@ const App = () => {
             />
             <Route path="/user/create" element={isLoggedIn && AuthService.getUserRole() ? <CreateUser themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
             <Route path="/user/:userId" element={isLoggedIn ? <UserDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
+	          <Route path="/users/all" element={isLoggedIn && AuthService.getUserRole() ? <AllUsersList themeMode={themeMode} /> : <Navigate to="/" />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Container>
