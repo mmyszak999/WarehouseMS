@@ -54,6 +54,21 @@ const AllUsersList = ({ themeMode }) => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [size, setSize] = useState(10);
+
+    // State to manage filter input values
+    const [filterInputs, setFilterInputs] = useState({
+        first_name: { value: '', operator: 'eq', sort: '' },
+        last_name: { value: '', operator: 'eq', sort: '' },
+        email: { value: '', operator: 'eq', sort: '' },
+        employment_date: { value: '', operator: 'eq', sort: '' },
+        birth_date: { value: '', operator: 'eq', sort: '' },
+        can_move_stocks: { value: '' },
+        can_recept_stocks: { value: '' },
+        can_issue_stocks: { value: '' },
+        is_active: { value: '' }
+    });
+
+    // State to manage the applied filters
     const [filters, setFilters] = useState({
         first_name: { value: '', operator: 'eq', sort: '' },
         last_name: { value: '', operator: 'eq', sort: '' },
@@ -123,10 +138,8 @@ const AllUsersList = ({ themeMode }) => {
                         break;
                 }
             } else if (error.request) {
-                // Handle network errors
                 setError('Network Error: No response received from server');
             } else {
-                // Handle other errors
                 setError('Error: ' + error.message);
             }
             console.error('Error fetching users:', error);
@@ -151,15 +164,15 @@ const AllUsersList = ({ themeMode }) => {
     const handleFilterChange = (event) => {
         const { name, value } = event.target;
         const [field, type] = name.split('.');
-        setFilters(prevFilters => ({
-            ...prevFilters,
-            [field]: { ...prevFilters[field], [type]: value }
+        setFilterInputs(prevInputs => ({
+            ...prevInputs,
+            [field]: { ...prevInputs[field], [type]: value }
         }));
     };
 
     const handleFilterApply = () => {
+        setFilters(filterInputs);
         setPage(1);
-        fetchUsers(1, size, filters);
     };
 
     if (loading) {
@@ -172,8 +185,8 @@ const AllUsersList = ({ themeMode }) => {
 
     const renderUserCard = (user) => {
         const userInfo = isStaff ? {
-            ...user, 
-            is_staff: user.is_staff ? 'Yes' : 'No', 
+            ...user,
+            is_staff: user.is_staff ? 'Yes' : 'No',
             has_password_set: user.has_password_set ? 'Yes' : 'No'
         } : {
             first_name: user.first_name,
@@ -225,7 +238,7 @@ const AllUsersList = ({ themeMode }) => {
                         <Typography variant="h6" gutterBottom>Filters</Typography>
                         <Divider sx={{ mb: 2 }} />
 
-                        {Object.entries(filters).map(([key, filter]) => (
+                        {Object.entries(filterInputs).map(([key, filter]) => (
                             (isStaff || key !== 'is_staff') && (
                                 <Box key={key} sx={{ mb: 3 }}>
                                     <Typography variant="subtitle1" gutterBottom>

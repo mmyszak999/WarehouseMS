@@ -48,6 +48,15 @@ const UsersList = ({ themeMode }) => {
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [size, setSize] = useState(10);
+
+    // State to manage filter input values
+    const [filterInputs, setFilterInputs] = useState({
+        first_name: { value: '', operator: 'eq', sort: '' },
+        last_name: { value: '', operator: 'eq', sort: '' },
+        employment_date: { value: '', operator: 'eq', sort: '' }
+    });
+
+    // State to manage the applied filters
     const [filters, setFilters] = useState({
         first_name: { value: '', operator: 'eq', sort: '' },
         last_name: { value: '', operator: 'eq', sort: '' },
@@ -94,7 +103,7 @@ const UsersList = ({ themeMode }) => {
             if (error.response) {
                 switch (error.response.status) {
                     case 422:
-                        const schema_error = JSON.parse(error.request.response)
+                        const schema_error = JSON.parse(error.request.response);
                         setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
                         break;
                     case 500:
@@ -104,15 +113,13 @@ const UsersList = ({ themeMode }) => {
                         setError('Error: ' + (error.response.statusText || 'You were logged out! '));
                         break;
                     default:
-                        const default_error = JSON.parse(error.request.response)
+                        const default_error = JSON.parse(error.request.response);
                         setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
                         break;
                 }
             } else if (error.request) {
-                // Handle network errors
                 setError('Network Error: No response received from server');
             } else {
-                // Handle other errors
                 setError('Error: ' + error.message);
             }
             console.error('Error fetching users:', error);
@@ -137,15 +144,15 @@ const UsersList = ({ themeMode }) => {
     const handleFilterChange = (event) => {
         const { name, value } = event.target;
         const [field, type] = name.split('.');
-        setFilters(prevFilters => ({
-            ...prevFilters,
-            [field]: { ...prevFilters[field], [type]: value }
+        setFilterInputs(prevInputs => ({
+            ...prevInputs,
+            [field]: { ...prevInputs[field], [type]: value }
         }));
     };
 
     const handleFilterApply = () => {
+        setFilters(filterInputs);
         setPage(1);
-        fetchUsers(1, size, filters);
     };
 
     if (loading) {
@@ -158,8 +165,8 @@ const UsersList = ({ themeMode }) => {
 
     const renderUserCard = (user) => {
         const userInfo = isStaff ? {
-            ...user, 
-            is_staff: user.is_staff ? 'Yes' : 'No', 
+            ...user,
+            is_staff: user.is_staff ? 'Yes' : 'No',
             has_password_set: user.has_password_set ? 'Yes' : 'No'
         } : {
             first_name: user.first_name,
@@ -211,7 +218,7 @@ const UsersList = ({ themeMode }) => {
                         <Typography variant="h6" gutterBottom>Filters</Typography>
                         <Divider sx={{ mb: 2 }} />
 
-                        {Object.entries(filters).map(([key, filter]) => (
+                        {Object.entries(filterInputs).map(([key, filter]) => (
                             (isStaff || key !== 'is_staff') && (
                                 <Box key={key} sx={{ mb: 3 }}>
                                     <Typography variant="subtitle1" gutterBottom>

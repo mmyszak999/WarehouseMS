@@ -9,6 +9,7 @@ import CategoriesList from './components/Category/CategoriesList';
 import CategoryDetail from './components/Category/CategoryDetail';
 import CreateCategory from './components/Category/CreateCategory';
 import UsersList from './components/User/UsersList';
+import ActivateAccount from './components/ActivateAccount';
 import AllUsersList from './components/User/AllUsersList';
 import CreateUser from './components/User/CreateUser';
 import UserDetail from './components/User/UserDetail';
@@ -16,6 +17,7 @@ import AuthService from './services/AuthService';
 import Login from './components/Login';
 import CreateProduct from './components/Product/CreateProduct';
 import NotFound from './components/NotFound';
+import UserProfile from './components/User/UserProfile'; // Import the UserProfile component
 import './App.css';
 import getTheme from './theme';
 
@@ -63,6 +65,11 @@ const App = () => {
             <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }}>
               My App
             </Typography>
+            {isLoggedIn && (
+              <IconButton color="inherit" component={Link} to="/profile">
+                <i className="fa fa-user" />
+              </IconButton>
+            )}
             <IconButton color="inherit" onClick={toggleTheme}>
               <i className={`fa fa-${themeMode === 'light' ? 'moon' : 'sun'}`} />
             </IconButton>
@@ -160,9 +167,11 @@ const App = () => {
                 )
               }
             />
-            <Route path="/user/create" element={isLoggedIn && AuthService.getUserRole() ? <CreateUser themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
+            <Route path="/user/create" element={isLoggedIn && AuthService.getUserRole() ? <CreateUser themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/users/all" : "/login"} />} />
             <Route path="/user/:userId" element={isLoggedIn ? <UserDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
-	          <Route path="/users/all" element={isLoggedIn && AuthService.getUserRole() ? <AllUsersList themeMode={themeMode} /> : <Navigate to="/" />} />
+            <Route path="/users/all" element={isLoggedIn && AuthService.getUserRole() ? <AllUsersList themeMode={themeMode} /> : <Navigate to="/" />} />
+            <Route path="/profile" element={isLoggedIn ? <UserProfile themeMode={themeMode} /> : <Navigate to="/login" />} /> {/* UserProfile Route */}
+            <Route path="/activate-account/:token" element={<ActivateAccount />} /> {/* ActivateAccount Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Container>

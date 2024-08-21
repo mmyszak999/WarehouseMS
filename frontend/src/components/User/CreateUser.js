@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextField, Button, Box, Typography, Container, AppBar, Toolbar } from '@mui/material';
+import { TextField, Button, Box, Typography, Container, AppBar, Toolbar, FormControlLabel, Checkbox } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -14,8 +14,6 @@ const CreateUser = () => {
     can_move_stocks: false,
     can_recept_stocks: false,
     can_issue_stocks: false,
-    password: '',
-    password_repeat: '',
   });
   const [error, setError] = useState(null);
 
@@ -39,34 +37,34 @@ const CreateUser = () => {
         },
       });
       console.log('User created:', response.data);
-      navigate('/'); // Redirect to homepage or wherever you want
+      navigate('/users/all');
     } catch (error) {
       if (error.response) {
-          switch (error.response.status) {
-              case 422:
-                  const schema_error = JSON.parse(error.request.response)
-                  setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
-                  break;
-              case 500:
-                  setError('Server Error: Please try again later');
-                  break;
-              case 401:
-                  setError('Error: ' + (error.response.statusText || 'You were logged out! '));
-                  break;
-              default:
-                  const default_error = JSON.parse(error.request.response)
-                  setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
-                  break;
-          }
+        switch (error.response.status) {
+          case 422:
+            const schema_error = JSON.parse(error.request.response)
+            setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
+            break;
+          case 500:
+            setError('Server Error: Please try again later');
+            break;
+          case 401:
+            setError('Error: ' + (error.response.statusText || 'You were logged out! '));
+            break;
+          default:
+            const default_error = JSON.parse(error.request.response)
+            setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
+            break;
+        }
       } else if (error.request) {
-          // Handle network errors
-          setError('Network Error: No response received from server');
+        // Handle network errors
+        setError('Network Error: No response received from server');
       } else {
-          // Handle other errors
-          setError('Error: ' + error.message);
+        // Handle other errors
+        setError('Error: ' + error.message);
       }
-      console.error('Error fetching users:', error);
-  }
+      console.error('Error creating user:', error);
+    }
   };
 
   return (
@@ -143,33 +141,58 @@ const CreateUser = () => {
             value={userData.employment_date}
             onChange={handleChange}
           />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="password"
-            label="Password"
-            name="password"
-            type="password"
-            value={userData.password}
-            onChange={handleChange}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={userData.is_staff}
+                onChange={handleChange}
+                name="is_staff"
+                color="primary"
+              />
+            }
+            label="Staff Member"
           />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="password_repeat"
-            label="Repeat Password"
-            name="password_repeat"
-            type="password"
-            value={userData.password_repeat}
-            onChange={handleChange}
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={userData.can_move_stocks}
+                onChange={handleChange}
+                name="can_move_stocks"
+                color="primary"
+              />
+            }
+            label="Can Move Stocks"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={userData.can_recept_stocks}
+                onChange={handleChange}
+                name="can_recept_stocks"
+                color="primary"
+              />
+            }
+            label="Can Recept Stocks"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={userData.can_issue_stocks}
+                onChange={handleChange}
+                name="can_issue_stocks"
+                color="primary"
+              />
+            }
+            label="Can Issue Stocks"
           />
           <Button type="submit" fullWidth variant="contained" color="primary" sx={{ mt: 3, mb: 2 }}>
             Create User
           </Button>
+          {error && (
+            <Typography color="error" variant="body2" align="center">
+              {error}
+            </Typography>
+          )}
         </Box>
       </Box>
     </Container>
