@@ -20,6 +20,7 @@ import {
 } from '@mui/material';
 import AuthService from '../../services/AuthService';
 import '../../App.css';
+import { handleError } from '../ErrorHandler';
 
 const UserDetail = ({ themeMode }) => {
     const { userId } = useParams();
@@ -77,31 +78,6 @@ const UserDetail = ({ themeMode }) => {
         fetchUserDetails();
     }, [userId]);
 
-    const handleError = (error) => {
-        if (error.response) {
-            switch (error.response.status) {
-                case 422:
-                    const schema_error = JSON.parse(error.request.response);
-                    setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
-                    break;
-                case 500:
-                    setError('Server Error: Please try again later');
-                    break;
-                case 401:
-                    setError('Error: ' + (error.response.statusText || 'You were logged out!'));
-                    break;
-                default:
-                    const default_error = JSON.parse(error.request.response);
-                    setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
-                    break;
-            }
-        } else if (error.request) {
-            setError('Network Error: No response received from server');
-        } else {
-            setError('Error: ' + error.message);
-        }
-        console.error('Error:', error);
-    };
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -133,7 +109,7 @@ const UserDetail = ({ themeMode }) => {
                 ...formData
             }));
         } catch (error) {
-            handleError(error);
+            handleError(error, setError);
         }
     };
 
@@ -146,7 +122,7 @@ const UserDetail = ({ themeMode }) => {
             });
             setUser(prevUser => ({ ...prevUser, is_active: true }));
         } catch (error) {
-            handleError(error);
+            handleError(error, setError);
         }
     };
 
@@ -159,7 +135,7 @@ const UserDetail = ({ themeMode }) => {
             });
             setUser(prevUser => ({ ...prevUser, is_active: false }));
         } catch (error) {
-            handleError(error);
+            handleError(error, setError);
         }
     };
 

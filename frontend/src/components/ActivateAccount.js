@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import axios from 'axios';
+import { handleError } from './ErrorHandler';
 
 const ActivateAccount = () => {
   const { token } = useParams();
@@ -10,31 +11,6 @@ const ActivateAccount = () => {
   const [passwordRepeat, setPasswordRepeat] = useState('');
   const [error, setError] = useState('');
 
-  const handleError = (error) => {
-    if (error.response) {
-        switch (error.response.status) {
-            case 422:
-                const schema_error = JSON.parse(error.request.response);
-                setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
-                break;
-            case 500:
-                setError('Server Error: Please try again later');
-                break;
-            case 401:
-                setError('Error: ' + (error.response.statusText || 'You were logged out!'));
-                break;
-            default:
-                const default_error = JSON.parse(error.request.response);
-                setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
-                break;
-        }
-    } else if (error.request) {
-        setError('Network Error: No response received from server');
-    } else {
-        setError('Error: ' + error.message);
-    }
-    console.error('Error:', error);
-};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,8 +33,8 @@ const ActivateAccount = () => {
         setError('Something went wrong. Please try again.');
       }
     } catch (error) {
-      handleError(error);
-    }
+      handleError(error, setError);
+  }
   };
 
   return (

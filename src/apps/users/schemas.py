@@ -66,8 +66,14 @@ class UserUpdateSchema(BaseModel):
     can_recept_stocks: Optional[bool]
     can_issue_stocks: Optional[bool]
 
+    @validator("employment_date")
+    def validate_employment_date(cls, employment_date: Optional[datetime.date]) -> Optional[datetime.date]:
+        if employment_date and (employment_date >= datetime.date.today()):
+            raise ValueError("Employment date must be in the past")
+        return employment_date
+
     @validator("birth_date")
-    def validate_birth_date(cls, birth_date: datetime.date) -> datetime.date:
+    def validate_birth_date(cls, birth_date: Optional[datetime.date]) -> Optional[datetime.date]:
         if birth_date and (birth_date >= datetime.date.today()):
             raise ValueError("Birth date must be in the past")
         return birth_date

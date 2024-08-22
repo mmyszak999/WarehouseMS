@@ -5,9 +5,12 @@ import ProductsList from './components/Product/ProductsList';
 import ProductDetail from './components/Product/ProductDetail';
 import StaffProductsList from './components/Product/StaffProductsList';
 import UpdateProduct from './components/Product/UpdateProduct';
+import WarehouseDetail from './components/Warehouse/WarehouseDetail';
 import CategoriesList from './components/Category/CategoriesList';
 import CategoryDetail from './components/Category/CategoryDetail';
 import CreateCategory from './components/Category/CreateCategory';
+import CreateWarehouse from './components/Warehouse/CreateWarehouse';
+import WarehousesList from './components/Warehouse/WarehousesList';
 import UsersList from './components/User/UsersList';
 import ActivateAccount from './components/ActivateAccount';
 import AllUsersList from './components/User/AllUsersList';
@@ -17,31 +20,38 @@ import AuthService from './services/AuthService';
 import Login from './components/Login';
 import CreateProduct from './components/Product/CreateProduct';
 import NotFound from './components/NotFound';
-import UserProfile from './components/User/UserProfile'; // Import the UserProfile component
+import UserProfile from './components/User/UserProfile';
 import './App.css';
 import getTheme from './theme';
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(!!AuthService.getCurrentUser());
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isStaff, setIsStaff] = useState(false);
   const [themeMode, setThemeMode] = useState('light');
   const [anchorEl, setAnchorEl] = useState(null);
 
   useEffect(() => {
-    document.body.className = themeMode;
-  }, [themeMode]);
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+      setIsStaff(AuthService.getUserRole());
+    }
+  }, []);
 
   const handleLogin = async (email, password) => {
     try {
       await AuthService.login(email, password);
       setIsLoggedIn(true);
+      setIsStaff(AuthService.getUserRole());
     } catch (error) {
-      throw new Error(error.message);
+      console.error("Login failed:", error);
     }
   };
 
   const handleLogout = () => {
     AuthService.logout();
     setIsLoggedIn(false);
+    setIsStaff(false);
   };
 
   const toggleTheme = () => {
@@ -85,7 +95,8 @@ const App = () => {
                   <MenuItem component={Link} to="/products">View Products</MenuItem>
                   <MenuItem component={Link} to="/categories">View Categories</MenuItem>
                   <MenuItem component={Link} to="/users">View Users</MenuItem>
-                  {AuthService.getUserRole() && (
+                  <MenuItem component={Link} to="/warehouses">View Warehouse</MenuItem>
+                  {isStaff && (
                     <>
                       <MenuItem component={Link} to="/products/all">Get All Products (Staff Only)</MenuItem>
                       <MenuItem component={Link} to="/users/all">Get All Users (Staff Only)</MenuItem>
@@ -111,15 +122,18 @@ const App = () => {
                     <Button variant="contained" color="primary" component={Link} to="/categories" sx={{ mb: 2 }}>
                       View Categories
                     </Button>
-                    <Button variant="contained" color="secondary" component={Link} to="/users">
+                    <Button variant="contained" color="primary" component={Link} to="/users" sx={{ mb: 2 }}>
                       View Users
                     </Button>
-                    {AuthService.getUserRole() && (
+                    <Button variant="contained" color="primary" component={Link} to="/warehouses" sx={{ mb: 2 }}>
+                      View Warehouse
+                    </Button>
+                    {isStaff && (
                       <>
-                        <Button variant="contained" color="secondary" component={Link} to="/products/all">
+                        <Button variant="contained" color="secondary" component={Link} to="/products/all" sx={{ mb: 2 }}>
                           Get All Products (Staff Only)
                         </Button>
-                        <Button variant="contained" color="secondary" component={Link} to="/users/all">
+                        <Button variant="contained" color="secondary" component={Link} to="/users/all" sx={{ mb: 2 }}>
                           Get All Users (Staff Only)
                         </Button>
                       </>
@@ -137,7 +151,7 @@ const App = () => {
             <Route
               path="/products/all"
               element={
-                isLoggedIn && AuthService.getUserRole() ? (
+                isLoggedIn && isStaff ? (
                   <StaffProductsList themeMode={themeMode} />
                 ) : (
                   <Navigate to={isLoggedIn ? "/" : "/login"} />
@@ -147,7 +161,7 @@ const App = () => {
             <Route
               path="/product/update/:productId"
               element={
-                isLoggedIn && AuthService.getUserRole() ? (
+                isLoggedIn && isStaff ? (
                   <UpdateProduct themeMode={themeMode} />
                 ) : (
                   <Navigate to={isLoggedIn ? "/" : "/login"} />
@@ -163,15 +177,27 @@ const App = () => {
                 isLoggedIn ? (
                   <UsersList themeMode={themeMode} />
                 ) : (
-                  <Navigate to={isLoggedIn ? "/" : "/login"} />
+                  <Navigate to="/login" />
                 )
               }
             />
-            <Route path="/user/create" element={isLoggedIn && AuthService.getUserRole() ? <CreateUser themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/users/all" : "/login"} />} />
+            <Route path="/user/create" element={isLoggedIn && isStaff ? <CreateUser themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/users/all" : "/login"} />} />
             <Route path="/user/:userId" element={isLoggedIn ? <UserDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
-            <Route path="/users/all" element={isLoggedIn && AuthService.getUserRole() ? <AllUsersList themeMode={themeMode} /> : <Navigate to="/" />} />
-            <Route path="/profile" element={isLoggedIn ? <UserProfile themeMode={themeMode} /> : <Navigate to="/login" />} /> {/* UserProfile Route */}
-            <Route path="/activate-account/:token" element={<ActivateAccount />} /> {/* ActivateAccount Route */}
+            <Route path="/users/all" element={isLoggedIn && isStaff ? <AllUsersList themeMode={themeMode} /> : <Navigate to="/" />} />
+            <Route path="/profile" element={isLoggedIn ? <UserProfile themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route path="/activate-account/:token" element={<ActivateAccount />} />
+            <Route
+              path="/warehouses"
+              element={isLoggedIn ? <WarehousesList themeMode={themeMode} /> : <Navigate to="/login" />}
+            />
+            <Route
+              path="/warehouse/create"
+              element={isLoggedIn && isStaff ? <CreateWarehouse themeMode={themeMode} /> : <Navigate to="/" />}
+            />
+            <Route
+              path="/warehouse/:warehouseId"
+              element={isLoggedIn ? <WarehouseDetail themeMode={themeMode} /> : <Navigate to="/login" />}
+            />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Container>

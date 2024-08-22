@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Container, Alert, AppBar, Toolbar } from '@mui/material';
 import { Link } from 'react-router-dom';
 import AuthService from '../services/AuthService';
+import { handleError } from './ErrorHandler';
 
 const Login = ({ handleLogin }) => {
     const [email, setEmail] = useState('');
@@ -14,9 +15,8 @@ const Login = ({ handleLogin }) => {
         setError('');
         try {
             await handleLogin(email, password);
-        } catch (err) {
-            console.error('Login error:', err.message); // Logowanie błędu
-            setError(err.message);
+        } catch (error) {
+            handleError(error, setError);
         }
     };
 

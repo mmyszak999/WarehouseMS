@@ -23,6 +23,7 @@ import { Link } from 'react-router-dom';
 import AuthService from '../../services/AuthService';
 import '../../App.css';
 import { format } from 'date-fns';
+import { handleError } from '../ErrorHandler';
 
 const operatorOptions = [
     { value: 'eq', label: 'Equals (=)' },
@@ -120,29 +121,7 @@ const AllUsersList = ({ themeMode }) => {
             setUsers(response.data.results);
             setTotalPages(Math.ceil(response.data.total / size));
         } catch (error) {
-            if (error.response) {
-                switch (error.response.status) {
-                    case 422:
-                        const schema_error = JSON.parse(error.request.response);
-                        setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
-                        break;
-                    case 500:
-                        setError('Server Error: Please try again later');
-                        break;
-                    case 401:
-                        setError('Error: ' + (error.response.statusText || 'You were logged out!'));
-                        break;
-                    default:
-                        const default_error = JSON.parse(error.request.response);
-                        setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
-                        break;
-                }
-            } else if (error.request) {
-                setError('Network Error: No response received from server');
-            } else {
-                setError('Error: ' + error.message);
-            }
-            console.error('Error fetching users:', error);
+            handleError(error, setError);
         } finally {
             setLoading(false);
         }

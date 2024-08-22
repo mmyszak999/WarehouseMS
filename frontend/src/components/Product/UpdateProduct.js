@@ -12,6 +12,7 @@ import {
     Select,
     MenuItem
 } from '@mui/material';
+import { handleError } from '../ErrorHandler';
 
 const UpdateProduct = ({ themeMode }) => {
     const { productId } = useParams();
@@ -56,31 +57,7 @@ const UpdateProduct = ({ themeMode }) => {
                     category_ids: { id: productCategories } // Format correctly
                 });
             } catch (error) {
-                if (error.response) {
-                    switch (error.response.status) {
-                        case 422:
-                            const schema_error = JSON.parse(error.request.response)
-                            setError('Validation Error: ' + (schema_error.detail[0]?.msg || 'Invalid input'));
-                            break;
-                        case 500:
-                            setError('Server Error: Please try again later');
-                            break;
-                        case 401:
-                            setError('Error: ' + (error.response.statusText || 'You were logged out! '));
-                            break;
-                        default:
-                            const default_error = JSON.parse(error.request.response)
-                            setError('Error: ' + (default_error.detail || 'An unexpected error occurred'));
-                            break;
-                    }
-                } else if (error.request) {
-                    // Handle network errors
-                    setError('Network Error: No response received from server');
-                } else {
-                    // Handle other errors
-                    setError('Error: ' + error.message);
-                }
-                console.error('Error fetching users:', error);
+                handleError(error, setError);
             } finally {
                 setLoading(false);
             }
