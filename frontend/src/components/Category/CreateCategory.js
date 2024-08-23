@@ -3,6 +3,7 @@ import { TextField, Button, Box, Typography, Container, AppBar, Toolbar } from '
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import AuthService from '../../services/AuthService';
+import { handleError } from '../ErrorHandler';
 
 const CreateCategory = () => {
     const [categoryName, setCategoryName] = useState('');
@@ -26,8 +27,7 @@ const CreateCategory = () => {
             console.log('Category created:', response.data);
             navigate('/categories'); // Redirect to the categories list
         } catch (error) {
-            setError('Error creating category');
-            console.error('Error creating category:', error);
+            handleError(error, setError);
         }
     };
 

@@ -17,7 +17,6 @@ FORBIDDEN_FIELDS = [
     "reception_id",
     "product_id",
     "is_superuser",
-    "is_staff",
     "has_password_set",
 ]
 

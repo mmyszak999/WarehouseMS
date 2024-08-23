@@ -10,7 +10,7 @@ class EmailSettings(BaseSettings):
     MAIL_TLS: bool = False
     MAIL_SSL: bool = True
     USE_CREDENTIALS: bool = True
-    VALIDATE_CERTS: bool = True
+    VALIDATE_CERTS: bool = False
     TEMPLATE_FOLDER = "./templates/"
 
     class Config:

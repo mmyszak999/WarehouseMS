@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import AuthService from '../../services/AuthService';
 import '../../App.css'; // Import your CSS file
 import { debounce } from 'lodash';
+import { handleError } from '../ErrorHandler'
 
 const operatorOptions = [
     { value: 'eq', label: 'Equals (=)' },
@@ -67,8 +68,7 @@ const CategoriesList = ({ themeMode }) => {
             setCategories(response.data.results);
             setTotalPages(Math.ceil(response.data.total / size));
         } catch (error) {
-            setError('Error fetching categories');
-            console.error('Error fetching categories:', error);
+            handleError(error, setError);
         } finally {
             setLoading(false);
         }

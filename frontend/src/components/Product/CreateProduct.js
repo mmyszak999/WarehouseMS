@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TextField, Button, Box, Typography, Container, MenuItem, AppBar, Toolbar, FormControl, InputLabel, Select } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { handleError } from '../ErrorHandler';
 
 const CreateProduct = () => {
     const [productData, setProductData] = useState({
@@ -14,6 +15,7 @@ const CreateProduct = () => {
 
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const navigate = useNavigate(); // Use navigate to programmatically navigate
 
     useEffect(() => {
@@ -28,8 +30,7 @@ const CreateProduct = () => {
                 setCategories(response.data.results || []);
                 setLoading(false);
             } catch (error) {
-                console.error('Error fetching categories:', error);
-                setLoading(false);
+                handleError(error, setError);
             }
         };
 
@@ -68,7 +69,7 @@ const CreateProduct = () => {
             console.log('Product created:', response.data);
             navigate('/products'); // Redirect to /products after creation
         } catch (error) {
-            console.error('Error creating product:', error);
+            handleError(error, setError);
         }
     };
 
@@ -155,6 +156,11 @@ const CreateProduct = () => {
                             )}
                         </Select>
                     </FormControl>
+                    {error && (
+                        <Typography variant="body2" color="error" sx={{ mt: 2 }}>
+                            {error}
+                        </Typography>
+                    )}
                     <Button
                         type="submit"
                         fullWidth

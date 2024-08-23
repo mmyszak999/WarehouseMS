@@ -1,9 +1,10 @@
-import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography, AppBar, Toolbar } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import '../../App.css'; // Import your CSS file
 import AuthService from '../../services/AuthService';
+import { handleError } from '../ErrorHandler';
 
 const ProductDetail = ({ themeMode }) => {
     const { productId } = useParams();
@@ -28,8 +29,7 @@ const ProductDetail = ({ themeMode }) => {
                 });
                 setProduct(response.data);
             } catch (error) {
-                setError('Error fetching product details');
-                console.error('Error fetching product details:', error);
+                handleError(error, setError);
             } finally {
                 setLoading(false);
             }
@@ -48,8 +48,7 @@ const ProductDetail = ({ themeMode }) => {
             setProduct(prevProduct => ({ ...prevProduct, legacy_product: true }));
             setLegacyDialogOpen(false);
         } catch (error) {
-            setError('Error making product legacy');
-            console.error('Error making product legacy:', error);
+            handleError(error, setError);
         }
     };
 
@@ -75,6 +74,12 @@ const ProductDetail = ({ themeMode }) => {
 
     return (
         <Box className="product-details">
+            <AppBar position="static" className={`app-bar ${themeMode}`}>
+                <Toolbar>
+                    <Button color="inherit" component={Link} to="/">Home</Button>
+                </Toolbar>
+            </AppBar>
+
             <Typography variant="h4" className="product-name">{product.name}</Typography>
             <Typography variant="body1" className="product-description">Description: {product.description}</Typography>
             <Typography variant="body2" className="product-weight">Weight: {product.weight}</Typography>

@@ -1,7 +1,8 @@
 import operator
 from distutils.util import strtobool
+from datetime import datetime
 
-from sqlalchemy import Boolean, Integer, String, cast
+from sqlalchemy import Boolean, Integer, String, cast, Date
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import Select
 
@@ -40,10 +41,14 @@ class Filter(Select):
 
     def _apply_operator_base(self, other):
         attr_check = getattr(self.current_model, self.field)
+        print(attr_check.type, "ww")
         if isinstance(attr_check.type, Boolean):
             other = bool(strtobool(other))
         if isinstance(attr_check.type, Integer):
             other = int(other)
+        if isinstance(attr_check.type, Date):
+            other = datetime.strptime(other, '%Y-%m-%d').date()
+            print(other, "ww")
         else:
             other = cast(other, attr_check.type)
         return other
