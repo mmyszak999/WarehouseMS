@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material';
+import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography, AppBar, Toolbar } from '@mui/material';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -74,6 +74,12 @@ const ProductDetail = ({ themeMode }) => {
 
     return (
         <Box className="product-details">
+            <AppBar position="static" className={`app-bar ${themeMode}`}>
+                <Toolbar>
+                    <Button color="inherit" component={Link} to="/">Home</Button>
+                </Toolbar>
+            </AppBar>
+
             <Typography variant="h4" className="product-name">{product.name}</Typography>
             <Typography variant="body1" className="product-description">Description: {product.description}</Typography>
             <Typography variant="body2" className="product-weight">Weight: {product.weight}</Typography>

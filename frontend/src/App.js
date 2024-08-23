@@ -6,6 +6,7 @@ import ProductDetail from './components/Product/ProductDetail';
 import StaffProductsList from './components/Product/StaffProductsList';
 import UpdateProduct from './components/Product/UpdateProduct';
 import WarehouseDetail from './components/Warehouse/WarehouseDetail';
+import UpdateWarehouse from './components/Warehouse/UpdateWarehouse';
 import CategoriesList from './components/Category/CategoriesList';
 import CategoryDetail from './components/Category/CategoryDetail';
 import CreateCategory from './components/Category/CreateCategory';
@@ -198,6 +199,8 @@ const App = () => {
               path="/warehouse/:warehouseId"
               element={isLoggedIn ? <WarehouseDetail themeMode={themeMode} /> : <Navigate to="/login" />}
             />
+            <Route path="/warehouse/update/:warehouseId"
+            element={isLoggedIn ? <UpdateWarehouse themeMode={themeMode} /> : <Navigate to="/login" />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Container>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
-import { CircularProgress, Typography, Box, TextField, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { CircularProgress, Typography, Box, TextField, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, AppBar, Toolbar } from '@mui/material';
 import AuthService from '../../services/AuthService';
 import { handleError } from '../ErrorHandler'
 
@@ -49,8 +49,8 @@ const CategoryDetail = ({ themeMode }) => {
       setCategory(prevCategory => ({ ...prevCategory, name: newName }));
       setEditMode(false);
     } catch (error) {
-    handleError(error, setError);
-  }
+      handleError(error, setError);
+    }
   };
 
   const handleDeleteCategory = async () => {
@@ -63,7 +63,7 @@ const CategoryDetail = ({ themeMode }) => {
       navigate('/categories'); // Redirect to the categories list after deletion
     } catch (error) {
       handleError(error, setError);
-  }
+    }
   };
 
   const handleOpenDeleteDialog = () => {
@@ -89,6 +89,12 @@ const CategoryDetail = ({ themeMode }) => {
 
   return (
     <Box className={`category-detail ${themeMode}`}>
+      <AppBar position="static" className={`app-bar ${themeMode}`}>
+        <Toolbar>
+          <Button color="inherit" component={Link} to="/">Home</Button>
+        </Toolbar>
+      </AppBar>
+
       <Typography variant="h4" gutterBottom>Category Detail</Typography>
       <Typography variant="h6">Name: {category.name}</Typography>
       <Typography variant="body1">Created At: {category.created_at}</Typography>

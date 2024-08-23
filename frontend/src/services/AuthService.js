@@ -33,7 +33,7 @@ class AuthService {
     }
 
     getUserRole() {
-        return localStorage.getItem('is_staff') === 'True'; // Ensure proper string comparison
+        return localStorage.getItem('is_staff') === 'True';
     }
 }
 
