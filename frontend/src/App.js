@@ -6,11 +6,14 @@ import ProductDetail from './components/Product/ProductDetail';
 import StaffProductsList from './components/Product/StaffProductsList';
 import UpdateProduct from './components/Product/UpdateProduct';
 import WarehouseDetail from './components/Warehouse/WarehouseDetail';
+import WaitingRoomDetail from './components/WaitingRoom/WaitingRoomDetail';
+import UpdateWaitingRoom from './components/WaitingRoom/UpdateWaitingRoom';
 import UpdateWarehouse from './components/Warehouse/UpdateWarehouse';
 import CategoriesList from './components/Category/CategoriesList';
 import CategoryDetail from './components/Category/CategoryDetail';
 import CreateCategory from './components/Category/CreateCategory';
 import CreateWarehouse from './components/Warehouse/CreateWarehouse';
+import WaitingRoomsList from './components/WaitingRoom/WaitingRoomsList';
 import WarehousesList from './components/Warehouse/WarehousesList';
 import UsersList from './components/User/UsersList';
 import ActivateAccount from './components/ActivateAccount';
@@ -22,6 +25,7 @@ import Login from './components/Login';
 import CreateProduct from './components/Product/CreateProduct';
 import NotFound from './components/NotFound';
 import UserProfile from './components/User/UserProfile';
+import CreateWaitingRoom from './components/WaitingRoom/CreateWaitingRoom';
 import './App.css';
 import getTheme from './theme';
 
@@ -97,6 +101,7 @@ const App = () => {
                   <MenuItem component={Link} to="/categories">View Categories</MenuItem>
                   <MenuItem component={Link} to="/users">View Users</MenuItem>
                   <MenuItem component={Link} to="/warehouses">View Warehouse</MenuItem>
+                  <MenuItem component={Link} to="/waiting_rooms">View Warehouse</MenuItem>
                   {isStaff && (
                     <>
                       <MenuItem component={Link} to="/products/all">Get All Products (Staff Only)</MenuItem>
@@ -128,6 +133,9 @@ const App = () => {
                     </Button>
                     <Button variant="contained" color="primary" component={Link} to="/warehouses" sx={{ mb: 2 }}>
                       View Warehouse
+                    </Button>
+                    <Button variant="contained" color="primary" component={Link} to="/waiting_rooms" sx={{ mb: 2 }}>
+                      View Waiting Rooms
                     </Button>
                     {isStaff && (
                       <>
@@ -202,6 +210,22 @@ const App = () => {
             <Route path="/warehouse/update/:warehouseId"
             element={isLoggedIn ? <UpdateWarehouse themeMode={themeMode} /> : <Navigate to="/login" />} />
             <Route path="*" element={<NotFound />} />
+            <Route
+              path="/waiting_room/create"
+              element={isLoggedIn && isStaff ? <CreateWaitingRoom themeMode={themeMode} /> : <Navigate to="/" />}
+            />
+            <Route
+                path="/waiting_rooms/"
+                element={isLoggedIn ? <WaitingRoomsList themeMode={themeMode} /> : <Navigate to="/login" />}
+            />
+            <Route
+                path="/waiting_room/:waitingRoomId"
+                element={isLoggedIn ? <WaitingRoomDetail themeMode={themeMode} /> : <Navigate to="/login" />}
+            />
+            <Route
+                path="/waiting_room/update/:waitingRoomId"
+                element={isLoggedIn ? <UpdateWaitingRoom themeMode={themeMode} /> : <Navigate to="/login" />}
+            />
           </Routes>
         </Container>
       </Router>
