@@ -42,6 +42,7 @@ class StockInputSchema(StockBaseSchema):
 class StockWaitingRoomBasicOutputSchema(BaseModel):
     max_stocks: int
     max_weight: Decimal
+    name: Optional[str]
     id: str
 
     class Config:

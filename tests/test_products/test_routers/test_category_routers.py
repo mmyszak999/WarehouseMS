@@ -84,7 +84,7 @@ async def test_staff_and_authenticated_user_can_get_all_categories(
         (
             pytest.lazy_fixture("db_user"),
             pytest.lazy_fixture("auth_headers"),
-            status.HTTP_200_OK,
+            status.HTTP_403_FORBIDDEN,
         ),
         (
             pytest.lazy_fixture("db_staff_user"),
