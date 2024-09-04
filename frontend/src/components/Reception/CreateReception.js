@@ -14,7 +14,7 @@ const CreateReception = () => {
     const [rackLevelSlots, setRackLevelSlots] = useState([]);
     const [formData, setFormData] = useState({
         products_data: [
-            { product_id: '', product_count: 0, waiting_room_id: '', rack_level_id: '', rack_level_slot_id: '' }
+            { product_id: '', product_count: 0, waiting_room_id: null, rack_level_id: null, rack_level_slot_id: null }
         ],
         description: ''
     });
@@ -53,7 +53,7 @@ const CreateReception = () => {
     }, []);
 
     useEffect(() => {
-        if (selectedRackLevel) {
+        if (selectedRackLevel && selectedRackLevel !== null) {
             const fetchRackLevelSlots = async () => {
                 try {
                     const response = await axios.get(`http://localhost:8000/api/rack_levels/${selectedRackLevel}/slots`, {
@@ -65,6 +65,8 @@ const CreateReception = () => {
                 }
             };
             fetchRackLevelSlots();
+        } else {
+            setRackLevelSlots([]); // Clear slots if "None" is selected
         }
     }, [selectedRackLevel]);
 
@@ -89,7 +91,7 @@ const CreateReception = () => {
     const handleAddProduct = () => {
         setFormData(prevState => ({
             ...prevState,
-            products_data: [...prevState.products_data, { product_id: '', product_count: 0, waiting_room_id: '', rack_level_id: '', rack_level_slot_id: '' }]
+            products_data: [...prevState.products_data, { product_id: '', product_count: 0, waiting_room_id: null, rack_level_id: null, rack_level_slot_id: null }]
         }));
     };
 
@@ -131,8 +133,9 @@ const CreateReception = () => {
                         formData.products_data.map((product, index) => (
                             <Box key={index} sx={{ mb: 2 }}>
                                 <FormControl fullWidth margin="normal">
-                                    <InputLabel>Product</InputLabel>
+                                    <InputLabel id={`product-label-${index}`}>Product</InputLabel>
                                     <Select
+                                        labelId={`product-label-${index}`}
                                         name="product_id"
                                         value={product.product_id}
                                         onChange={(e) => handleProductChange(e, index)}
@@ -156,23 +159,25 @@ const CreateReception = () => {
                                     onChange={(e) => handleProductChange(e, index)}
                                 />
                                 <FormControl fullWidth margin="normal">
-                                    <InputLabel>Waiting Room</InputLabel>
+                                    <InputLabel id={`waiting-room-label-${index}`}>Waiting Room</InputLabel>
                                     <Select
+                                        labelId={`waiting-room-label-${index}`}
                                         name="waiting_room_id"
                                         value={product.waiting_room_id}
                                         onChange={(e) => handleProductChange(e, index)}
                                     >
-                                        <MenuItem value="">None</MenuItem>
-                                        {waitingRooms.map(room => (
-                                            <MenuItem key={room.id} value={room.id}>
-                                                {room.name}
-                                            </MenuItem>
-                                        ))}
+                                        <MenuItem value="none">None</MenuItem>
+                                        {waitingRooms.map(room                                            => (
+                                                <MenuItem key={room.id} value={room.id}>
+                                                    {room.name}
+                                                </MenuItem>
+                                            ))}
                                     </Select>
                                 </FormControl>
                                 <FormControl fullWidth margin="normal">
-                                    <InputLabel>Rack Level</InputLabel>
+                                    <InputLabel id={`rack-level-label-${index}`}>Rack Level</InputLabel>
                                     <Select
+                                        labelId={`rack-level-label-${index}`}
                                         name="rack_level_id"
                                         value={product.rack_level_id}
                                         onChange={(e) => {
@@ -180,7 +185,7 @@ const CreateReception = () => {
                                             setSelectedRackLevel(e.target.value);
                                         }}
                                     >
-                                        <MenuItem value="">None</MenuItem>
+                                        <MenuItem value="none">None</MenuItem>
                                         {rackLevels.map(level => (
                                             <MenuItem key={level.id} value={level.id}>
                                                 {level.rack_level_number}
@@ -188,15 +193,16 @@ const CreateReception = () => {
                                         ))}
                                     </Select>
                                 </FormControl>
-                                {product.rack_level_id && (
+                                {product.rack_level_id !== "none" && (
                                     <FormControl fullWidth margin="normal">
-                                        <InputLabel>Rack Level Slot</InputLabel>
+                                        <InputLabel id={`rack-level-slot-label-${index}`}>Rack Level Slot</InputLabel>
                                         <Select
+                                            labelId={`rack-level-slot-label-${index}`}
                                             name="rack_level_slot_id"
                                             value={product.rack_level_slot_id}
                                             onChange={(e) => handleProductChange(e, index)}
                                         >
-                                            <MenuItem value="">None</MenuItem>
+                                            <MenuItem value="none">None</MenuItem>
                                             {rackLevelSlots.map(slot => (
                                                 <MenuItem key={slot.id} value={slot.id}>
                                                     {slot.rack_level_slot_number}
@@ -265,3 +271,4 @@ const CreateReception = () => {
 };
 
 export default CreateReception;
+

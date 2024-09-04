@@ -4,7 +4,7 @@ import { Typography, Card, CardContent, CardHeader, CircularProgress, Grid, AppB
 import { Link, useNavigate } from 'react-router-dom';
 import '../../App.css'; // Import your CSS file
 import AuthService from '../../services/AuthService'; // Import the AuthService for role checking
-import { debounce } from 'lodash';
+import { handleError } from '../ErrorHandler'; // Import the error handler
 
 const operatorOptions = [
     { value: 'eq', label: 'Equals (=)' },
@@ -65,7 +65,7 @@ const WaitingRoomsList = ({ themeMode }) => {
             setWaitingRooms(response.data.results);
             setTotalPages(Math.ceil(response.data.total / size));
         } catch (error) {
-            setError(error.message);
+            handleError(error, setError); // Handle errors
         } finally {
             setLoading(false);
         }
@@ -112,7 +112,7 @@ const WaitingRoomsList = ({ themeMode }) => {
                     <Button color="inherit" component={Link} to="/">Home</Button>
                     {userRole && (
                         <Button color="inherit" component={Link} to="/waiting_room/create">
-                        Create Waiting Room
+                            Create Waiting Room
                         </Button>
                     )}
                 </Toolbar>
