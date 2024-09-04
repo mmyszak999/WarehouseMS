@@ -26,12 +26,17 @@ import CreateProduct from './components/Product/CreateProduct';
 import NotFound from './components/NotFound';
 import UserProfile from './components/User/UserProfile';
 import CreateWaitingRoom from './components/WaitingRoom/CreateWaitingRoom';
+import CreateReception from './components/Reception/CreateReception';
+import ReceptionsList from './components/Reception/ReceptionsList';
 import './App.css';
 import getTheme from './theme';
 
 const App = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isStaff, setIsStaff] = useState(false);
+  const [canReceptStocks, setCanReceptStocks] = useState(false);
+  const [canMoveStocks, setCanMoveStocks] = useState(false);
+  const [canIssueStocks, setCanIssueStocks] = useState(false);
   const [themeMode, setThemeMode] = useState('light');
   const [anchorEl, setAnchorEl] = useState(null);
 
@@ -40,6 +45,9 @@ const App = () => {
     if (token) {
       setIsLoggedIn(true);
       setIsStaff(AuthService.getUserRole());
+      setCanReceptStocks(AuthService.canReceptStocks());
+      setCanMoveStocks(AuthService.canMoveStocks());
+      setCanIssueStocks(AuthService.canIssueStocks());
     }
   }, []);
 
@@ -48,6 +56,9 @@ const App = () => {
       await AuthService.login(email, password);
       setIsLoggedIn(true);
       setIsStaff(AuthService.getUserRole());
+      setCanReceptStocks(AuthService.canReceptStocks());
+      setCanMoveStocks(AuthService.canMoveStocks());
+      setCanIssueStocks(AuthService.canIssueStocks());
     } catch (error) {
       console.error("Login failed:", error);
     }
@@ -57,6 +68,9 @@ const App = () => {
     AuthService.logout();
     setIsLoggedIn(false);
     setIsStaff(false);
+    setCanReceptStocks(false);
+    setCanMoveStocks(false);
+    setCanIssueStocks(false);
   };
 
   const toggleTheme = () => {
@@ -101,7 +115,12 @@ const App = () => {
                   <MenuItem component={Link} to="/categories">View Categories</MenuItem>
                   <MenuItem component={Link} to="/users">View Users</MenuItem>
                   <MenuItem component={Link} to="/warehouses">View Warehouse</MenuItem>
-                  <MenuItem component={Link} to="/waiting_rooms">View Warehouse</MenuItem>
+                  <MenuItem component={Link} to="/waiting_rooms">View Waiting Rooms</MenuItem>
+                  {canReceptStocks && (
+                    <>
+                    <MenuItem component={Link} to="/receptions">View receptions</MenuItem>
+                    </>
+                  )}
                   {isStaff && (
                     <>
                       <MenuItem component={Link} to="/products/all">Get All Products (Staff Only)</MenuItem>
@@ -137,6 +156,11 @@ const App = () => {
                     <Button variant="contained" color="primary" component={Link} to="/waiting_rooms" sx={{ mb: 2 }}>
                       View Waiting Rooms
                     </Button>
+                    {canReceptStocks && (
+                    <Button variant="contained" color="secondary" component={Link} to="/receptions" sx={{ mb: 2 }}>
+                    View Receptions
+                    </Button>
+                    )}
                     {isStaff && (
                       <>
                         <Button variant="contained" color="secondary" component={Link} to="/products/all" sx={{ mb: 2 }}>
@@ -192,40 +216,29 @@ const App = () => {
             />
             <Route path="/user/create" element={isLoggedIn && isStaff ? <CreateUser themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/users/all" : "/login"} />} />
             <Route path="/user/:userId" element={isLoggedIn ? <UserDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
-            <Route path="/users/all" element={isLoggedIn && isStaff ? <AllUsersList themeMode={themeMode} /> : <Navigate to="/" />} />
+            <Route
+              path="/users/all"
+              element={
+                isLoggedIn && isStaff ? (
+                  <AllUsersList themeMode={themeMode} />
+                ) : (
+                  <Navigate to={isLoggedIn ? "/" : "/login"} />
+                )
+              }
+            />
+            <Route path="/warehouses" element={isLoggedIn ? <WarehousesList themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route path="/warehouse/create" element={isLoggedIn && isStaff ? <CreateWarehouse themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route path="/warehouse/:warehouseId" element={isLoggedIn ? <WarehouseDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route path="/warehouse/update/:warehouseId" element={isLoggedIn && isStaff ? <UpdateWarehouse themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route path="/waiting_rooms" element={isLoggedIn ? <WaitingRoomsList themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route path="/waiting_room/create" element={isLoggedIn ? <CreateWaitingRoom themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route path="/waiting_room/:waitingRoomId" element={isLoggedIn ? <WaitingRoomDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route path="/waiting_room/update/:waitingRoomId" element={isLoggedIn && isStaff ? <UpdateWaitingRoom themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route path="/activate/:token" element={isLoggedIn ? <ActivateAccount /> : <Navigate to="/login" />} />
             <Route path="/profile" element={isLoggedIn ? <UserProfile themeMode={themeMode} /> : <Navigate to="/login" />} />
-            <Route path="/activate-account/:token" element={<ActivateAccount />} />
-            <Route
-              path="/warehouses"
-              element={isLoggedIn ? <WarehousesList themeMode={themeMode} /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/warehouse/create"
-              element={isLoggedIn && isStaff ? <CreateWarehouse themeMode={themeMode} /> : <Navigate to="/" />}
-            />
-            <Route
-              path="/warehouse/:warehouseId"
-              element={isLoggedIn ? <WarehouseDetail themeMode={themeMode} /> : <Navigate to="/login" />}
-            />
-            <Route path="/warehouse/update/:warehouseId"
-            element={isLoggedIn ? <UpdateWarehouse themeMode={themeMode} /> : <Navigate to="/login" />} />
+            <Route path="/reception/create" element={isLoggedIn && canReceptStocks ? <CreateReception themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
+            <Route path="/receptions" element={isLoggedIn && canReceptStocks ? <ReceptionsList themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
             <Route path="*" element={<NotFound />} />
-            <Route
-              path="/waiting_room/create"
-              element={isLoggedIn && isStaff ? <CreateWaitingRoom themeMode={themeMode} /> : <Navigate to="/" />}
-            />
-            <Route
-                path="/waiting_rooms/"
-                element={isLoggedIn ? <WaitingRoomsList themeMode={themeMode} /> : <Navigate to="/login" />}
-            />
-            <Route
-                path="/waiting_room/:waitingRoomId"
-                element={isLoggedIn ? <WaitingRoomDetail themeMode={themeMode} /> : <Navigate to="/login" />}
-            />
-            <Route
-                path="/waiting_room/update/:waitingRoomId"
-                element={isLoggedIn ? <UpdateWaitingRoom themeMode={themeMode} /> : <Navigate to="/login" />}
-            />
           </Routes>
         </Container>
       </Router>

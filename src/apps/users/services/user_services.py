@@ -77,7 +77,10 @@ async def authenticate(
                 User.password,
                 User.is_active,
                 User.has_password_set,
-                User.is_staff
+                User.is_staff,
+                User.can_recept_stocks,
+                User.can_move_stocks,
+                User.can_issue_stocks
             )
         )
         .filter(User.email == login_data["email"])
@@ -101,7 +104,10 @@ async def get_access_token_schema(
     access_token = auth_jwt.create_access_token(subject=email, algorithm="HS256")
     return AccessTokenOutputSchema(
         access_token=access_token,
-        is_staff=user.is_staff
+        is_staff=user.is_staff,
+        can_recept_stocks=user.can_recept_stocks,
+        can_move_stocks=user.can_move_stocks,
+        can_issue_stocks=user.can_issue_stocks
         )
 
 

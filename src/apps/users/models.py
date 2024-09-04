@@ -6,6 +6,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql.sqltypes import DateTime
 
 from src.apps.issues.models import Issue
+from src.apps.receptions.models import Reception
 from src.core.utils.utils import generate_uuid
 from src.database.db_connection import Base
 
