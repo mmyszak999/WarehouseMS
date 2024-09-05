@@ -28,6 +28,7 @@
   import CreateWaitingRoom from './components/WaitingRoom/CreateWaitingRoom';
   import CreateReception from './components/Reception/CreateReception';
   import ReceptionsList from './components/Reception/ReceptionsList';
+  import ReceptionDetail from './components/Reception/ReceptionDetail';
   import './App.css';
   import getTheme from './theme';
 
@@ -238,6 +239,7 @@
               <Route path="/profile" element={isLoggedIn ? <UserProfile themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/reception/create" element={isLoggedIn && canReceptStocks ? <CreateReception themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
               <Route path="/receptions" element={isLoggedIn && canReceptStocks ? <ReceptionsList themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
+              <Route path="/reception/:receptionId" element={isLoggedIn && canReceptStocks ? <ReceptionDetail themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Container>

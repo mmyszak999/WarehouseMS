@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Typography, List, ListItem, ListItemText, CircularProgress, AppBar, Toolbar, Button, Box, Grid, TextField, FormControl, Divider, MenuItem, Select, InputLabel } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom'; // import useNavigate
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -33,6 +33,7 @@ const ReceptionsList = ({ themeMode }) => {
 
   const token = localStorage.getItem('token');
   const canReceptStocks = AuthService.canReceptStocks();
+  const navigate = useNavigate(); // Initialize useNavigate
 
   useEffect(() => {
     const fetchReceptions = async () => {
@@ -241,7 +242,11 @@ const ReceptionsList = ({ themeMode }) => {
             </Typography>
             <List>
               {receptions.map((reception) => (
-                <ListItem key={reception.id}>
+                <ListItem 
+                  key={reception.id} 
+                  button 
+                  onClick={() => navigate(`/reception/${reception.id}`)} // Navigate to reception detail page
+                >
                   <ListItemText
                     primary={`Reception ID: ${reception.id}`}
                     secondary={`Date: ${new Date(reception.reception_date).toLocaleDateString()} - Description: ${reception.description || 'N/A'}`}
