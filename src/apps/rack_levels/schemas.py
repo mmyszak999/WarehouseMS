@@ -73,7 +73,7 @@ class RackLevelBaseOutputSchema(RackLevelBaseSchema):
 
 
 class RackLevelOutputSchema(RackLevelBaseOutputSchema):
-    rack_level_slots: list[RackLevelSlotBaseOutputSchema]
+    rack_level_slots: Optional[list[RackLevelSlotBaseOutputSchema]]
 
     class Config:
         orm_mode = True

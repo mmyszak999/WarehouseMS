@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Typography, Card, CardContent, CardHeader, CircularProgress, Grid, AppBar, Toolbar, Button, Box, Pagination, TextField, MenuItem, Select, InputLabel, FormControl, Divider } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import '../../App.css'; // Import your CSS file
-import { debounce } from 'lodash';
+import AuthService from '../../services/AuthService'; // Import the AuthService for role checking
+import { handleError } from '../ErrorHandler'; // Import the error handler
 
 const operatorOptions = [
     { value: 'eq', label: 'Equals (=)' },
@@ -38,7 +39,8 @@ const WaitingRoomsList = ({ themeMode }) => {
         max_weight: { value: '', operator: 'eq', sort: '' },
     });
 
-    const navigate = useNavigate(); // Hook for navigation
+    const navigate = useNavigate();
+    const userRole = AuthService.getUserRole(); // Get the user's role
 
     const fetchWaitingRooms = async (page, size, appliedFilters) => {
         try {
@@ -63,7 +65,7 @@ const WaitingRoomsList = ({ themeMode }) => {
             setWaitingRooms(response.data.results);
             setTotalPages(Math.ceil(response.data.total / size));
         } catch (error) {
-            setError(error.message);
+            handleError(error, setError); // Handle errors
         } finally {
             setLoading(false);
         }
@@ -108,6 +110,11 @@ const WaitingRoomsList = ({ themeMode }) => {
             <AppBar position="static" className={`app-bar ${themeMode}`}>
                 <Toolbar>
                     <Button color="inherit" component={Link} to="/">Home</Button>
+                    {userRole && (
+                        <Button color="inherit" component={Link} to="/waiting_room/create">
+                            Create Waiting Room
+                        </Button>
+                    )}
                 </Toolbar>
             </AppBar>
             <Grid container spacing={3} sx={{ mt: 3 }}>
