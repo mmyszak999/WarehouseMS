@@ -20,9 +20,15 @@ const sortOptions = [
   { value: 'desc', label: 'Descending' }
 ];
 
+const booleanOptions = [
+  { value: '', label: 'No Filter' },
+  { value: 'true', label: 'Yes' },
+  { value: 'false', label: 'No' }
+];
+
 const pageSizeOptions = [5, 10, 15, 20, 25, 50, 100];
 
-const StocksList = ({ themeMode }) => {
+const AllStocksList = ({ themeMode }) => {
   const [stocks, setStocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,6 +38,7 @@ const StocksList = ({ themeMode }) => {
   const [filters, setFilters] = useState({
     weight: { value: '', operator: 'eq', sort: '' },
     product_count: { value: '', operator: 'eq', sort: '' },
+    is_issued: { value: '' }
   });
 
   const token = localStorage.getItem('token');
@@ -39,11 +46,15 @@ const StocksList = ({ themeMode }) => {
   const fetchStocks = async () => {
     try {
       setLoading(true);
-      let endpoint = `http://localhost:8000/api/stocks/?page=${page}&size=${size}`;
+      let endpoint = `http://localhost:8000/api/stocks/all?page=${page}&size=${size}`;
 
       for (const [key, filter] of Object.entries(filters)) {
         if (filter.value) {
-          endpoint += `&${key}__${filter.operator}=${filter.value}`;
+          if (key === 'is_issued') {
+            endpoint += `&${key}=${filter.value}`;
+          } else {
+            endpoint += `&${key}__${filter.operator}=${filter.value}`;
+          }
         }
         if (filter.sort) {
           endpoint += `&sort=${key}__${filter.sort}`;
@@ -56,7 +67,7 @@ const StocksList = ({ themeMode }) => {
         }
       });
       setStocks(response.data.results);
-      setTotalPages(Math.ceil(response.data.count / size));
+      setTotalPages(Math.ceil(response.data.total / size));
     } catch (error) {
       handleError(error, setError);
     } finally {
@@ -74,7 +85,7 @@ const StocksList = ({ themeMode }) => {
 
   const handleSizeChange = (event) => {
     setSize(event.target.value);
-    setPage(1); // Reset to first page whenever size changes
+    setPage(1);
   };
 
   const handleFilterChange = (event) => {
@@ -83,6 +94,14 @@ const StocksList = ({ themeMode }) => {
     setFilters(prevFilters => ({
       ...prevFilters,
       [field]: { ...prevFilters[field], [type]: value }
+    }));
+  };
+
+  const handleBooleanFilterChange = (event) => {
+    const { name, value } = event.target;
+    setFilters(prevFilters => ({
+      ...prevFilters,
+      [name]: { value }
     }));
   };
 
@@ -115,52 +134,75 @@ const StocksList = ({ themeMode }) => {
                   <strong>{key.replace(/_/g, ' ')}</strong>
                 </Typography>
                 <Grid container spacing={2}>
-                  {/* Value Input */}
-                  <Grid item xs={12}>
-                    <TextField
-                      label={key.replace(/_/g, ' ')}
-                      name={`${key}.value`}
-                      value={filter.value}
-                      onChange={handleFilterChange}
-                      fullWidth
-                    />
-                  </Grid>
-                  {/* Operator Select */}
-                  <Grid item xs={12}>
-                    <FormControl fullWidth>
-                      <InputLabel>Operator</InputLabel>
-                      <Select
-                        name={`${key}.operator`}
-                        value={filter.operator}
-                        onChange={handleFilterChange}
-                        label="Operator"
-                      >
-                        {operatorOptions.map(option => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
-                  {/* Sort By Select */}
-                  <Grid item xs={12}>
-                    <FormControl fullWidth>
-                      <InputLabel>Sort By</InputLabel>
-                      <Select
-                        name={`${key}.sort`}
-                        value={filter.sort}
-                        onChange={handleFilterChange}
-                        label="Sort By"
-                      >
-                        {sortOptions.map(option => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </Grid>
+                  {key !== 'is_issued' && (
+                    <>
+                      {/* Value Input */}
+                      <Grid item xs={12}>
+                        <TextField
+                          label={key.replace(/_/g, ' ')}
+                          name={`${key}.value`}
+                          value={filter.value}
+                          onChange={handleFilterChange}
+                          fullWidth
+                        />
+                      </Grid>
+                      {/* Operator Select */}
+                      <Grid item xs={12}>
+                        <FormControl fullWidth>
+                          <InputLabel>Operator</InputLabel>
+                          <Select
+                            name={`${key}.operator`}
+                            value={filter.operator}
+                            onChange={handleFilterChange}
+                            label="Operator"
+                          >
+                            {operatorOptions.map(option => (
+                              <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      {/* Sort By Select */}
+                      <Grid item xs={12}>
+                        <FormControl fullWidth>
+                          <InputLabel>Sort By</InputLabel>
+                          <Select
+                            name={`${key}.sort`}
+                            value={filter.sort}
+                            onChange={handleFilterChange}
+                            label="Sort By"
+                          >
+                            {sortOptions.map(option => (
+                              <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    </>
+                  )}
+                  {key === 'is_issued' && (
+                    <Grid item xs={12}>
+                      <FormControl fullWidth>
+                        <InputLabel>Is Issued</InputLabel>
+                        <Select
+                          name="is_issued"
+                          value={filter.value}
+                          onChange={handleBooleanFilterChange}
+                          fullWidth
+                        >
+                          {booleanOptions.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  )}
                 </Grid>
               </Box>
             ))}
@@ -170,16 +212,16 @@ const StocksList = ({ themeMode }) => {
           </Box>
         </Grid>
 
-        {/* Stocks List Section */}
+        {/* All Stocks List Section */}
         <Grid item xs={12} md={8}>
           <List>
             {stocks.map((stock) => (
               <ListItem key={stock.id}>
                 <ListItemText
-                  primary={<Link to={`/stock/${stock.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  primary={<Link to={`/stock/all/${stock.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     Product: {stock.product.name}
                   </Link>}
-                  secondary={`Weight: ${stock.weight}, Product Count: ${stock.product_count}`}
+                  secondary={`Weight: ${stock.weight}, Product Count: ${stock.product_count}, Recepted by: ${stock.reception?.user.first_name} ${stock.reception?.user.last_name}`}
                 />
               </ListItem>
             ))}
@@ -213,4 +255,4 @@ const StocksList = ({ themeMode }) => {
   );
 };
 
-export default StocksList;
+export default AllStocksList;

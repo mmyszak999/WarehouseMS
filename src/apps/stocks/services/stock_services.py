@@ -267,7 +267,7 @@ async def get_multiple_stocks(
     )
 
 
-async def get_all_stocks(
+async def get_every_stock(
     session: AsyncSession, page_params: PageParams, query_params: list[tuple] = None
 ) -> PagedResponseSchema[StockOutputSchema]:
     return await get_multiple_stocks(

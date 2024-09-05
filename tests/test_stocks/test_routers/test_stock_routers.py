@@ -70,7 +70,7 @@ async def test_only_authenticated_user_can_get_available_stocks(
     ],
 )
 @pytest.mark.asyncio
-async def test_only_staff_user_can_get_all_stocks(
+async def test_only_staff_user_can_get_every_stock(
     async_client: AsyncClient,
     user: UserOutputSchema,
     user_headers: dict[str, str],

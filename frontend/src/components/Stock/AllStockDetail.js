@@ -4,7 +4,7 @@ import { Box, Typography, CircularProgress, Link as MuiLink, AppBar, Toolbar, Bu
 import { useParams, Link } from 'react-router-dom';
 import { handleError } from '../ErrorHandler';
 
-const StockDetail = () => {
+const AllStockDetail = () => {
   const { stockId } = useParams();
   const [stock, setStock] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,7 +16,7 @@ const StockDetail = () => {
     const fetchStock = async () => {
       try {
         setLoading(true);
-        const response = await axios.get(`http://localhost:8000/api/stocks/${stockId}`, {
+        const response = await axios.get(`http://localhost:8000/api/stocks/all/${stockId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -50,10 +50,12 @@ const StockDetail = () => {
 
       <Box sx={{ padding: 3 }}>
         <Typography variant="h4" gutterBottom>
-          Stock Details
+          All Stock Details
         </Typography>
+
+        {/* Product Details */}
         <Typography variant="h6">
-          <strong>Product: </strong> 
+          <strong>Product: </strong>
           <MuiLink
             component={Link}
             to={`/product/${stock.product.id}`}
@@ -74,8 +76,10 @@ const StockDetail = () => {
         <Typography variant="subtitle1">
           <strong>Product Count:</strong> {stock.product_count}
         </Typography>
+
+        {/* Waiting Room and Rack Details */}
         <Typography variant="subtitle1">
-          <strong>Waiting Room: </strong> 
+          <strong>Waiting Room: </strong>
           {stock.waiting_room ? (
             <MuiLink
               component={Link}
@@ -89,12 +93,56 @@ const StockDetail = () => {
         <Typography variant="subtitle1">
           <strong>Rack Level Slot:</strong> {stock.rack_level_slot ? stock.rack_level_slot.description : 'N/A'}
         </Typography>
+
+        {/* Additional Fields */}
+        <Typography variant="subtitle1">
+          <strong>Is Issued:</strong> {stock.is_issued ? 'Yes' : 'No'}
+        </Typography>
+
+        {/* Reception Details */}
+        {stock.reception ? (
+          <Typography variant="subtitle1">
+            <MuiLink
+              component={Link}
+              to={`/reception/${stock.reception.id}`}
+              sx={{ textDecoration: 'none', color: 'primary.main' }}
+            >
+              <strong>Reception </strong>
+            </MuiLink>
+          </Typography>
+        ) : (
+          <Typography variant="subtitle1">
+            <strong>Reception -  </strong> N/A
+          </Typography>
+        )}
+
+        {stock.issue ? (
+          <Typography variant="subtitle1">
+            <MuiLink
+              component={Link}
+              to={`/issue/${stock.issue.id}`}
+              sx={{ textDecoration: 'none', color: 'primary.main' }}
+            >
+              <strong>Issue </strong>
+            </MuiLink>
+          </Typography>
+        ) : (
+          <Typography variant="subtitle1">
+            <strong>Issue -  </strong> N/A
+          </Typography>
+        )}
+        
+
+        {/* Timestamps */}
         <Typography variant="subtitle1">
           <strong>Created At:</strong> {stock.created_at}
+        </Typography>
+        <Typography variant="subtitle1">
+          <strong>Updated At:</strong> {stock.updated_at}
         </Typography>
       </Box>
     </Box>
   );
 };
 
-export default StockDetail;
+export default AllStockDetail;

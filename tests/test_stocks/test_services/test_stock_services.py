@@ -19,7 +19,7 @@ from src.apps.stocks.schemas.stock_schemas import (
 from src.apps.stocks.services.stock_services import (
     create_stocks,
     get_all_available_stocks,
-    get_all_stocks,
+    get_every_stock,
     get_single_stock,
     issue_stocks,
 )
@@ -296,7 +296,7 @@ async def test_if_all_available_stocks_were_returned(
 async def test_if_all_stocks_were_returned(
     async_session: AsyncSession, db_stocks: PagedResponseSchema[StockOutputSchema]
 ):
-    stocks = await get_all_stocks(async_session, PageParams(page=1, size=5))
+    stocks = await get_every_stock(async_session, PageParams())
     assert stocks.total == db_stocks.total
 
 
