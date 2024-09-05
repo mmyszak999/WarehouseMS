@@ -24,7 +24,7 @@ from src.apps.stocks.schemas.stock_schemas import (
     StockOutputSchema,
 )
 from src.apps.stocks.schemas.user_stock_schemas import UserStockOutputSchema
-from src.apps.stocks.services.stock_services import get_all_stocks
+from src.apps.stocks.services.stock_services import get_every_stock
 from src.apps.stocks.services.user_stock_services import get_all_user_stocks
 from src.apps.users.schemas import UserOutputSchema
 from src.apps.waiting_rooms.models import WaitingRoom
@@ -118,7 +118,7 @@ async def db_stocks(
     )
     await async_session.refresh(waiting_room_with_no_stocks)
     await async_session.refresh(waiting_rooms[0])
-    return await get_all_stocks(async_session, PageParams())
+    return await get_every_stock(async_session, PageParams())
 
 
 @pytest_asyncio.fixture

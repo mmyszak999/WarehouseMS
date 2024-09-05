@@ -105,8 +105,8 @@ const ReceptionDetail = ({ themeMode }) => {
             <ListItem key={stock.id}>
               <ListItemText
                 primary={
-                  <Link to={`/product/${stock.product.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    Product: {stock.product.name}
+                  <Link to={`/stock/${stock.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    Stock: {stock.product.name}
                   </Link>
                 }
                 secondary={`Weight: ${stock.weight}, Product Count: ${stock.product_count}`}

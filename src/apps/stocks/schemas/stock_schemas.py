@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, validator
 from src.apps.products.schemas.product_schemas import ProductBasicOutputSchema
 from src.apps.receptions.schemas import ReceptionBasicOutputSchema
 from src.apps.users.schemas import UserInfoOutputSchema
+from src.apps.issues.schemas import IssueBasicOutputSchema
 
 
 class StockBaseSchema(BaseModel):
@@ -89,6 +90,7 @@ class StockOutputSchema(StockBasicOutputSchema):
     is_issued: bool
     updated_at: Optional[datetime]
     reception: Optional[ReceptionBasicOutputSchema]
+    issue: Optional[IssueBasicOutputSchema]
 
     class Config:
         orm_mode = True

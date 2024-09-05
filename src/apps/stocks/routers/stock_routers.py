@@ -1,3 +1,5 @@
+from typing import Union
+
 from fastapi import Depends, Request, Response, status
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -10,7 +12,7 @@ from src.apps.stocks.schemas.stock_schemas import (
 from src.apps.stocks.schemas.user_stock_schemas import UserStockOutputSchema
 from src.apps.stocks.services.stock_services import (
     get_all_available_stocks,
-    get_all_stocks,
+    get_every_stock,
     get_single_stock,
 )
 from src.apps.stocks.services.user_stock_services import (
@@ -47,14 +49,14 @@ async def get_available_stocks(
     response_model=PagedResponseSchema[StockOutputSchema],
     status_code=status.HTTP_200_OK,
 )
-async def get_stocks(
+async def get_all_stocks(
     request: Request,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
     page_params: PageParams = Depends(),
 ) -> PagedResponseSchema[StockOutputSchema]:
     await check_if_staff(request_user)
-    return await get_all_stocks(
+    return await get_every_stock(
         session, page_params, query_params=request.query_params.multi_items()
     )
 
@@ -93,12 +95,12 @@ async def get_stock_history(
 
 @stock_router.get(
     "/{stock_id}",
-    response_model=StockBasicOutputSchema,
+    response_model=Union[StockOutputSchema, StockBasicOutputSchema],
     status_code=status.HTTP_200_OK,
 )
 async def get_stock(
     stock_id: str,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
-) -> StockOutputSchema:
-    return await get_single_stock(session, stock_id)
+) -> Union[StockOutputSchema, StockBasicOutputSchema]:
+    return await get_single_stock(session, stock_id, output_schema=StockBasicOutputSchema)

@@ -29,6 +29,10 @@
   import CreateReception from './components/Reception/CreateReception';
   import ReceptionsList from './components/Reception/ReceptionsList';
   import ReceptionDetail from './components/Reception/ReceptionDetail';
+  import StocksList from './components/Stock/StocksList';
+  import StockDetail from './components/Stock/StockDetail';
+  import AllStocksList from './components/Stock/AllStocksList';
+  import AllStockDetail from './components/Stock/AllStockDetail';
   import './App.css';
   import getTheme from './theme';
 
@@ -117,15 +121,17 @@
                     <MenuItem component={Link} to="/users">View Users</MenuItem>
                     <MenuItem component={Link} to="/warehouses">View Warehouse</MenuItem>
                     <MenuItem component={Link} to="/waiting_rooms">View Waiting Rooms</MenuItem>
+                    <MenuItem component={Link} to="/stocks">View Available Stocks</MenuItem>
                     {canReceptStocks && (
                       <>
-                      <MenuItem component={Link} to="/receptions">View receptions</MenuItem>
+                      <MenuItem component={Link} to="/receptions">View Receptions</MenuItem>
                       </>
                     )}
                     {isStaff && (
                       <>
                         <MenuItem component={Link} to="/products/all">Get All Products (Staff Only)</MenuItem>
                         <MenuItem component={Link} to="/users/all">Get All Users (Staff Only)</MenuItem>
+                        <MenuItem component={Link} to="/stocks/all">Get All Stocks (Staff Only)</MenuItem>
                       </>
                     )}
                   </Menu>
@@ -157,9 +163,12 @@
                       <Button variant="contained" color="primary" component={Link} to="/waiting_rooms" sx={{ mb: 2 }}>
                         View Waiting Rooms
                       </Button>
+                      <Button variant="contained" color="primary" component={Link} to="/stocks" sx={{ mb: 2 }}>
+                        View Available Stocks
+                      </Button>
                       {canReceptStocks && (
                       <Button variant="contained" color="secondary" component={Link} to="/receptions" sx={{ mb: 2 }}>
-                      View Receptions
+                        View Receptions
                       </Button>
                       )}
                       {isStaff && (
@@ -169,6 +178,9 @@
                           </Button>
                           <Button variant="contained" color="secondary" component={Link} to="/users/all" sx={{ mb: 2 }}>
                             Get All Users (Staff Only)
+                          </Button>
+                          <Button variant="contained" color="secondary" component={Link} to="/stocks/all" sx={{ mb: 2 }}>
+                            Get All Stocks (Staff Only)
                           </Button>
                         </>
                       )}
@@ -240,6 +252,10 @@
               <Route path="/reception/create" element={isLoggedIn && canReceptStocks ? <CreateReception themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
               <Route path="/receptions" element={isLoggedIn && canReceptStocks ? <ReceptionsList themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
               <Route path="/reception/:receptionId" element={isLoggedIn && canReceptStocks ? <ReceptionDetail themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
+              <Route path="/stocks" element={isLoggedIn ? <StocksList themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/stock/:stockId" element={isLoggedIn ? <StockDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/stocks/all" element={isLoggedIn && isStaff ? <AllStocksList themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/stock/all/:stockId" element={isLoggedIn && isStaff ? <AllStockDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Container>
