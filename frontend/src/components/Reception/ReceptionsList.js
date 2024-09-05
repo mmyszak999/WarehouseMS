@@ -40,23 +40,29 @@ const ReceptionsList = ({ themeMode }) => {
         setLoading(true);
         let endpoint = 'http://localhost:8000/api/receptions?';
 
-        // Append filter parameters
-        if (filters.reception_date.value.start && filters.reception_date.value.end) {
+        // Append filter parameters for reception_date
+        if (filters.reception_date.value.start) {
           const startDate = format(filters.reception_date.value.start, 'yyyy-MM-dd');
+          endpoint += `reception_date__ge=${startDate}&`;
+        }
+        if (filters.reception_date.value.end) {
           const endDate = format(filters.reception_date.value.end, 'yyyy-MM-dd');
-          endpoint += `reception_date__ge=${startDate}&reception_date__le=${endDate}`;
+          endpoint += `reception_date__le=${endDate}&`;
         }
         if (filters.description.value) {
-          endpoint += `&description__${filters.description.operator}=${filters.description.value}`;
+          endpoint += `description__${filters.description.operator}=${filters.description.value}&`;
         }
 
         // Append sorting parameters
         if (filters.reception_date.sort) {
-          endpoint += `&sort=reception_date__${filters.reception_date.sort}`;
+          endpoint += `sort=reception_date__${filters.reception_date.sort}&`;
         }
         if (filters.description.sort) {
-          endpoint += `&sort=description__${filters.description.sort}`;
+          endpoint += `sort=description__${filters.description.sort}&`;
         }
+
+        // Remove trailing "&"
+        endpoint = endpoint.slice(0, -1);
 
         const response = await axios.get(endpoint, {
           headers: {

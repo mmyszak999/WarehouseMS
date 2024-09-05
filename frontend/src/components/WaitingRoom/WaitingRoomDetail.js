@@ -131,7 +131,7 @@ const WaitingRoomDetail = ({ themeMode }) => {
                     <Typography variant="body1">Available Slots: {waitingRoom?.available_slots}</Typography>
                     <Typography variant="body1">Available Stock Weight: {waitingRoom?.available_stock_weight}</Typography>
                     <Typography variant="body2">Created At: {waitingRoom?.created_at || 'N/A'}</Typography>
-                    
+
                     {userRole && (
                         <Box sx={{ mt: 2 }}>
                             <Button
@@ -152,12 +152,19 @@ const WaitingRoomDetail = ({ themeMode }) => {
                         </Box>
                     )}
 
-                    {userRole && waitingRoom?.stocks?.length > 0 && (
+                    {userRole && (
                         <>
-                            <Typography variant="h6" sx={{ mt: 2 }}>Stocks:</Typography>
-                            {waitingRoom.stocks.map((stock, index) => (
-                                <Typography variant="body2" key={index}>{stock.name}</Typography>
-                            ))}
+                            <Typography variant="h6" sx={{ mt: 2 }}>Stocks in Waiting Room:</Typography>
+                            {waitingRoom?.stocks && waitingRoom.stocks.length > 0 ? (
+                                waitingRoom.stocks.map((stock, index) => (
+                                    <Typography variant="body2" key={index}>
+                                        {`Stock ${index + 1}: Product Name: ${stock.product.name} - Weight: ${stock.weight}
+                                        , Product Count: ${stock.product_count}, Product Description: ${stock.product.description}`}
+                                    </Typography>
+                                ))
+                            ) : (
+                                <Typography variant="body2">No stocks found in this waiting room.</Typography>
+                            )}
                         </>
                     )}
                 </CardContent>
