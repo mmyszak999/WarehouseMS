@@ -22,7 +22,8 @@ import {
     FormControl,
     InputLabel,
     Select,
-    MenuItem
+    MenuItem,
+    Divider
 } from '@mui/material';
 import AuthService from '../../services/AuthService';
 import { handleError } from '../ErrorHandler';
@@ -127,6 +128,10 @@ const WaitingRoomDetail = ({ themeMode }) => {
         fetchStocks(1, event.target.value); // Fetch stocks for the new page size
     };
 
+    const handleStockClick = (stockId) => {
+        navigate(`/stock/${stockId}`);
+    };
+
     if (loading) return <CircularProgress />;
     if (error) return <Typography variant="h6" color="error">{error}</Typography>;
 
@@ -181,12 +186,16 @@ const WaitingRoomDetail = ({ themeMode }) => {
                         <>
                             <Typography variant="h6" sx={{ mt: 2 }}>Stocks in Waiting Room:</Typography>
                             {waitingRoom?.stocks && waitingRoom.stocks.length > 0 ? (
-                                waitingRoom.stocks.map((stock, index) => (
-                                    <Typography variant="body2" key={index}>
-                                        Stock {index + 1}: Product Name: {stock.product.name} - Weight: {stock.weight}
-                                        , Product Count: {stock.product_count}, Product Description: {stock.product.description}
-                                    </Typography>
-                                ))
+                                <List>
+                                    {waitingRoom.stocks.map((stock, index) => (
+                                        <ListItem button key={stock.id} onClick={() => handleStockClick(stock.id)}>
+                                            <ListItemText
+                                                primary={stock.product.name}
+                                                secondary={`Weight: ${stock.weight}, Count: ${stock.product_count}`}
+                                            />
+                                        </ListItem>
+                                    ))}
+                                </List>
                             ) : (
                                 <Typography variant="body2">No stocks found in this waiting room.</Typography>
                             )}
@@ -216,10 +225,10 @@ const WaitingRoomDetail = ({ themeMode }) => {
                     <List>
                         {stocks.length > 0 ? (
                             stocks.map(stock => (
-                                <ListItem button key={stock.id} onClick={() => setSelectedStock(stock)}>
+                                <ListItem button key={stock.id} onClick={() => handleStockClick(stock.id)}>
                                     <ListItemText
                                         primary={stock.product.name}
-                                        secondary={`Weight: ${stock.weight}, Product Count: ${stock.product_count}`}
+                                        secondary={`Weight: ${stock.weight}, Count: ${stock.product_count}`}
                                     />
                                 </ListItem>
                             ))

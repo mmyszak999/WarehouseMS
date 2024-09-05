@@ -1,3 +1,5 @@
+from typing import Union
+
 from fastapi import Depends, Request, Response, status
 from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -93,12 +95,12 @@ async def get_stock_history(
 
 @stock_router.get(
     "/{stock_id}",
-    response_model=StockBasicOutputSchema,
+    response_model=Union[StockOutputSchema, StockBasicOutputSchema],
     status_code=status.HTTP_200_OK,
 )
 async def get_stock(
     stock_id: str,
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
-) -> StockOutputSchema:
-    return await get_single_stock(session, stock_id)
+) -> Union[StockOutputSchema, StockBasicOutputSchema]:
+    return await get_single_stock(session, stock_id, output_schema=StockBasicOutputSchema)

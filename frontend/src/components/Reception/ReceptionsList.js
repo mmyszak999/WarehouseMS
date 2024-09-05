@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Typography, List, ListItem, ListItemText, CircularProgress, AppBar, Toolbar, Button, Box, Grid, TextField, FormControl, Divider, MenuItem, Select, InputLabel } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom'; // import useNavigate
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -14,18 +14,22 @@ const sortOptions = [
   { value: 'desc', label: 'Descending' }
 ];
 
+const pageSizeOptions = [5, 10, 15, 20, 25, 50, 100];
+
 const ReceptionsList = ({ themeMode }) => {
   const [receptions, setReceptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // State to manage filter inputs
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [filterInputs, setFilterInputs] = useState({
     reception_date: { value: { start: null, end: null }, sort: '' },
     description: { value: '', operator: 'eq', sort: '' }
   });
 
-  // State to manage the applied filters
   const [filters, setFilters] = useState({
     reception_date: { value: { start: null, end: null }, sort: '' },
     description: { value: '', operator: 'eq', sort: '' }
@@ -33,37 +37,31 @@ const ReceptionsList = ({ themeMode }) => {
 
   const token = localStorage.getItem('token');
   const canReceptStocks = AuthService.canReceptStocks();
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchReceptions = async () => {
       try {
         setLoading(true);
-        let endpoint = 'http://localhost:8000/api/receptions?';
+        let endpoint = `http://localhost:8000/api/receptions/?page=${page}&size=${size}`;
 
-        // Append filter parameters for reception_date
         if (filters.reception_date.value.start) {
           const startDate = format(filters.reception_date.value.start, 'yyyy-MM-dd');
-          endpoint += `reception_date__ge=${startDate}&`;
+          endpoint += `&reception_date__ge=${startDate}`;
         }
         if (filters.reception_date.value.end) {
           const endDate = format(filters.reception_date.value.end, 'yyyy-MM-dd');
-          endpoint += `reception_date__le=${endDate}&`;
+          endpoint += `&reception_date__le=${endDate}`;
         }
         if (filters.description.value) {
-          endpoint += `description__${filters.description.operator}=${filters.description.value}&`;
+          endpoint += `&description__${filters.description.operator}=${filters.description.value}`;
         }
-
-        // Append sorting parameters
         if (filters.reception_date.sort) {
-          endpoint += `sort=reception_date__${filters.reception_date.sort}&`;
+          endpoint += `&sort=reception_date__${filters.reception_date.sort}`;
         }
         if (filters.description.sort) {
-          endpoint += `sort=description__${filters.description.sort}&`;
+          endpoint += `&sort=description__${filters.description.sort}`;
         }
-
-        // Remove trailing "&"
-        endpoint = endpoint.slice(0, -1);
 
         const response = await axios.get(endpoint, {
           headers: {
@@ -71,6 +69,7 @@ const ReceptionsList = ({ themeMode }) => {
           }
         });
         setReceptions(response.data.results);
+        setTotalPages(Math.ceil(response.data.count / size)); // Assuming 'count' is the total number of items
       } catch (err) {
         handleError(err, setError);
       } finally {
@@ -79,7 +78,16 @@ const ReceptionsList = ({ themeMode }) => {
     };
 
     fetchReceptions();
-  }, [token, filters]);
+  }, [page, size, filters]);
+
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
+
+  const handleSizeChange = (event) => {
+    setSize(event.target.value);
+    setPage(1); // Reset to first page whenever size changes
+  };
 
   const handleFilterChange = (event) => {
     const { name, value } = event.target;
@@ -105,6 +113,7 @@ const ReceptionsList = ({ themeMode }) => {
 
   const handleFilterApply = () => {
     setFilters(filterInputs);
+    setPage(1); // Reset to first page whenever filters are applied
   };
 
   if (loading) return <CircularProgress />;
@@ -112,7 +121,6 @@ const ReceptionsList = ({ themeMode }) => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      {/* Navigation Bar */}
       <AppBar position="static" className={`app-bar ${themeMode}`}>
         <Toolbar>
           <Button color="inherit" component={Link} to="/">Home</Button>
@@ -242,18 +250,50 @@ const ReceptionsList = ({ themeMode }) => {
             </Typography>
             <List>
               {receptions.map((reception) => (
-                <ListItem 
-                  key={reception.id} 
-                  button 
-                  onClick={() => navigate(`/reception/${reception.id}`)} // Navigate to reception detail page
+                <ListItem
+                  key={reception.id}
+                  button
+                  component={Link}
+                  to={`/reception/${reception.id}`}
                 >
                   <ListItemText
                     primary={`Reception ID: ${reception.id}`}
-                    secondary={`Date: ${new Date(reception.reception_date).toLocaleDateString()} - Description: ${reception.description || 'N/A'}`}
+                    secondary={`Date: ${reception.reception_date}`}
                   />
                 </ListItem>
               ))}
             </List>
+
+            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
+              <FormControl>
+                <InputLabel>Page Size</InputLabel>
+                <Select
+                  value={size}
+                  onChange={handleSizeChange}
+                >
+                  {pageSizeOptions.map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <Box>
+                <Button
+                  disabled={page === 1}
+                  onClick={() => handlePageChange(null, page - 1)}
+                >
+                  Previous
+                </Button>
+                <Button
+                  disabled={page === totalPages}
+                  onClick={() => handlePageChange(null, page + 1)}
+                >
+                  Next
+                </Button>
+              </Box>
+            </Box>
           </Container>
         </Grid>
       </Grid>
