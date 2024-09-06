@@ -1,38 +1,43 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { CircularProgress, Typography, AppBar, Toolbar, Button, Box, List, ListItem, ListItemText, TextField, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { CircularProgress, Typography, AppBar, Toolbar, Button, Box, List, ListItem, ListItemText, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import axios from 'axios';
-import AuthService from '../../services/AuthService';
+import { format } from 'date-fns';
 import { handleError } from '../ErrorHandler';
+import AuthService from '../../services/AuthService';
 
-const ReceptionDetail = ({ themeMode }) => {
-  const { receptionId } = useParams();
+const IssueDetail = ({ themeMode }) => {
+  const { issueId } = useParams();
   const navigate = useNavigate();
-  const [reception, setReception] = useState(null);
+  const [issue, setIssue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [description, setDescription] = useState('');
+  const [open, setOpen] = useState(false); // For dialog
+  const [description, setDescription] = useState(''); // For updating issue description
+  const [isStaff, setIsStaff] = useState(false);
 
   const token = localStorage.getItem('token');
-  const canReceptStocks = AuthService.canReceptStocks();
-  const isStaff = AuthService.getUserRole(); // Check if the user is a staff member
 
   useEffect(() => {
-    const fetchReceptionDetails = async () => {
-      if (!canReceptStocks) {
-        navigate('/');  // Redirect if the user doesn't have permission
-        return;
-      }
+    // Check if the user is staff
+    const fetchUserRole = () => {
+      setIsStaff(AuthService.getUserRole());
+    };
 
+    fetchUserRole();
+  }, []);
+
+  useEffect(() => {
+    const fetchIssue = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/api/receptions/${receptionId}`, {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:8000/api/issues/${issueId}`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        setReception(response.data);
-        setDescription(response.data.description || '');
+        setIssue(response.data);
+        setDescription(response.data.description || ''); // Set initial description
       } catch (err) {
         handleError(err, setError);
       } finally {
@@ -40,9 +45,10 @@ const ReceptionDetail = ({ themeMode }) => {
       }
     };
 
-    fetchReceptionDetails();
-  }, [receptionId, token, canReceptStocks, navigate]);
+    fetchIssue();
+  }, [issueId, token]);
 
+  // Handle dialog open/close
   const handleUpdateClick = () => {
     setOpen(true);
   };
@@ -51,30 +57,31 @@ const ReceptionDetail = ({ themeMode }) => {
     setOpen(false);
   };
 
+  // Handle update issue description
   const handleUpdate = async () => {
     try {
-      await axios.patch(`http://localhost:8000/api/receptions/${receptionId}`, {
+      await axios.patch(`http://localhost:8000/api/issues/${issueId}`, {
         description
       }, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      // Refetch reception details after update
-      const response = await axios.get(`http://localhost:8000/api/receptions/${receptionId}`, {
+      // Refetch the updated issue
+      const response = await axios.get(`http://localhost:8000/api/issues/${issueId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      setReception(response.data);
-      setOpen(false);
+      setIssue(response.data);
+      setOpen(false); // Close dialog
     } catch (err) {
       handleError(err, setError);
     }
   };
 
   if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
+  if (error) return <Typography color="error">Error: {error}</Typography>;
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -82,32 +89,30 @@ const ReceptionDetail = ({ themeMode }) => {
       <AppBar position="static" className={`app-bar ${themeMode}`}>
         <Toolbar>
           <Button color="inherit" component={Link} to="/">Home</Button>
-          <Button 
-            color="inherit" 
-            sx={{ ml: 2 }}
-            onClick={handleUpdateClick}
-          >
-            Update Reception
+          <Button color="inherit" sx={{ ml: 2 }} onClick={handleUpdateClick}>
+            Update Issue
           </Button>
         </Toolbar>
       </AppBar>
 
       <Box sx={{ padding: 2 }}>
-        <Typography variant="h6">Reception ID: {reception.id}</Typography>
-        <Typography variant="body1">Description: {reception.description || 'N/A'}</Typography>
+        <Typography variant="h6">Issue ID: {issue.id}</Typography>
+        <Typography variant="body1">Description: {issue.description || 'N/A'}</Typography>
         <Typography variant="body1">
-          Reception Date: {new Date(reception.reception_date).toLocaleDateString()}
+          Issue Date: {format(new Date(issue.issue_date), 'yyyy-MM-dd')}
         </Typography>
-        <Typography variant="body1">Created By: {reception.user.first_name} {reception.user.last_name}</Typography>
+        <Typography variant="body1">
+          Created By: {issue.user.first_name} {issue.user.last_name}
+        </Typography>
 
         <Typography variant="h6" sx={{ mt: 2 }}>Stocks:</Typography>
         <List>
-          {reception.stocks.map((stock) => (
+          {issue.stocks.map((stock) => (
             <ListItem key={stock.id}>
               <ListItemText
                 primary={
-                  <Link 
-                    to={isStaff ? `/stock/all/${stock.id}` : `/stock/${stock.id}`} 
+                  <Link
+                    to={isStaff ? `/stock/all/${stock.id}` : `/stock/${stock.id}`}
                     style={{ textDecoration: 'none', color: 'inherit' }}
                   >
                     Stock: {stock.product.name}
@@ -131,9 +136,9 @@ const ReceptionDetail = ({ themeMode }) => {
         </List>
       </Box>
 
-      {/* Update Dialog */}
+      {/* Update Issue Dialog */}
       <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Update Reception</DialogTitle>
+        <DialogTitle>Update Issue</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -154,4 +159,4 @@ const ReceptionDetail = ({ themeMode }) => {
   );
 };
 
-export default ReceptionDetail;
+export default IssueDetail;

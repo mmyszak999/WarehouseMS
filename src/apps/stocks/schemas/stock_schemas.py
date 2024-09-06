@@ -96,28 +96,21 @@ class StockOutputSchema(StockBasicOutputSchema):
         orm_mode = True
 
 
-class StockIssueInputSchema(BaseModel):
+class StockWaitingRoomInputSchema(BaseModel):
     id: str
 
     class Config:
         orm_mode = True
 
 
-class StockWaitingRoomInputSchema(StockIssueInputSchema):
-    pass
+class StockRackLevelInputSchema(StockWaitingRoomInputSchema):
+    id: str
 
     class Config:
         orm_mode = True
 
 
-class StockRackLevelInputSchema(StockIssueInputSchema):
-    pass
-
-    class Config:
-        orm_mode = True
-
-
-class StockRackLevelSlotInputSchema(StockIssueInputSchema):
+class StockRackLevelSlotInputSchema(StockWaitingRoomInputSchema):
     pass
 
     class Config:
