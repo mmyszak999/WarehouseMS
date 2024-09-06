@@ -16,8 +16,8 @@ const sortOptions = [
 
 const pageSizeOptions = [5, 10, 15, 20, 25, 50, 100];
 
-const ReceptionsList = ({ themeMode }) => {
-  const [receptions, setReceptions] = useState([]);
+const IssuesList = ({ themeMode }) => {
+  const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -26,38 +26,38 @@ const ReceptionsList = ({ themeMode }) => {
   const [totalPages, setTotalPages] = useState(1);
 
   const [filterInputs, setFilterInputs] = useState({
-    reception_date: { value: { start: null, end: null }, sort: '' },
+    issue_date: { value: { start: null, end: null }, sort: '' },
     description: { value: '', operator: 'eq', sort: '' }
   });
 
   const [filters, setFilters] = useState({
-    reception_date: { value: { start: null, end: null }, sort: '' },
+    issue_date: { value: { start: null, end: null }, sort: '' },
     description: { value: '', operator: 'eq', sort: '' }
   });
 
   const token = localStorage.getItem('token');
-  const canReceptStocks = AuthService.canReceptStocks();
+  const canIssueStocks = AuthService.canIssueStocks();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchReceptions = async () => {
+    const fetchIssues = async () => {
       try {
         setLoading(true);
-        let endpoint = `http://localhost:8000/api/receptions/?page=${page}&size=${size}`;
+        let endpoint = `http://localhost:8000/api/issues/?page=${page}&size=${size}`;
 
-        if (filters.reception_date.value.start) {
-          const startDate = format(filters.reception_date.value.start, 'yyyy-MM-dd');
-          endpoint += `&reception_date__ge=${startDate}`;
+        if (filters.issue_date.value.start) {
+          const startDate = format(filters.issue_date.value.start, 'yyyy-MM-dd');
+          endpoint += `&issue_date__ge=${startDate}`;
         }
-        if (filters.reception_date.value.end) {
-          const endDate = format(filters.reception_date.value.end, 'yyyy-MM-dd');
-          endpoint += `&reception_date__le=${endDate}`;
+        if (filters.issue_date.value.end) {
+          const endDate = format(filters.issue_date.value.end, 'yyyy-MM-dd');
+          endpoint += `&issue_date__le=${endDate}`;
         }
         if (filters.description.value) {
           endpoint += `&description__${filters.description.operator}=${filters.description.value}`;
         }
-        if (filters.reception_date.sort) {
-          endpoint += `&sort=reception_date__${filters.reception_date.sort}`;
+        if (filters.issue_date.sort) {
+          endpoint += `&sort=issue_date__${filters.issue_date.sort}`;
         }
         if (filters.description.sort) {
           endpoint += `&sort=description__${filters.description.sort}`;
@@ -68,8 +68,8 @@ const ReceptionsList = ({ themeMode }) => {
             'Authorization': `Bearer ${token}`
           }
         });
-        setReceptions(response.data.results);
-        setTotalPages(Math.ceil(response.data.count / size)); // Assuming 'count' is the total number of items
+        setIssues(response.data.results);
+        setTotalPages(Math.ceil(response.data.total / size)); // Assuming 'total' is the total number of items
       } catch (err) {
         handleError(err, setError);
       } finally {
@@ -77,7 +77,7 @@ const ReceptionsList = ({ themeMode }) => {
       }
     };
 
-    fetchReceptions();
+    fetchIssues();
   }, [page, size, filters]);
 
   const handlePageChange = (event, value) => {
@@ -101,10 +101,10 @@ const ReceptionsList = ({ themeMode }) => {
   const handleDateChange = (name, date) => {
     setFilterInputs(prevInputs => ({
       ...prevInputs,
-      reception_date: {
-        ...prevInputs.reception_date,
+      issue_date: {
+        ...prevInputs.issue_date,
         value: {
-          ...prevInputs.reception_date.value,
+          ...prevInputs.issue_date.value,
           [name]: date
         }
       }
@@ -124,9 +124,9 @@ const ReceptionsList = ({ themeMode }) => {
       <AppBar position="static" className={`app-bar ${themeMode}`}>
         <Toolbar>
           <Button color="inherit" component={Link} to="/">Home</Button>
-          {canReceptStocks && (
-            <Button color="inherit" component={Link} to="/reception/create">
-              Create Reception
+          {canIssueStocks && (
+            <Button color="inherit" component={Link} to="/issue/create">
+              Create Issue
             </Button>
           )}
         </Toolbar>
@@ -139,30 +139,30 @@ const ReceptionsList = ({ themeMode }) => {
             <Typography variant="h6" gutterBottom>Filters</Typography>
             <Divider sx={{ mb: 2 }} />
 
-            {/* Reception Date Filter */}
+            {/* Issue Date Filter */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="subtitle1" gutterBottom>
-                <strong>Reception Date Range</strong>
+                <strong>Issue Date Range</strong>
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} md={6}>
                   <DatePicker
-                    selected={filterInputs.reception_date.value.start}
+                    selected={filterInputs.issue_date.value.start}
                     onChange={(date) => handleDateChange('start', date)}
                     selectsStart
-                    startDate={filterInputs.reception_date.value.start}
-                    endDate={filterInputs.reception_date.value.end}
+                    startDate={filterInputs.issue_date.value.start}
+                    endDate={filterInputs.issue_date.value.end}
                     placeholderText="Start Date"
                     fullWidth
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <DatePicker
-                    selected={filterInputs.reception_date.value.end}
+                    selected={filterInputs.issue_date.value.end}
                     onChange={(date) => handleDateChange('end', date)}
                     selectsEnd
-                    startDate={filterInputs.reception_date.value.start}
-                    endDate={filterInputs.reception_date.value.end}
+                    startDate={filterInputs.issue_date.value.start}
+                    endDate={filterInputs.issue_date.value.end}
                     placeholderText="End Date"
                     fullWidth
                   />
@@ -173,8 +173,8 @@ const ReceptionsList = ({ themeMode }) => {
                   <FormControl fullWidth>
                     <InputLabel>Sort Order</InputLabel>
                     <Select
-                      name="reception_date.sort"
-                      value={filterInputs.reception_date.sort}
+                      name="issue_date.sort"
+                      value={filterInputs.issue_date.sort}
                       onChange={handleFilterChange}
                       fullWidth
                     >
@@ -246,35 +246,33 @@ const ReceptionsList = ({ themeMode }) => {
           </Box>
         </Grid>
 
-        {/* Receptions List Section */}
+        {/* Issues List Section */}
         <Grid item xs={12} md={8}>
           <Container>
             <Typography variant="h4" gutterBottom>
-              List of Receptions
+              List of Issues
             </Typography>
             <List>
-              {receptions.map((reception) => (
+            {issues.map((issue) => (
                 <ListItem
-                  key={reception.id}
-                  button
-                  component={Link}
-                  to={`/reception/${reception.id}`}
+                key={issue.id}
+                button
+                component={Link}
+                to={`/issue/${issue.id}`} // Navigates to the IssueDetail page
                 >
-                  <ListItemText
-                    primary={`Reception ID: ${reception.id}`}
-                    secondary={`Date: ${reception.reception_date}, Description: ${reception.description}`}
-                  />
+                <ListItemText
+                    primary={`Issue Date: ${issue.issue_date}`}
+                    secondary={issue.description}
+                />
                 </ListItem>
-              ))}
+            ))}
             </List>
 
-            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'space-between' }}>
-              <FormControl>
+            {/* Pagination */}
+            <Box display="flex" justifyContent="center" mt={2}>
+              <FormControl sx={{ mr: 2 }}>
                 <InputLabel>Page Size</InputLabel>
-                <Select
-                  value={size}
-                  onChange={handleSizeChange}
-                >
+                <Select value={size} onChange={handleSizeChange}>
                   {pageSizeOptions.map((option) => (
                     <MenuItem key={option} value={option}>
                       {option}
@@ -282,21 +280,20 @@ const ReceptionsList = ({ themeMode }) => {
                   ))}
                 </Select>
               </FormControl>
-
-              <Box>
-                <Button
-                  disabled={page === 1}
-                  onClick={() => handlePageChange(null, page - 1)}
-                >
-                  Previous
-                </Button>
-                <Button
-                  disabled={page === totalPages}
-                  onClick={() => handlePageChange(null, page + 1)}
-                >
-                  Next
-                </Button>
-              </Box>
+              <Button
+                variant="outlined"
+                onClick={(event) => handlePageChange(event, page - 1)}
+                disabled={page === 1}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={(event) => handlePageChange(event, page + 1)}
+                disabled={page === totalPages}
+              >
+                Next
+              </Button>
             </Box>
           </Container>
         </Grid>
@@ -305,4 +302,4 @@ const ReceptionsList = ({ themeMode }) => {
   );
 };
 
-export default ReceptionsList;
+export default IssuesList;

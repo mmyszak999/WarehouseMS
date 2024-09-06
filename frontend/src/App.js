@@ -33,6 +33,9 @@
   import StockDetail from './components/Stock/StockDetail';
   import AllStocksList from './components/Stock/AllStocksList';
   import AllStockDetail from './components/Stock/AllStockDetail';
+  import CreateIssue from './components/Issue/CreateIssue';
+  import IssueList from './components/Issue/IssueList';
+  import IssueDetail from './components/Issue/IssueDetail';
   import './App.css';
   import getTheme from './theme';
 
@@ -122,9 +125,14 @@
                     <MenuItem component={Link} to="/warehouses">View Warehouse</MenuItem>
                     <MenuItem component={Link} to="/waiting_rooms">View Waiting Rooms</MenuItem>
                     <MenuItem component={Link} to="/stocks">View Available Stocks</MenuItem>
-                    {canReceptStocks && (
+                    {(canReceptStocks || isStaff) && (
                       <>
                       <MenuItem component={Link} to="/receptions">View Receptions</MenuItem>
+                      </>
+                    )}
+                    {(canIssueStocks || isStaff) && (
+                      <>
+                      <MenuItem component={Link} to="/issues">View Issues</MenuItem>
                       </>
                     )}
                     {isStaff && (
@@ -166,9 +174,14 @@
                       <Button variant="contained" color="primary" component={Link} to="/stocks" sx={{ mb: 2 }}>
                         View Available Stocks
                       </Button>
-                      {canReceptStocks && (
+                      {(canReceptStocks || isStaff) && (
                       <Button variant="contained" color="secondary" component={Link} to="/receptions" sx={{ mb: 2 }}>
                         View Receptions
+                      </Button>
+                      )}
+                      {(canIssueStocks || isStaff) && (
+                      <Button variant="contained" color="secondary" component={Link} to="/issues" sx={{ mb: 2 }}>
+                        View Issues
                       </Button>
                       )}
                       {isStaff && (
@@ -249,13 +262,16 @@
               <Route path="/waiting_room/update/:waitingRoomId" element={isLoggedIn && isStaff ? <UpdateWaitingRoom themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/activate/:token" element={isLoggedIn ? <ActivateAccount /> : <Navigate to="/login" />} />
               <Route path="/profile" element={isLoggedIn ? <UserProfile themeMode={themeMode} /> : <Navigate to="/login" />} />
-              <Route path="/reception/create" element={isLoggedIn && canReceptStocks ? <CreateReception themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
-              <Route path="/receptions" element={isLoggedIn && canReceptStocks ? <ReceptionsList themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
+              <Route path="/reception/create" element={isLoggedIn || canReceptStocks ? <CreateReception themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
+              <Route path="/receptions" element={isLoggedIn && (canReceptStocks || canMoveStocks) ? <ReceptionsList themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
               <Route path="/reception/:receptionId" element={isLoggedIn && canReceptStocks ? <ReceptionDetail themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
               <Route path="/stocks" element={isLoggedIn ? <StocksList themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/stock/:stockId" element={isLoggedIn ? <StockDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/stocks/all" element={isLoggedIn && isStaff ? <AllStocksList themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/stock/all/:stockId" element={isLoggedIn && isStaff ? <AllStockDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/issue/create" element={isLoggedIn && canIssueStocks ? <CreateIssue themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
+              <Route path="/issues" element={isLoggedIn && (canIssueStocks || canMoveStocks) ? <IssueList themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
+              <Route path="/issue/:issueId" element={isLoggedIn && canIssueStocks ? <IssueDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Container>

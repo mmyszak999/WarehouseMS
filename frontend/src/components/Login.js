@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { TextField, Button, Box, Typography, Container, Alert, AppBar, Toolbar } from '@mui/material';
 import { Link } from 'react-router-dom';
-import AuthService from '../services/AuthService';
 import { handleError } from './ErrorHandler';
 
 const Login = ({ handleLogin }) => {

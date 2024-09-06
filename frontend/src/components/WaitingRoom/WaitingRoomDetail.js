@@ -35,7 +35,9 @@ const WaitingRoomDetail = ({ themeMode }) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [stocks, setStocks] = useState([]);
+    const [sourceWaitingRooms, setSourceWaitingRooms] = useState([]);
     const [selectedStock, setSelectedStock] = useState(null);
+    const [selectedSourceWaitingRoom, setSelectedSourceWaitingRoom] = useState('');
     const [isAddStockDialogOpen, setAddStockDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [page, setPage] = useState(1);
@@ -61,16 +63,30 @@ const WaitingRoomDetail = ({ themeMode }) => {
         }
     }, [waitingRoomId, token]);
 
-    const fetchStocks = useCallback(async (page, size) => {
+    const fetchStocks = useCallback(async (page, size, waitingRoomId) => {
         try {
-            const endpoint = `http://localhost:8000/api/stocks/?page=${page}&size=${size}`;
+            const endpoint = `http://localhost:8000/api/waiting_rooms/${waitingRoomId}`;
             const response = await axios.get(endpoint, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            setStocks(response.data.results);
-            setTotalPages(Math.ceil(response.data.total / size));
+            setStocks(response.data.stocks);
+            setTotalPages(Math.ceil(response.data.total_count / size)); // Update total pages based on response
+        } catch (error) {
+            handleError(error, setError);
+        }
+    }, [token]);
+
+    const fetchSourceWaitingRooms = useCallback(async () => {
+        try {
+            const endpoint = 'http://localhost:8000/api/waiting_rooms/';
+            const response = await axios.get(endpoint, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setSourceWaitingRooms(response.data.results);
         } catch (error) {
             handleError(error, setError);
         }
@@ -78,7 +94,8 @@ const WaitingRoomDetail = ({ themeMode }) => {
 
     useEffect(() => {
         fetchWaitingRoom();
-    }, [fetchWaitingRoom]);
+        fetchSourceWaitingRooms();
+    }, [fetchWaitingRoom, fetchSourceWaitingRooms]);
 
     const handleDelete = async () => {
         try {
@@ -93,16 +110,19 @@ const WaitingRoomDetail = ({ themeMode }) => {
         }
     };
 
-    const handleAddStock = async () => {
+    const handleAddStock = () => {
         setAddStockDialogOpen(true);
-        fetchStocks(page, size); // Fetch stocks with current pagination settings
+        if (selectedSourceWaitingRoom) {
+            fetchStocks(page, size, selectedSourceWaitingRoom);
+        }
     };
 
     const handleConfirmAddStock = async () => {
-        if (selectedStock) {
+        if (selectedStock && selectedSourceWaitingRoom) {
             try {
                 await axios.patch(`http://localhost:8000/api/waiting_rooms/${waitingRoomId}/add-stock`, {
-                    id: selectedStock.id
+                    id: selectedStock.id,
+                    source_waiting_room: selectedSourceWaitingRoom
                 }, {
                     headers: {
                         'Authorization': `Bearer ${token}`
@@ -119,17 +139,30 @@ const WaitingRoomDetail = ({ themeMode }) => {
 
     const handlePageChange = (event, value) => {
         setPage(value);
-        fetchStocks(value, size); // Fetch stocks for the new page
+        if (selectedSourceWaitingRoom) {
+            fetchStocks(value, size, selectedSourceWaitingRoom);
+        }
     };
 
     const handleSizeChange = (event) => {
         setSize(event.target.value);
         setPage(1); // Reset to first page whenever size changes
-        fetchStocks(1, event.target.value); // Fetch stocks for the new page size
+        if (selectedSourceWaitingRoom) {
+            fetchStocks(1, event.target.value, selectedSourceWaitingRoom);
+        }
     };
 
-    const handleStockClick = (stockId) => {
-        navigate(`/stock/${stockId}`);
+    const handleStockClick = (stock) => {
+        // Conditionally navigate to different routes based on user role
+        if (userRole) {
+            navigate(`/stock/all/${stock.id}`);
+        } else {
+            navigate(`/stock/${stock.id}`);
+        }
+    };
+
+    const handleAddStockClick = (stock) => {
+        setSelectedStock(stock); // Navigate to the stock detail page
     };
 
     if (loading) return <CircularProgress />;
@@ -187,8 +220,12 @@ const WaitingRoomDetail = ({ themeMode }) => {
                             <Typography variant="h6" sx={{ mt: 2 }}>Stocks in Waiting Room:</Typography>
                             {waitingRoom?.stocks && waitingRoom.stocks.length > 0 ? (
                                 <List>
-                                    {waitingRoom.stocks.map((stock, index) => (
-                                        <ListItem button key={stock.id} onClick={() => handleStockClick(stock.id)}>
+                                    {waitingRoom.stocks.map((stock) => (
+                                        <ListItem
+                                            button
+                                            key={stock.id}
+                                            onClick={() => handleStockClick(stock)}
+                                        >
                                             <ListItemText
                                                 primary={stock.product.name}
                                                 secondary={`Weight: ${stock.weight}, Count: ${stock.product_count}`}
@@ -206,67 +243,83 @@ const WaitingRoomDetail = ({ themeMode }) => {
 
             {/* Add Stock Dialog */}
             <Dialog open={isAddStockDialogOpen} onClose={() => setAddStockDialogOpen(false)}>
-                <DialogTitle>Select Stock to Add</DialogTitle>
+                <DialogTitle>Select Source Waiting Room and Stock to Add</DialogTitle>
                 <DialogContent>
                     <FormControl sx={{ mb: 2, minWidth: 120 }}>
-                        <InputLabel>Items per page</InputLabel>
+                        <InputLabel>Source Waiting Room</InputLabel>
                         <Select
-                            value={size}
-                            onChange={handleSizeChange}
-                            label="Items per page"
+                            value={selectedSourceWaitingRoom}
+                            onChange={(e) => {
+                                setSelectedSourceWaitingRoom(e.target.value);
+                                fetchStocks(page, size, e.target.value);
+                            }}
+                            label="Source Waiting Room"
                         >
-                            {[5, 10, 15, 20, 25].map(option => (
-                                <MenuItem key={option} value={option}>
-                                    {option}
+                            {sourceWaitingRooms.map(room => (
+                                <MenuItem key={room.id} value={room.id}>
+                                    {room.name}
                                 </MenuItem>
                             ))}
                         </Select>
                     </FormControl>
-                    <List>
-                        {stocks.length > 0 ? (
-                            stocks.map(stock => (
-                                <ListItem button key={stock.id} onClick={() => handleStockClick(stock.id)}>
+                    <FormControl sx={{ mb: 2, minWidth: 120 }}>
+                        <InputLabel>Items per page</InputLabel>
+                        <Select value={size} onChange={handleSizeChange} label="Items per page">
+                            <MenuItem value={10}>10</MenuItem>
+                            <MenuItem value={20}>20</MenuItem>
+                            <MenuItem value={50}>50</MenuItem>
+                        </Select>
+                    </FormControl>
+                    {stocks && stocks.length > 0 ? (
+                        <List>
+                            {stocks.map(stock => (
+                                <ListItem
+                                    button
+                                    key={stock.id}
+                                    selected={selectedStock?.id === stock.id}
+                                    onClick={() => handleAddStockClick(stock)}
+                                >
                                     <ListItemText
                                         primary={stock.product.name}
                                         secondary={`Weight: ${stock.weight}, Count: ${stock.product_count}`}
                                     />
                                 </ListItem>
-                            ))
-                        ) : (
-                            <Typography variant="body2">No stocks available to add.</Typography>
-                        )}
-                    </List>
-                    <Pagination
-                        count={totalPages}
-                        page={page}
-                        onChange={handlePageChange}
-                        color="primary"
-                        sx={{ mt: 2 }}
-                    />
+                            ))}
+                        </List>
+                    ) : (
+                        <Typography>No stocks found in this waiting room.</Typography>
+                    )}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setAddStockDialogOpen(false)}>Cancel</Button>
-                    <Button onClick={handleConfirmAddStock} color="primary" disabled={!selectedStock}>
-                        Add Stock
+                    <Button
+                        onClick={handleConfirmAddStock}
+                        disabled={!selectedStock || !selectedSourceWaitingRoom}
+                        color="primary"
+                    >
+                        Confirm Add Stock
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Delete Confirmation Dialog */}
+            {/* Delete Dialog */}
             <Dialog open={isDeleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-                <DialogTitle>Confirm Deletion</DialogTitle>
-                <DialogContent>
-                    <Typography variant="body2">
-                        Are you sure you want to delete this waiting room? This action cannot be undone.
-                    </Typography>
-                </DialogContent>
+                <DialogTitle>Are you sure you want to delete this waiting room?</DialogTitle>
                 <DialogActions>
                     <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-                    <Button onClick={handleDelete} color="error" autoFocus>
-                        Delete
-                    </Button>
+                    <Button onClick={handleDelete} color="error">Delete</Button>
                 </DialogActions>
             </Dialog>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <Pagination
+                    count={totalPages}
+                    page={page}
+                    onChange={handlePageChange}
+                    sx={{ mt: 2 }}
+                />
+            )}
         </Box>
     );
 };

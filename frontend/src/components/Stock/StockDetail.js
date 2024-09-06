@@ -3,12 +3,23 @@ import axios from 'axios';
 import { Box, Typography, CircularProgress, Link as MuiLink, AppBar, Toolbar, Button } from '@mui/material';
 import { useParams, Link } from 'react-router-dom';
 import { handleError } from '../ErrorHandler';
+import AuthService from '../../services/AuthService';
 
 const StockDetail = () => {
   const { stockId } = useParams();
   const [stock, setStock] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [isStaff, setIsStaff] = useState(false);
+
+    useEffect(() => {
+        const fetchUserRole = () => {
+            setIsStaff(AuthService.getUserRole());
+        };
+
+        fetchUserRole();
+    }, []);
 
   const token = localStorage.getItem('token');
 

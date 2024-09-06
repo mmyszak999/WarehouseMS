@@ -235,7 +235,7 @@ async def get_single_stock(
 ) -> Union[StockOutputSchema, StockBasicOutputSchema]:
     if not (stock_object := await if_exists(Stock, "id", stock_id, session)):
         raise DoesNotExist(Stock.__name__, "id", stock_id)
-
+    
     if (not can_get_issued) and stock_object.is_issued:
         raise CannotRetrieveIssuedStockException
     return output_schema.from_orm(stock_object)
