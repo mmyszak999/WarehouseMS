@@ -200,12 +200,12 @@ async def delete_single_section(session: AsyncSession, section_id: str):
     if section_object.occupied_weight or section_object.reserved_weight:
         raise SectionIsNotEmptyException(resource="occupied or reserved weight")
 
-    statement = delete(Section).filter(Section.id == section_id)
-    result = await session.execute(statement)
     warehouse = await if_exists(Warehouse, "id", section_object.warehouse_id, session)
-
     warehouse = await manage_warehouse_state(warehouse, sections_involved=True)
     session.add(warehouse)
+    
+    statement = delete(Section).filter(Section.id == section_id)
+    result = await session.execute(statement)
 
-    await session.commit()
+    result = await session.commit()
     return result

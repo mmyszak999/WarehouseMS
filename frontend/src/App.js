@@ -36,6 +36,11 @@
   import CreateIssue from './components/Issue/CreateIssue';
   import IssueList from './components/Issue/IssueList';
   import IssueDetail from './components/Issue/IssueDetail';
+  import CreateSection from './components/Section/CreateSection';
+  import SectionsList from './components/Section/SectionsList';
+  import SectionDetail from './components/Section/SectionDetail';
+  import UpdateSection from './components/Section/UpdateSection';
+
   import './App.css';
   import getTheme from './theme';
 
@@ -125,6 +130,7 @@
                     <MenuItem component={Link} to="/warehouses">View Warehouse</MenuItem>
                     <MenuItem component={Link} to="/waiting_rooms">View Waiting Rooms</MenuItem>
                     <MenuItem component={Link} to="/stocks">View Available Stocks</MenuItem>
+                    <MenuItem component={Link} to="/sections">View Sections</MenuItem>
                     {(canReceptStocks || isStaff) && (
                       <>
                       <MenuItem component={Link} to="/receptions">View Receptions</MenuItem>
@@ -173,6 +179,9 @@
                       </Button>
                       <Button variant="contained" color="primary" component={Link} to="/stocks" sx={{ mb: 2 }}>
                         View Available Stocks
+                      </Button>
+                      <Button variant="contained" color="primary" component={Link} to="/sections" sx={{ mb: 2 }}>
+                        View Sections
                       </Button>
                       {(canReceptStocks || isStaff) && (
                       <Button variant="contained" color="secondary" component={Link} to="/receptions" sx={{ mb: 2 }}>
@@ -273,7 +282,11 @@
               <Route path="/issues" element={isLoggedIn && (canIssueStocks || canMoveStocks) ? <IssueList themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
               <Route path="/issue/:issueId" element={isLoggedIn && canIssueStocks ? <IssueDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="*" element={<NotFound />} />
-            </Routes>
+              <Route path="/section/create" element={isLoggedIn && isStaff ? <CreateSection themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/sections" element={isLoggedIn ? <SectionsList themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/section/:sectionId" element={isLoggedIn ? <SectionDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/section/:sectionId/update" element={isLoggedIn && isStaff ? <UpdateSection /> : <Navigate to="/login" />} />
+              </Routes>
           </Container>
         </Router>
       </ThemeProvider>
