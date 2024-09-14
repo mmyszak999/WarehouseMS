@@ -40,7 +40,10 @@
   import SectionsList from './components/Section/SectionsList';
   import SectionDetail from './components/Section/SectionDetail';
   import UpdateSection from './components/Section/UpdateSection';
-
+  import CreateRack from './components/Rack/CreateRack';
+  import RacksList from './components/Rack/RacksList';
+  import RackDetail from './components/Rack/RackDetail';
+  import UpdateRack from './components/Rack/UpdateRack';
   import './App.css';
   import getTheme from './theme';
 
@@ -131,6 +134,7 @@
                     <MenuItem component={Link} to="/waiting_rooms">View Waiting Rooms</MenuItem>
                     <MenuItem component={Link} to="/stocks">View Available Stocks</MenuItem>
                     <MenuItem component={Link} to="/sections">View Sections</MenuItem>
+                    <MenuItem component={Link} to="/racks">View Racks</MenuItem>
                     {(canReceptStocks || isStaff) && (
                       <>
                       <MenuItem component={Link} to="/receptions">View Receptions</MenuItem>
@@ -182,6 +186,9 @@
                       </Button>
                       <Button variant="contained" color="primary" component={Link} to="/sections" sx={{ mb: 2 }}>
                         View Sections
+                      </Button>
+                      <Button variant="contained" color="primary" component={Link} to="/racks" sx={{ mb: 2 }}>
+                        View Racks
                       </Button>
                       {(canReceptStocks || isStaff) && (
                       <Button variant="contained" color="secondary" component={Link} to="/receptions" sx={{ mb: 2 }}>
@@ -281,11 +288,15 @@
               <Route path="/issue/create" element={isLoggedIn && canIssueStocks ? <CreateIssue themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
               <Route path="/issues" element={isLoggedIn && (canIssueStocks || canMoveStocks) ? <IssueList themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
               <Route path="/issue/:issueId" element={isLoggedIn && canIssueStocks ? <IssueDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={<NotFound themeMode={themeMode} />} />
               <Route path="/section/create" element={isLoggedIn && isStaff ? <CreateSection themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/sections" element={isLoggedIn ? <SectionsList themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/section/:sectionId" element={isLoggedIn ? <SectionDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
-              <Route path="/section/:sectionId/update" element={isLoggedIn && isStaff ? <UpdateSection /> : <Navigate to="/login" />} />
+              <Route path="/section/:sectionId/update" element={isLoggedIn && isStaff ? <UpdateSection themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/rack/create" element={isLoggedIn && isStaff ? <CreateRack themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/racks" element={isLoggedIn ? <RacksList themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/rack/:rackId" element={isLoggedIn ? <RackDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/rack/:rackId/update" element={isLoggedIn && isStaff ? <UpdateRack themeMode={themeMode} /> : <Navigate to="/login" />} />
               </Routes>
           </Container>
         </Router>

@@ -112,7 +112,11 @@ const SectionDetail = ({ themeMode }) => {
                   {section.racks.map(rack => (
                     <Card key={rack.id} sx={{ mb: 2 }}>
                       <CardContent>
-                        <Typography variant="body1">Rack Name: {rack.rack_name}</Typography>
+                        <Typography variant="body1">
+                          <Link to={`/rack/${rack.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                            Rack Name: {rack.rack_name}
+                          </Link>
+                        </Typography>
                         <Typography variant="body1">Max Weight: {rack.max_weight}</Typography>
                         <Typography variant="body1">Available Weight: {rack.available_weight}</Typography>
                         <Typography variant="body1">Occupied Weight: {rack.occupied_weight}</Typography>
