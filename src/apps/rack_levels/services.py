@@ -112,7 +112,7 @@ async def create_rack_level(
     for slot_number in range(1, rack_level_data.get("max_slots") + 1):
         input_schema = RackLevelSlotInputSchema(
             rack_level_slot_number=slot_number,
-            description=f"slot #{slot_number}",
+            description=f"rack level {new_rack_level.rack_level_number} | slot #{slot_number}",
             rack_level_id=new_rack_level.id,
         )
         await create_rack_level_slot(
