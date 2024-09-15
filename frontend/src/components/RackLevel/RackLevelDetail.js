@@ -124,6 +124,8 @@ const RackLevelDetail = ({ themeMode }) => {
               <Typography variant="body1">Max Slots: {rackLevel.max_slots}</Typography>
               <Typography variant="body1">Available Slots: {rackLevel.available_slots}</Typography>
               <Typography variant="body1">Occupied Slots: {rackLevel.occupied_slots}</Typography>
+              <Typography variant="body1">Active Slots: {rackLevel.active_slots}</Typography>
+              <Typography variant="body1">Inactive Slots: {rackLevel.inactive_slots}</Typography>
             </CardContent>
           </Card>
 

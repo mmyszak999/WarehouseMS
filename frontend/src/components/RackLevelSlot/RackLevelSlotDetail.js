@@ -35,6 +35,24 @@ const RackLevelSlotDetail = ({ themeMode }) => {
     fetchRackLevelSlotDetails();
   }, [rackLevelSlotId]);
 
+  const handleActivateDeactivate = async () => {
+    const url = rackLevelSlot.is_active
+      ? `http://localhost:8000/api/rack-level-slots/${rackLevelSlotId}/deactivate`
+      : `http://localhost:8000/api/rack-level-slots/${rackLevelSlotId}/activate`;
+
+    try {
+      await axios.patch(url, {}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      // Refresh the slot details after activation/deactivation
+      fetchRackLevelSlotDetails();
+    } catch (error) {
+      handleError(error, setError); // Handle errors
+    }
+  };
+
   if (loading) {
     return <CircularProgress />;
   }
@@ -74,6 +92,19 @@ const RackLevelSlotDetail = ({ themeMode }) => {
               <Typography variant="body1">Active: {rackLevelSlot.is_active ? 'Yes' : 'No'}</Typography>
               <Typography variant="body1">Created At: {new Date(rackLevelSlot.created_at).toLocaleDateString()}</Typography>
 
+              {/* Activate/Deactivate Button */}
+              {isStaff && (
+                <Button
+                  variant="contained"
+                  color={rackLevelSlot.is_active ? 'error' : 'success'}
+                  onClick={handleActivateDeactivate}
+                  sx={{ mb: 2 }}
+                >
+                  {rackLevelSlot.is_active ? 'Deactivate' : 'Activate'}
+                </Button>
+              )}
+
+              {/* Stock Information */}
               {rackLevelSlot.stock && (
                 <>
                   <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>

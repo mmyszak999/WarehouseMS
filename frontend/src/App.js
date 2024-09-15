@@ -50,6 +50,7 @@
   import UpdateRackLevel from './components/RackLevel/UpdateRackLevel';
   import RackLevelSlotsList from './components/RackLevelSlot/RackLevelSlotsList';
   import RackLevelSlotDetail from './components/RackLevelSlot/RackLevelSlotDetail';
+  import UpdateRackLevelSlot from './components/RackLevelSlot/UpdateRackLevelSlot';
   import './App.css';
   import getTheme from './theme';
 
@@ -317,6 +318,7 @@
               <Route path="/rack-level/:rackLevelId/update" element={isLoggedIn && isStaff ? <UpdateRackLevel themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/rack-level-slots" element={isLoggedIn ? <RackLevelSlotsList themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/rack-level-slot/:rackLevelSlotId" element={isLoggedIn ? <RackLevelSlotDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/rack-level-slot/:rackLevelSlotId/update" element={isLoggedIn ? <UpdateRackLevelSlot themeMode={themeMode} /> : <Navigate to="/login" />} />
               </Routes>
           </Container>
         </Router>

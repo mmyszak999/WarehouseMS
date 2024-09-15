@@ -38,8 +38,8 @@ const RackLevelSlotsList = ({ themeMode }) => {
     is_active: { value: '', operator: 'eq' }, // Only filter for is_active, no sort
     description: { value: '', operator: 'eq', sort: '' },
     rack_level_slot_number: { value: '', operator: 'eq', sort: '' },
-    stock_weight: { value: '', operator: 'eq', sort: '' },
-    stock_product_count: { value: '', operator: 'eq', sort: '' }
+    stock__weight: { value: '', operator: 'eq', sort: '' },
+    stock__product_count: { value: '', operator: 'eq', sort: '' }
   });
 
   const navigate = useNavigate();
@@ -58,11 +58,6 @@ const RackLevelSlotsList = ({ themeMode }) => {
         if (filter.sort) {
           endpoint += `&sort=${key}__${filter.sort}`;
         }
-      }
-
-      // Ensure that only slots with stock are considered when filtering by stock-related fields
-      if (filters.stock_weight.value || filters.stock_product_count.value) {
-        endpoint += `&has_stock=true`;
       }
 
       const response = await axios.get(endpoint, {
@@ -226,7 +221,6 @@ const RackLevelSlotsList = ({ themeMode }) => {
                         style={{ textDecoration: 'none', color: 'inherit' }} 
                       >
                         {slot.description}
-                        (slot number: {slot.rack_level_slot_number})
                       </Typography>
                     }
                   />
