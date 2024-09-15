@@ -13,6 +13,7 @@ const RackDetail = ({ themeMode }) => {
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const isStaff = AuthService.getUserRole(); // Check if user is staff
+  const canMoveStocks = AuthService.canMoveStocks();
 
   const fetchRackDetails = async () => {
     try {
@@ -104,21 +105,21 @@ const RackDetail = ({ themeMode }) => {
               <Typography variant="body1">Reserved Weight: {rack.reserved_weight}</Typography>
               <Typography variant="body1">Weight to Reserve: {rack.weight_to_reserve}</Typography>
               <Typography variant="body2">Created At: {rack.created_at || 'N/A'}</Typography>
-              {isStaff && rack.rack_levels && (
+              {(isStaff || canMoveStocks) && rack.rack_levels && (
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="h6" gutterBottom>Rack Levels:</Typography>
-                  {rack.rack_levels.map(level => (
-                    <Card key={level.id} sx={{ mb: 2 }}>
+                  {rack.rack_levels.map(rack_level => (
+                    <Card key={rack_level.id} sx={{ mb: 2 }}>
                       <CardContent>
                       <Typography variant="body1">
-                          <Link to={`/rack-level/${rack.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                          <Link to={`/rack-level/${rack_level.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                             Rack Level Description: {rack_level.description}
                           </Link>
                         </Typography>
                         <Typography variant="body1">Rack Level Number: {rack_level.rack_level_number}</Typography>
-                        <Typography variant="body1">Max Weight: {level.max_weight}</Typography>
-                        <Typography variant="body1">Available Weight: {level.available_weight}</Typography>
-                        <Typography variant="body1">Occupied Weight: {level.occupied_weight}</Typography>
+                        <Typography variant="body1">Max Weight: {rack_level.max_weight}</Typography>
+                        <Typography variant="body1">Available Weight: {rack_level.available_weight}</Typography>
+                        <Typography variant="body1">Occupied Weight: {rack_level.occupied_weight}</Typography>
                       </CardContent>
                     </Card>
                   ))}

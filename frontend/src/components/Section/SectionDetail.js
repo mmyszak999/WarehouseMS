@@ -13,6 +13,7 @@ const SectionDetail = ({ themeMode }) => {
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false); // State for delete confirmation dialog
   const isStaff = AuthService.getUserRole(); // Check if user is staff
+  const canMoveStocks = AuthService.canMoveStocks();
 
   const fetchSection = async () => {
     try {
@@ -106,7 +107,7 @@ const SectionDetail = ({ themeMode }) => {
               <Typography variant="body2">Created At: {section.created_at || 'N/A'}</Typography>
 
               {/* Racks if available */}
-              {section.racks && section.racks.length > 0 && isStaff && (
+              {section.racks && section.racks.length > 0 && (isStaff || canMoveStocks) && (
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="h6" gutterBottom>Racks:</Typography>
                   {section.racks.map(rack => (
