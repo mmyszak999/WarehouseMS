@@ -189,7 +189,6 @@ async def create_stocks(
                     RackLevelSlot.is_active == True,
                     RackLevelSlot.rack_level_id == rack_level_id,
                 )
-                .order_by(RackLevelSlot.rack_level_slot_number.asc())
                 .limit(1)
             )
 
