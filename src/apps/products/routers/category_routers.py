@@ -3,10 +3,10 @@ from fastapi.routing import APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.products.schemas.category_schemas import (
+    CategoryBaseSchema,
     CategoryInputSchema,
     CategoryOutputSchema,
     CategoryUpdateSchema,
-    CategoryBaseSchema
 )
 from src.apps.products.services.category_services import (
     create_category,

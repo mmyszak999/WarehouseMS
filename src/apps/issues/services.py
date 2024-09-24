@@ -9,9 +9,9 @@ from src.apps.issues.schemas import (
     IssueUpdateSchema,
 )
 from src.apps.products.models import Product
-from src.apps.users.models import User
 from src.apps.stocks.models import Stock
 from src.apps.stocks.services.stock_services import issue_stocks
+from src.apps.users.models import User
 from src.core.exceptions import (
     AlreadyExists,
     DoesNotExist,

@@ -1,8 +1,8 @@
 from fastapi import Depends
 from fastapi_jwt_auth import AuthJWT
 from sqlalchemy import select
-from sqlalchemy.orm import load_only
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import load_only
 
 from src.apps.users.models import User
 from src.core.exceptions import (
@@ -21,10 +21,18 @@ async def authenticate_user(
     jwt_subject = auth_jwt.get_jwt_subject()
     user = await session.scalar(
         select(User)
-        .options(load_only(
-            User.email, User.is_active, User.has_password_set,
-            User.id, User.is_staff, User.can_move_stocks,
-            User.can_issue_stocks, User.can_recept_stocks))
+        .options(
+            load_only(
+                User.email,
+                User.is_active,
+                User.has_password_set,
+                User.id,
+                User.is_staff,
+                User.can_move_stocks,
+                User.can_issue_stocks,
+                User.can_recept_stocks,
+            )
+        )
         .filter(User.email == jwt_subject)
         .limit(1)
     )

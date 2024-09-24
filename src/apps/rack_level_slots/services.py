@@ -360,7 +360,7 @@ async def add_single_stock_to_rack_level_slot(
 
     if stock_object.is_issued:
         raise CannotMoveIssuedStockException
-    
+
     if rack_level_slot_object.stock:
         raise ServiceException("The slot is occupied! ")
 

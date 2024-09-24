@@ -5,9 +5,7 @@ from src.apps.issues.services import create_issue
 from src.apps.products.models import Product
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.stocks.models import Stock
-from src.apps.stocks.schemas.stock_schemas import (
-    StockOutputSchema,
-)
+from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.stocks.schemas.user_stock_schemas import UserStockOutputSchema
 from src.apps.stocks.services.user_stock_services import (
     create_user_stock_object,

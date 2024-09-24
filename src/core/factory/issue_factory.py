@@ -2,7 +2,11 @@ from datetime import date
 from decimal import Decimal
 from typing import Optional
 
-from src.apps.issues.schemas import IssueInputSchema, IssueUpdateSchema, StockIssueInputSchema
+from src.apps.issues.schemas import (
+    IssueInputSchema,
+    IssueUpdateSchema,
+    StockIssueInputSchema,
+)
 from src.core.factory.core import SchemaFactory
 from src.core.utils.faker import set_product_count, set_product_weight
 

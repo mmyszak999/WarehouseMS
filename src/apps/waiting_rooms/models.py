@@ -46,7 +46,5 @@ class WaitingRoom(Base):
         ForeignKey("warehouse.id", ondelete="SET NULL", onupdate="cascade"),
         nullable=True,
     )
-    warehouse = relationship(
-        "Warehouse", back_populates="waiting_rooms", lazy="noload"
-    )
+    warehouse = relationship("Warehouse", back_populates="waiting_rooms", lazy="noload")
     created_at = Column(DateTime, default=dt.datetime.now, nullable=True)
