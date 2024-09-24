@@ -25,8 +25,8 @@ class UserBaseSchema(BaseModel):
 
 
 class UserInputSchema(UserBaseSchema):
-    email: EmailStr = Field()
-    birth_date: datetime.date
+    email: Optional[EmailStr] = Field()
+    birth_date: Optional[datetime.date]
     is_staff: bool
     can_move_stocks: bool
     can_recept_stocks: bool
@@ -93,9 +93,9 @@ class UserInfoOutputSchema(UserBaseSchema):
 class UserOutputSchema(UserInputSchema):
     id: str
     is_active: bool
-    is_superuser: bool
+    is_superuser: Optional[bool]
     is_staff: bool
-    has_password_set: bool
+    has_password_set: Optional[bool]
     created_at: Optional[datetime.datetime]
 
     class Config:

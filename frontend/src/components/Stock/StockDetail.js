@@ -98,7 +98,13 @@ const StockDetail = () => {
           ) : 'N/A'}
         </Typography>
         <Typography variant="subtitle1">
-          <strong>Rack Level Slot:</strong> {stock.rack_level_slot ? stock.rack_level_slot.description : 'N/A'}
+          <strong>Rack Level Slot:</strong> {stock.rack_level_slot ? <MuiLink
+              component={Link}
+              to={`/rack-level-slot/${stock.rack_level_slot.id}`}
+              sx={{ textDecoration: 'none', color: 'primary.main' }}
+            >
+              {stock.rack_level_slot.description}
+            </MuiLink> : 'N/A'}
         </Typography>
         <Typography variant="subtitle1">
           <strong>Created At:</strong> {stock.created_at}

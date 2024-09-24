@@ -10,10 +10,8 @@ from src.apps.products.schemas.category_schemas import (
 )
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.stocks.schemas.stock_schemas import (
-    StockIssueInputSchema,
     StockOutputSchema,
 )
-from src.apps.stocks.services.stock_services import get_all_stocks
 from src.apps.users.schemas import UserOutputSchema
 from src.core.factory.issue_factory import IssueInputSchemaFactory
 from src.core.factory.stock_factory import StockInputSchemaFactory

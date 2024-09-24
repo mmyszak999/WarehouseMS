@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.apps.issues.services import create_issue
+from src.apps.issues.schemas import StockIssueInputSchema
 from src.apps.products.models import Product
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.rack_level_slots.models import RackLevelSlot
@@ -13,7 +14,6 @@ from src.apps.racks.services import create_rack, get_all_racks, get_single_rack
 from src.apps.sections.schemas import SectionOutputSchema
 from src.apps.stocks.models import Stock
 from src.apps.stocks.schemas.stock_schemas import (
-    StockIssueInputSchema,
     StockOutputSchema,
 )
 from src.apps.stocks.services.stock_services import (

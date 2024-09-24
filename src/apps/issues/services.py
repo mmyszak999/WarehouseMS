@@ -9,6 +9,7 @@ from src.apps.issues.schemas import (
     IssueUpdateSchema,
 )
 from src.apps.products.models import Product
+from src.apps.users.models import User
 from src.apps.stocks.models import Stock
 from src.apps.stocks.services.stock_services import issue_stocks
 from src.core.exceptions import (
@@ -85,7 +86,7 @@ async def get_single_issue(session: AsyncSession, issue_id: int) -> IssueOutputS
 async def get_all_issues(
     session: AsyncSession, page_params: PageParams, query_params: list[tuple] = None
 ) -> PagedResponseSchema[IssueBasicOutputSchema]:
-    query = select(Issue)
+    query = select(Issue).join(User, Issue.user_id == User.id)
 
     if query_params:
         query = filter_and_sort_instances(query_params, query, Issue)

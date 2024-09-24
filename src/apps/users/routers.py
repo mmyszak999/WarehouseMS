@@ -70,9 +70,10 @@ async def login_user(
     response_model=UserOutputSchema,
 )
 async def get_logged_user(
+    session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
 ) -> UserOutputSchema:
-    return UserOutputSchema.from_orm(request_user)
+    return await get_single_user(session, request_user.id)
 
 
 @user_router.get(

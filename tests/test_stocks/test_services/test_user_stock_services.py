@@ -6,7 +6,6 @@ from src.apps.products.models import Product
 from src.apps.products.schemas.product_schemas import ProductOutputSchema
 from src.apps.stocks.models import Stock
 from src.apps.stocks.schemas.stock_schemas import (
-    StockIssueInputSchema,
     StockOutputSchema,
 )
 from src.apps.stocks.schemas.user_stock_schemas import UserStockOutputSchema

@@ -392,6 +392,10 @@ async def add_single_stock_to_rack_level(
         raise NoAvailableRackLevelSlotException(
             stock_object.product.name, stock_object.product_count, stock_object.weight
         )
+    
+    if rack_level_slot_object.stock:
+        raise ServiceException("The slot is occupied! ")
+    
     _new_rack_level_slot_object = rack_level_slot_object
 
     if old_waiting_room_object := stock_object.waiting_room:

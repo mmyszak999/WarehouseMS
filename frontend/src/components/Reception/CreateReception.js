@@ -306,7 +306,7 @@ const CreateReception = () => {
                                                     >
                                                         {rackLevels[index].map((rackLevel) => (
                                                             <MenuItem key={rackLevel.id} value={rackLevel.id}>
-                                                                {`${rackLevel.description} - level #${rackLevel.rack_level_number}, available weight: ${rackLevel.available_weight}, available slots: ${rackLevel.available_slots}`}
+                                                                {`${rackLevel.description} - level #${rackLevel.rack_level_number}, available weight: ${rackLevel.available_weight}, available slots: ${rackLevel.available_slots}, max slots: ${rackLevel.max_slots}`}
                                                             </MenuItem>
                                                         ))}
                                                     </Select>
@@ -356,7 +356,7 @@ const CreateReception = () => {
                                                     >
                                                         {rackLevels[index].map((rackLevel) => (
                                                             <MenuItem key={rackLevel.id} value={rackLevel.id}>
-                                                                {`${rackLevel.description} - level #${rackLevel.rack_level_number}, available weight: ${rackLevel.available_weight}, available slots: ${rackLevel.available_slots}`}
+                                                                {`${rackLevel.description} - level #${rackLevel.rack_level_number}, available weight: ${rackLevel.available_weight}, available slots: ${rackLevel.available_slots}, max slots: ${rackLevel.max_slots}`}
                                                             </MenuItem>
                                                         ))}
                                                     </Select>

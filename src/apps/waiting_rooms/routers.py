@@ -76,7 +76,7 @@ async def get_waiting_room(
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
 ) -> Union[WaitingRoomOutputSchema, WaitingRoomBasicOutputSchema]:
-    if request_user.is_staff:
+    if await check_if_staff_or_has_permission(request_user, "can_move_stocks"):
         return await get_single_waiting_room(session, waiting_room_id)
     return await get_single_waiting_room(
         session, waiting_room_id, output_schema=WaitingRoomBasicOutputSchema

@@ -82,6 +82,7 @@ async def get_all_sections(
     PagedResponseSchema[SectionOutputSchema],
     PagedResponseSchema[SectionBaseOutputSchema],
 ]:
+    print("one3")
     query = select(Section)
 
     if query_params:
