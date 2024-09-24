@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
 
@@ -59,7 +59,7 @@ class ReceptionStockOutputSchema(BaseModel):
     weight: Decimal
     product_count: int
     product: ProductBasicOutputSchema
-    rack_level_id: Optional[str]
+    rack_level_slot_id: Optional[str]
     waiting_room_id: Optional[str]
 
     class Config:

@@ -75,5 +75,5 @@ class Product(Base):
         back_populates="products",
         lazy="selectin",
     )
-    stocks = relationship("Stock", back_populates="product", lazy="selectin")
+    stocks = relationship("Stock", back_populates="product", lazy="noload")
     created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

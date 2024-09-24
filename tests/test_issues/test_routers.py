@@ -3,12 +3,9 @@ from fastapi import status
 from fastapi_jwt_auth import AuthJWT
 from httpx import AsyncClient, Response
 
-from src.apps.issues.schemas import IssueOutputSchema
+from src.apps.issues.schemas import IssueOutputSchema, StockIssueInputSchema
 from src.apps.stocks.models import Stock
-from src.apps.stocks.schemas.stock_schemas import (
-    StockIssueInputSchema,
-    StockOutputSchema,
-)
+from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.users.schemas import UserOutputSchema
 from src.core.factory.issue_factory import (
     IssueInputSchemaFactory,

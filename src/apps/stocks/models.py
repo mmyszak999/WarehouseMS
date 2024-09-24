@@ -116,7 +116,7 @@ class Stock(Base):
         "UserStock",
         back_populates="stock",
         foreign_keys="UserStock.stock_id",
-        lazy="selectin",
+        lazy="noload",
     )
     rack_level_slot = relationship(
         "RackLevelSlot", uselist=False, back_populates="stock", lazy="selectin"

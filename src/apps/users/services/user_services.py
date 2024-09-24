@@ -80,7 +80,7 @@ async def authenticate(
                 User.is_staff,
                 User.can_recept_stocks,
                 User.can_move_stocks,
-                User.can_issue_stocks
+                User.can_issue_stocks,
             )
         )
         .filter(User.email == login_data["email"])
@@ -107,8 +107,8 @@ async def get_access_token_schema(
         is_staff=user.is_staff,
         can_recept_stocks=user.can_recept_stocks,
         can_move_stocks=user.can_move_stocks,
-        can_issue_stocks=user.can_issue_stocks
-        )
+        can_issue_stocks=user.can_issue_stocks,
+    )
 
 
 async def get_single_user(

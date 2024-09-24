@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Optional
 
@@ -6,9 +6,7 @@ from pydantic import BaseModel, Field, validator
 
 from src.apps.products.schemas.product_schemas import ProductBasicOutputSchema
 from src.apps.receptions.schemas import ReceptionStockOutputSchema
-from src.apps.stocks.schemas.stock_schemas import (
-    StockWithoutWaitingRoomOutputSchema
-)
+from src.apps.stocks.schemas.stock_schemas import StockWithoutWaitingRoomOutputSchema
 from src.apps.users.schemas import UserInfoOutputSchema
 
 

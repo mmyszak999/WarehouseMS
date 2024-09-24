@@ -48,6 +48,9 @@
   import RackLevelsList from './components/RackLevel/RackLevelsList';
   import RackLevelDetail from './components/RackLevel/RackLevelDetail';
   import UpdateRackLevel from './components/RackLevel/UpdateRackLevel';
+  import RackLevelSlotsList from './components/RackLevelSlot/RackLevelSlotsList';
+  import RackLevelSlotDetail from './components/RackLevelSlot/RackLevelSlotDetail';
+  import UpdateRackLevelSlot from './components/RackLevelSlot/UpdateRackLevelSlot';
   import './App.css';
   import getTheme from './theme';
 
@@ -140,6 +143,7 @@
                     <MenuItem component={Link} to="/sections">View Sections</MenuItem>
                     <MenuItem component={Link} to="/racks">View Racks</MenuItem>
                     <MenuItem component={Link} to="/rack-levels">View Rack Levels</MenuItem>
+                    <MenuItem component={Link} to="/rack-level-slots">View Rack Level Slots</MenuItem>
                     {(canReceptStocks || isStaff) && (
                       <>
                       <MenuItem component={Link} to="/receptions">View Receptions</MenuItem>
@@ -197,6 +201,9 @@
                       </Button>
                       <Button variant="contained" color="primary" component={Link} to="/rack-levels" sx={{ mb: 2 }}>
                         View Rack Levels
+                      </Button>
+                      <Button variant="contained" color="primary" component={Link} to="/rack-level-slots" sx={{ mb: 2 }}>
+                        View Rack Level Slots
                       </Button>
                       {(canReceptStocks || isStaff) && (
                       <Button variant="contained" color="secondary" component={Link} to="/receptions" sx={{ mb: 2 }}>
@@ -309,6 +316,9 @@
               <Route path="/rack-levels" element={isLoggedIn ? <RackLevelsList themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/rack-level/:rackLevelId" element={isLoggedIn ? <RackLevelDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/rack-level/:rackLevelId/update" element={isLoggedIn && isStaff ? <UpdateRackLevel themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/rack-level-slots" element={isLoggedIn ? <RackLevelSlotsList themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/rack-level-slot/:rackLevelSlotId" element={isLoggedIn ? <RackLevelSlotDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/rack-level-slot/:rackLevelSlotId/update" element={isLoggedIn ? <UpdateRackLevelSlot themeMode={themeMode} /> : <Navigate to="/login" />} />
               </Routes>
           </Container>
         </Router>

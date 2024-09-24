@@ -25,8 +25,8 @@ class UserBaseSchema(BaseModel):
 
 
 class UserInputSchema(UserBaseSchema):
-    email: EmailStr = Field()
-    birth_date: datetime.date
+    email: Optional[EmailStr] = Field()
+    birth_date: Optional[datetime.date]
     is_staff: bool
     can_move_stocks: bool
     can_recept_stocks: bool
@@ -67,13 +67,17 @@ class UserUpdateSchema(BaseModel):
     can_issue_stocks: Optional[bool]
 
     @validator("employment_date")
-    def validate_employment_date(cls, employment_date: Optional[datetime.date]) -> Optional[datetime.date]:
+    def validate_employment_date(
+        cls, employment_date: Optional[datetime.date]
+    ) -> Optional[datetime.date]:
         if employment_date and (employment_date >= datetime.date.today()):
             raise ValueError("Employment date must be in the past")
         return employment_date
 
     @validator("birth_date")
-    def validate_birth_date(cls, birth_date: Optional[datetime.date]) -> Optional[datetime.date]:
+    def validate_birth_date(
+        cls, birth_date: Optional[datetime.date]
+    ) -> Optional[datetime.date]:
         if birth_date and (birth_date >= datetime.date.today()):
             raise ValueError("Birth date must be in the past")
         return birth_date
@@ -93,9 +97,9 @@ class UserInfoOutputSchema(UserBaseSchema):
 class UserOutputSchema(UserInputSchema):
     id: str
     is_active: bool
-    is_superuser: bool
+    is_superuser: Optional[bool]
     is_staff: bool
-    has_password_set: bool
+    has_password_set: Optional[bool]
     created_at: Optional[datetime.datetime]
 
     class Config:

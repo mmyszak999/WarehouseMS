@@ -55,7 +55,7 @@ async def create_product(
 
         product_data["categories"] = categories
         print(category_ids, "ww")
-        
+
     if category_ids is not None:
         product_data.pop("category_ids")
 
@@ -172,7 +172,6 @@ async def update_single_product(
                 )
             )
             product_was_updated += 1
-        
 
         if to_insert := incoming_categories:
             rows = [

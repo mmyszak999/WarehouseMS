@@ -31,6 +31,7 @@ const ReceptionDetail = ({ themeMode }) => {
             'Authorization': `Bearer ${token}`
           }
         });
+        console.log(response.data, "xxx1")
         setReception(response.data);
         setDescription(response.data.description || '');
       } catch (err) {
@@ -115,6 +116,8 @@ const ReceptionDetail = ({ themeMode }) => {
                 }
                 secondary={`Weight: ${stock.weight}, Product Count: ${stock.product_count}`}
               />
+              
+              {/* Link do Waiting Room, jeśli istnieje waiting_room_id */}
               {stock.waiting_room_id && (
                 <Button 
                   component={Link} 
@@ -126,6 +129,18 @@ const ReceptionDetail = ({ themeMode }) => {
                   View Waiting Room
                 </Button>
               )}
+              
+              {stock.rack_level_slot_id ? (
+                <Button 
+                  component={Link} 
+                  to={`/rack-level-slot/${stock.rack_level_slot_id}`} 
+                  sx={{ ml: 2 }} 
+                  variant="contained" 
+                  color="secondary"
+                >
+                  View Rack Level Slot
+                </Button>
+              ) : null}
             </ListItem>
           ))}
         </List>

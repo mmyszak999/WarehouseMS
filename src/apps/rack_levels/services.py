@@ -112,7 +112,7 @@ async def create_rack_level(
     for slot_number in range(1, rack_level_data.get("max_slots") + 1):
         input_schema = RackLevelSlotInputSchema(
             rack_level_slot_number=slot_number,
-            description=f"slot #{slot_number}",
+            description=f"rack level {new_rack_level.rack_level_number} | slot #{slot_number}",
             rack_level_id=new_rack_level.id,
         )
         await create_rack_level_slot(
@@ -392,6 +392,10 @@ async def add_single_stock_to_rack_level(
         raise NoAvailableRackLevelSlotException(
             stock_object.product.name, stock_object.product_count, stock_object.weight
         )
+
+    if rack_level_slot_object.stock:
+        raise ServiceException("The slot is occupied! ")
+
     _new_rack_level_slot_object = rack_level_slot_object
 
     if old_waiting_room_object := stock_object.waiting_room:

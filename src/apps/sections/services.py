@@ -82,6 +82,7 @@ async def get_all_sections(
     PagedResponseSchema[SectionOutputSchema],
     PagedResponseSchema[SectionBaseOutputSchema],
 ]:
+    print("one3")
     query = select(Section)
 
     if query_params:
@@ -203,7 +204,7 @@ async def delete_single_section(session: AsyncSession, section_id: str):
     warehouse = await if_exists(Warehouse, "id", section_object.warehouse_id, session)
     warehouse = await manage_warehouse_state(warehouse, sections_involved=True)
     session.add(warehouse)
-    
+
     statement = delete(Section).filter(Section.id == section_id)
     result = await session.execute(statement)
 

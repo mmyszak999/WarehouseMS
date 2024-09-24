@@ -1,7 +1,7 @@
 from fastapi import APIRouter, FastAPI, Request, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_jwt_auth.exceptions import AuthJWTException
-from fastapi.middleware.cors import CORSMiddleware
 
 from src.apps.emails.routers import email_router
 from src.apps.issues.routers import issue_router

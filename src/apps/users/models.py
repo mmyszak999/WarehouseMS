@@ -34,12 +34,12 @@ class User(Base):
     can_move_stocks = Column(Boolean, nullable=False, server_default="false")
     can_recept_stocks = Column(Boolean, nullable=False, server_default="false")
     can_issue_stocks = Column(Boolean, nullable=False, server_default="false")
-    issues = relationship("Issue", back_populates="user", lazy="joined")
-    receptions = relationship("Reception", back_populates="user", lazy="joined")
+    issues = relationship("Issue", back_populates="user", lazy="noload")
+    receptions = relationship("Reception", back_populates="user", lazy="noload")
     stock_user_history = relationship(
         "UserStock",
         back_populates="user",
         foreign_keys="UserStock.user_id",
-        lazy="joined",
+        lazy="noload",
     )
     created_at = Column(DateTime, default=dt.datetime.now, nullable=True)

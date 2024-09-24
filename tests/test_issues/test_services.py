@@ -1,7 +1,7 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.apps.issues.schemas import IssueOutputSchema
+from src.apps.issues.schemas import IssueOutputSchema, StockIssueInputSchema
 from src.apps.issues.services import (
     base_create_issue,
     create_issue,
@@ -9,11 +9,8 @@ from src.apps.issues.services import (
     get_single_issue,
     update_single_issue,
 )
-from src.apps.stocks.schemas.stock_schemas import (
-    StockIssueInputSchema,
-    StockOutputSchema,
-)
-from src.apps.stocks.services.stock_services import get_all_stocks, issue_stocks
+from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
+from src.apps.stocks.services.stock_services import get_every_stock, issue_stocks
 from src.apps.users.schemas import UserOutputSchema
 from src.core.exceptions import (
     AlreadyExists,
@@ -48,7 +45,7 @@ async def test_if_issue_was_created_correctly(
     db_issues: PagedResponseSchema[IssueOutputSchema],
     db_staff_user: UserOutputSchema,
 ):
-    db_stocks = await get_all_stocks(async_session, PageParams())
+    db_stocks = await get_every_stock(async_session, PageParams())
     issue_input = IssueInputSchemaFactory().generate(
         stock_ids=[
             StockIssueInputSchema(id=db_stocks.results[0].id),

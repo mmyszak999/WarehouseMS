@@ -2,6 +2,7 @@ import pytest
 import pytest_asyncio
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.apps.issues.schemas import StockIssueInputSchema
 from src.apps.issues.services import create_issue
 from src.apps.products.schemas.category_schemas import (
     CategoryIdListSchema,
@@ -19,10 +20,7 @@ from src.apps.receptions.schemas import (
 )
 from src.apps.receptions.services import create_reception, get_all_receptions
 from src.apps.sections.schemas import SectionOutputSchema
-from src.apps.stocks.schemas.stock_schemas import (
-    StockIssueInputSchema,
-    StockOutputSchema,
-)
+from src.apps.stocks.schemas.stock_schemas import StockOutputSchema
 from src.apps.stocks.schemas.user_stock_schemas import UserStockOutputSchema
 from src.apps.stocks.services.stock_services import get_every_stock
 from src.apps.stocks.services.user_stock_services import get_all_user_stocks
@@ -83,6 +81,7 @@ async def db_stocks(
                 )
             ]
         )
+        print(reception_input, "cd", db_racks.results)
         await create_reception(async_session, reception_input, db_staff_user.id)
 
     # one stock to the waiting room

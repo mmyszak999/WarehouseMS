@@ -103,4 +103,6 @@ async def get_stock(
     session: AsyncSession = Depends(get_db),
     request_user: User = Depends(authenticate_user),
 ) -> Union[StockOutputSchema, StockBasicOutputSchema]:
-    return await get_single_stock(session, stock_id, output_schema=StockBasicOutputSchema)
+    return await get_single_stock(
+        session, stock_id, output_schema=StockBasicOutputSchema
+    )

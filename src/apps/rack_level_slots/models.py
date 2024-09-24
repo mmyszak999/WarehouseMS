@@ -43,7 +43,7 @@ class RackLevelSlot(Base):
         nullable=False,
     )
     rack_level = relationship(
-        "RackLevel", back_populates="rack_level_slots", lazy="joined"
+        "RackLevel", back_populates="rack_level_slots", lazy="selectin"
     )
     stock = relationship(
         "Stock", uselist=False, back_populates="rack_level_slot", lazy="selectin"
