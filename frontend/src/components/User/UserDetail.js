@@ -43,7 +43,7 @@ const UserDetail = ({ themeMode }) => {
 
     useEffect(() => {
         const fetchUserRole = () => {
-            setIsStaff(AuthService.getUserRole());
+            setIsStaff(AuthService.getUserRole()); // Assuming this method returns boolean for staff role
         };
 
         fetchUserRole();
@@ -77,7 +77,6 @@ const UserDetail = ({ themeMode }) => {
 
         fetchUserDetails();
     }, [userId]);
-
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -189,6 +188,17 @@ const UserDetail = ({ themeMode }) => {
                                     )}
                                 </>
                             )}
+
+                            {/* Add button to check stock history, only visible to staff */}
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                component={Link}
+                                to={`/user/${userId}/history`}
+                                sx={{ mt: 2 }}
+                            >
+                                Check User History
+                            </Button>
                         </>
                     ) : (
                         <Typography variant="body2">Active: {user.is_active ? 'Yes' : 'No'}</Typography>

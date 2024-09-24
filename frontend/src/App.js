@@ -51,6 +51,10 @@
   import RackLevelSlotsList from './components/RackLevelSlot/RackLevelSlotsList';
   import RackLevelSlotDetail from './components/RackLevelSlot/RackLevelSlotDetail';
   import UpdateRackLevelSlot from './components/RackLevelSlot/UpdateRackLevelSlot';
+  import UserStockList from './components/UserStock/UserStockList';
+  import UserStockDetail from './components/UserStock/UserStockDetail';
+  import UserStockStockHistoryList from './components/UserStock/UserStockStockHistoryList';
+  import UserStockUserHistoryList from './components/UserStock/UserStockUserHistoryList';
   import './App.css';
   import getTheme from './theme';
 
@@ -159,6 +163,7 @@
                         <MenuItem component={Link} to="/products/all">Get All Products (Staff Only)</MenuItem>
                         <MenuItem component={Link} to="/users/all">Get All Users (Staff Only)</MenuItem>
                         <MenuItem component={Link} to="/stocks/all">Get All Stocks (Staff Only)</MenuItem>
+                        <MenuItem component={Link} to="/user-stocks">Get Stock History (Staff Only)</MenuItem>
                       </>
                     )}
                   </Menu>
@@ -226,6 +231,9 @@
                           <Button variant="contained" color="secondary" component={Link} to="/stocks/all" sx={{ mb: 2 }}>
                             Get All Stocks (Staff Only)
                           </Button>
+                          <Button variant="contained" color="secondary" component={Link} to="/user-stocks" sx={{ mb: 2 }}>
+                            Get Stock History (Staff Only)
+                          </Button>
                         </>
                       )}
                     </Box>
@@ -273,6 +281,7 @@
               />
               <Route path="/user/create" element={isLoggedIn && isStaff ? <CreateUser themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/users/all" : "/login"} />} />
               <Route path="/user/:userId" element={isLoggedIn ? <UserDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/user/:userId/history" element={isLoggedIn ? <UserStockUserHistoryList themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route
                 path="/users/all"
                 element={
@@ -300,6 +309,7 @@
               <Route path="/stock/:stockId" element={isLoggedIn ? <StockDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/stocks/all" element={isLoggedIn && isStaff ? <AllStocksList themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/stock/all/:stockId" element={isLoggedIn && isStaff ? <AllStockDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/stock/all/:stockId/history" element={isLoggedIn && isStaff ? <UserStockStockHistoryList themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/issue/create" element={isLoggedIn && canIssueStocks ? <CreateIssue themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
               <Route path="/issues" element={isLoggedIn && (canIssueStocks || canMoveStocks) ? <IssueList themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
               <Route path="/issue/:issueId" element={isLoggedIn && canIssueStocks ? <IssueDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
@@ -319,6 +329,8 @@
               <Route path="/rack-level-slots" element={isLoggedIn ? <RackLevelSlotsList themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/rack-level-slot/:rackLevelSlotId" element={isLoggedIn ? <RackLevelSlotDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/rack-level-slot/:rackLevelSlotId/update" element={isLoggedIn ? <UpdateRackLevelSlot themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/user-stocks" element={isLoggedIn && canMoveStocks ? <UserStockList themeMode={themeMode} /> : <Navigate to="/login" />} />
+              <Route path="/user-stock/:userStockId" element={isLoggedIn && canMoveStocks ? <UserStockDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
               </Routes>
           </Container>
         </Router>
