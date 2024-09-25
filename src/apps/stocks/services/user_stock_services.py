@@ -8,6 +8,7 @@ from src.apps.issues.models import Issue
 from src.apps.products.models import Product
 from src.apps.rack_level_slots.models import RackLevelSlot
 from src.apps.stocks.models import Stock, UserStock
+from src.apps.receptions.models import Reception
 from src.apps.stocks.schemas.user_stock_schemas import (
     UserStockInputSchema,
     UserStockOutputSchema,
@@ -41,6 +42,7 @@ async def create_user_stock_object(
     from_rack_level_slot_id: str = None,
     to_rack_level_slot_id: str = None,
     issue_id: str = None,
+    reception_id: str = None
 ) -> UserStockOutputSchema:
     if not (stock_object := await if_exists(Stock, "id", stock_id, session)):
         raise DoesNotExist(Stock.__name__, "id", stock_id)
@@ -83,6 +85,10 @@ async def create_user_stock_object(
     if issue_id is not None:
         if not (issue_object := await if_exists(Issue, "id", issue_id, session)):
             raise DoesNotExist(Issue.__name__, "id", issue_id)
+    
+    if reception_id is not None:
+        if not (reception_object := await if_exists(Reception, "id", reception_id, session)):
+            raise DoesNotExist(Reception.__name__, "id", reception_id)
 
     input_schema = UserStockInputSchema(
         user_id=user_id,
@@ -92,6 +98,7 @@ async def create_user_stock_object(
         to_rack_level_slot_id=to_rack_level_slot_id,
         from_rack_level_slot_id=from_rack_level_slot_id,
         issue_id=issue_id,
+        reception_id=reception_id
     )
 
     new_user_stock = UserStock(**input_schema.dict(exclude_none=True))

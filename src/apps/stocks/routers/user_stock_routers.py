@@ -46,8 +46,7 @@ async def get_user_stocks(
 async def get_user_stock(
     user_stock_id: str,
     session: AsyncSession = Depends(get_db),
-    request_user: User = Depends(authenticate_user),
-    page_params: PageParams = Depends(),
+    request_user: User = Depends(authenticate_user)
 ) -> UserStockOutputSchema:
     await check_if_staff_or_has_permission(request_user, "can_move_stocks")
     return await get_single_user_stock(session, user_stock_id)

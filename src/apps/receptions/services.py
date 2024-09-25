@@ -99,7 +99,7 @@ async def create_reception(
         rack_level_ids,
         products,
         product_counts,
-        new_reception.id,
+        reception_id=new_reception.id
     )
 
     await session.commit()
@@ -110,7 +110,7 @@ async def create_reception(
 
 
 async def get_single_reception(
-    session: AsyncSession, reception_id: int
+    session: AsyncSession, reception_id: str
 ) -> ReceptionOutputSchema:
     if not (
         reception_object := await if_exists(Reception, "id", reception_id, session)
@@ -138,7 +138,7 @@ async def get_all_receptions(
 
 
 async def update_single_reception(
-    session: AsyncSession, reception_input: ReceptionUpdateSchema, reception_id: int
+    session: AsyncSession, reception_input: ReceptionUpdateSchema, reception_id: str
 ) -> ReceptionOutputSchema:
     if not (
         reception_object := await if_exists(Reception, "id", reception_id, session)

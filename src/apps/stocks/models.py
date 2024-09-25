@@ -63,6 +63,11 @@ class UserStock(Base):
         String, ForeignKey("issue.id", ondelete="SET NULL"), nullable=True
     )
     issue = relationship("Issue", foreign_keys=[issue_id], lazy="selectin")
+    
+    reception_id = Column(
+        String, ForeignKey("reception.id", ondelete="SET NULL"), nullable=True
+    )
+    reception = relationship("Reception", foreign_keys=[reception_id], lazy="selectin")
 
     to_rack_level_slot_id = Column(
         String, ForeignKey("rack_level_slot.id", ondelete="SET NULL"), nullable=True

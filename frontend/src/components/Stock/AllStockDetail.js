@@ -1,14 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Box, Typography, CircularProgress, Link as MuiLink, AppBar, Toolbar, Button } from '@mui/material';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { handleError } from '../ErrorHandler';
+import AuthService from '../../services/AuthService'; // Assuming AuthService provides staff role check
 
 const AllStockDetail = () => {
   const { stockId } = useParams();
   const [stock, setStock] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isStaff, setIsStaff] = useState(false); // State to track if the user is staff
+  const navigate = useNavigate();
 
   const token = localStorage.getItem('token');
 
@@ -29,7 +32,12 @@ const AllStockDetail = () => {
       }
     };
 
+    const fetchUserRole = () => {
+      setIsStaff(AuthService.getUserRole()); // Assuming AuthService has a method to check if the user is staff
+    };
+
     fetchStock();
+    fetchUserRole();
   }, [stockId, token]);
 
   if (loading) return <CircularProgress />;
@@ -91,14 +99,17 @@ const AllStockDetail = () => {
           ) : 'N/A'}
         </Typography>
         <Typography variant="subtitle1">
-          <strong>Rack Level Slot:</strong> {stock.rack_level_slot ? <MuiLink
+          <strong>Rack Level Slot:</strong> {stock.rack_level_slot ? (
+            <MuiLink
               component={Link}
               to={`/rack-level-slot/${stock.rack_level_slot.id}`}
               sx={{ textDecoration: 'none', color: 'primary.main' }}
             >
               {stock.rack_level_slot.description}
-            </MuiLink> : 'N/A'}
+            </MuiLink>
+          ) : 'N/A'}
         </Typography>
+
         {/* Additional Fields */}
         <Typography variant="subtitle1">
           <strong>Is Issued:</strong> {stock.is_issued ? 'Yes' : 'No'}
@@ -136,7 +147,6 @@ const AllStockDetail = () => {
             <strong>Issue -  </strong> N/A
           </Typography>
         )}
-        
 
         {/* Timestamps */}
         <Typography variant="subtitle1">
@@ -145,6 +155,19 @@ const AllStockDetail = () => {
         <Typography variant="subtitle1">
           <strong>Updated At:</strong> {stock.updated_at}
         </Typography>
+
+        {/* Button to View Stock History (Visible only to Staff) */}
+        {isStaff && (
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2 }}
+            component={Link}
+            to={`/stock/all/${stockId}/history`}
+          >
+            View Stock History
+          </Button>
+        )}
       </Box>
     </Box>
   );

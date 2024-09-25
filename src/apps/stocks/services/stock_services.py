@@ -216,6 +216,7 @@ async def create_stocks(
             user_id,
             to_rack_level_slot_id=_rack_level_slot_id,
             to_waiting_room_id=_waiting_room_id,
+            reception_id=reception_id
         )
         stock_list.append(new_stock)
 
