@@ -58,7 +58,8 @@ const WaitingRoomDetail = ({ themeMode }) => {
             setWaitingRoomStocks(response.data.stocks.map(stock => ({
                 id: stock.id,
                 product_name: stock.product.name,
-                weight: stock.weight
+                weight: stock.weight,
+                product_count: stock.product_count
             })));
         } catch (error) {
             handleError(error, setError);

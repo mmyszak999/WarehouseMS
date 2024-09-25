@@ -74,6 +74,12 @@ const UserStockList = ({ themeMode }) => {
                                         <Typography variant="h6" fontWeight="bold">
                                             Stock ID: {userStock.stock.id}
                                         </Typography>
+                                        <Typography variant="h6">
+                                            Stock Product Count: {userStock.stock.product_count}
+                                        </Typography>
+                                        <Typography variant="h6">
+                                            Stock Weight: {userStock.stock.weight}
+                                        </Typography>
                                         <Typography variant="body1">
                                             Product: {userStock.stock.product.name}
                                         </Typography>
@@ -83,8 +89,8 @@ const UserStockList = ({ themeMode }) => {
                                         <Typography variant="body1">
                                             Moved At: {new Date(userStock.moved_at).toLocaleDateString()}
                                         </Typography>
-                                        <Typography variant="body2">Waiting Room: {userStock.stock.waiting_room?.name || 'N/A'}</Typography>
-                                        <Typography variant="body2">Rack Slot: {userStock.stock.rack_level_slot?.description || 'N/A'}</Typography>
+                                        <Typography variant="body1">Waiting Room: {userStock.stock.waiting_room?.name || 'N/A'}</Typography>
+                                        <Typography variant="body1">Rack Slot: {userStock.stock.rack_level_slot?.description || 'N/A'}</Typography>
                                     </CardContent>
                                 </Card>
                             </Grid>

@@ -42,12 +42,29 @@ const UserStockDetail = () => {
             </AppBar>
 
             <Typography variant="h4" gutterBottom>Stock History Details</Typography>
-
-            <Typography variant="h6">Stock ID: {userStock.stock.id}</Typography>
-            <Typography variant="body1">Product: {userStock.stock.product.name}</Typography>
-            <Typography variant="body1">Managed By: {userStock.user.first_name} {userStock.user.last_name}</Typography>
+            <Typography variant="body1">
+                Managed By:
+                {userStock.user ? (
+                    <MuiLink component={Link} to={`/user/${userStock.user.id}`}>
+                        {userStock.user.first_name} {userStock.user.last_name}
+                    </MuiLink>
+                ) : 'N/A'}
+            </Typography>
             <Typography variant="body1">Moved At: {new Date(userStock.moved_at).toLocaleDateString()}</Typography>
-
+            <Typography variant="body1">
+                Stock: 
+                {userStock.stock ? (
+                    <MuiLink component={Link} to={`/stock/all/${userStock.stock.id}`}>
+                        Stock
+                    </MuiLink>
+                ) : 'N/A'}
+            </Typography>
+            <Typography variant="body1">
+                Product: 
+                <MuiLink component={Link} to={`/product/${userStock.stock.product.id}`}>
+                    {userStock.stock.product.name}
+                </MuiLink>
+            </Typography>
             {/* Waiting Room Links */}
             <Typography variant="body1">
                 <strong>From Waiting Room: </strong>
@@ -91,7 +108,7 @@ const UserStockDetail = () => {
                 <strong>Issue: </strong>
                 {userStock.issue ? (
                     <MuiLink component={Link} to={`/issue/${userStock.issue.id}`}>
-                        View Issue
+                        Issue
                     </MuiLink>
                 ) : 'N/A'}
             </Typography>
@@ -106,7 +123,7 @@ const UserStockDetail = () => {
                 <strong>Reception: </strong>
                 {userStock.reception ? (
                     <MuiLink component={Link} to={`/reception/${userStock.reception.id}`}>
-                        View Reception
+                        Reception
                     </MuiLink>
                 ) : 'N/A'}
             </Typography>
