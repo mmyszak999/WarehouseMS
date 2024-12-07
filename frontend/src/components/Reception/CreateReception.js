@@ -85,7 +85,6 @@ const CreateReception = () => {
         setFormData(prevState => {
             const updatedProducts = [...prevState.products_data];
             updatedProducts[index].location_type = value;
-            // Reset fields based on location type
             if (value === 'waiting_room') {
                 updatedProducts[index] = {
                     ...updatedProducts[index],
@@ -173,7 +172,6 @@ const CreateReception = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Ensure that rack_level_id and rack_level_slot_id are mutually exclusive
             const products_data = formData.products_data.map(product => {
                 let { waiting_room_id, rack_level_slot_id, rack_level_id } = product;
                 if (rack_level_slot_id) {

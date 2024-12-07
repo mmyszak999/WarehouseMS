@@ -43,7 +43,7 @@ const UserDetail = ({ themeMode }) => {
 
     useEffect(() => {
         const fetchUserRole = () => {
-            setIsStaff(AuthService.getUserRole()); // Assuming this method returns boolean for staff role
+            setIsStaff(AuthService.getUserRole());
         };
 
         fetchUserRole();
@@ -189,7 +189,6 @@ const UserDetail = ({ themeMode }) => {
                                 </>
                             )}
 
-                            {/* Add button to check stock history, only visible to staff */}
                             <Button
                                 variant="contained"
                                 color="primary"

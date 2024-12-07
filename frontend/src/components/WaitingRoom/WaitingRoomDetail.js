@@ -48,7 +48,6 @@ const WaitingRoomDetail = ({ themeMode }) => {
     const token = localStorage.getItem('token');
     const isStaff = AuthService.getUserRole();
 
-    // Fetch waiting room details and stocks
     const fetchWaitingRoom = useCallback(async () => {
         try {
             const response = await axios.get(`http://localhost:8000/api/waiting_rooms/${waitingRoomId}/`, {
@@ -68,7 +67,6 @@ const WaitingRoomDetail = ({ themeMode }) => {
         }
     }, [waitingRoomId, token]);
 
-    // Fetch all waiting rooms
     const fetchWaitingRooms = useCallback(async () => {
         try {
             const response = await axios.get('http://localhost:8000/api/waiting_rooms/', {
@@ -80,7 +78,6 @@ const WaitingRoomDetail = ({ themeMode }) => {
         }
     }, [token]);
 
-    // Fetch sections
     const fetchSections = useCallback(async () => {
         try {
             const response = await axios.get('http://localhost:8000/api/sections/', {
@@ -92,31 +89,29 @@ const WaitingRoomDetail = ({ themeMode }) => {
         }
     }, [token]);
 
-    // Fetch racks based on selected section
     const fetchRacks = useCallback(async (sectionId) => {
-        if (!sectionId) return; // Prevent fetching if no section is selected
+        if (!sectionId) return;
         try {
             const response = await axios.get(`http://localhost:8000/api/sections/${sectionId}/racks/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setRacks(response.data.results);
-            setSelectedRack(''); // Reset rack selection
-            setRackLevels([]); // Reset rack levels
-            setSelectedRackLevel(''); // Reset rack level selection
+            setSelectedRack('');
+            setRackLevels([]);
+            setSelectedRackLevel('');
         } catch (error) {
             handleError(error, setError);
         }
     }, [token]);
 
-    // Fetch rack levels based on selected rack
     const fetchRackLevels = useCallback(async (rackId) => {
-        if (!rackId) return; // Prevent fetching rack levels if no rack is selected
+        if (!rackId) return;
         try {
             const response = await axios.get(`http://localhost:8000/api/racks/${rackId}/rack_levels/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setRackLevels(response.data.results);
-            setSelectedRackLevel(''); // Reset rack level selection
+            setSelectedRackLevel('');
         } catch (error) {
             handleError(error, setError);
         }
@@ -124,13 +119,13 @@ const WaitingRoomDetail = ({ themeMode }) => {
 
     useEffect(() => {
         fetchWaitingRoom();
-        fetchWaitingRooms(); // Fetch waiting rooms
+        fetchWaitingRooms();
         fetchSections();
     }, [fetchWaitingRoom, fetchWaitingRooms, fetchSections]);
 
     const handleAddStock = () => {
         setAddStockDialogOpen(true);
-        setFetchedStocks([]); // Clear fetched stocks when opening the dialog
+        setFetchedStocks([]);
     };
 
     const handleConfirmAddStock = async () => {

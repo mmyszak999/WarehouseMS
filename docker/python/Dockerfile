@@ -6,9 +6,10 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update \
-    && apt-get -y install libpq-dev gcc \
+    && apt-get -y install libpq-dev gcc graphviz libgraphviz-dev pkg-config \
     && apt-get install -yq netcat \ 
-    && pip install asyncpg
+    && pip install asyncpg \
+    && pip install eralchemy2
 
 COPY requirements.txt .
 

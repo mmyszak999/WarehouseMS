@@ -235,15 +235,18 @@ const RackLevelDetail = ({ themeMode }) => {
                               Rack Level Slots:
                           </Typography>
                           <Grid container spacing={2}>
-                              {rackLevel.rack_level_slots.map((slot, index) => (
+                              {rackLevel.rack_level_slots
+                              .slice() 
+                              .sort((a, b) => a.rack_level_slot_number - b.rack_level_slot_number)
+                              .map((slot, index) => (
                                   <Grid item xs={3} key={index}>
                                       <Card
                                           sx={{
                                               backgroundColor: getSlotColor(slot),
                                               height: '100%',
-                                              cursor: 'pointer', // Makes the card look clickable
+                                              cursor: 'pointer',
                                           }}
-                                          onClick={() => navigate(`/rack-level-slot/${slot.id}`)} // Navigate to the slot detail
+                                          onClick={() => navigate(`/rack-level-slot/${slot.id}`)}
                                       >
                                           <CardContent>
                                               <Typography variant="body2">

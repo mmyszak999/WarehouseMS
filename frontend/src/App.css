@@ -55,10 +55,39 @@ button {
   border-radius: 5px;
   padding: 10px;
   cursor: pointer;
+  text-align: center;
+  margin: 0; /* Remove any default margin for buttons */
+}
+
+button.primary {
+  background-color: #007bff;
+  color: white;
+}
+
+button.secondary {
+  background-color: #28a745;
+  color: white;
 }
 
 button:hover {
-  opacity: 0.8;
+  opacity: 0.85;
+}
+
+/* Grid adjustments for layout */
+.box-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two columns: primary on left, secondary on right */
+  gap: 40px 30px; /* Space between columns and rows */
+  padding: 20px;
+}
+
+/* Align buttons within the columns */
+.box-container > div {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Space between buttons in each column */
+  margin-top: 20px; /* Space before the first button in each section */
+  margin-bottom: 20px; /* Space after the last button in each section */
 }
 
 /* Styles for product details */

@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Typography, Card, CardContent, CircularProgress, Grid, AppBar, Toolbar, Button, Box, Pagination, FormControl, Select, MenuItem, InputLabel } from '@mui/material';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import '../../App.css'; // Import your CSS file
-import AuthService from '../../services/AuthService'; // Import the AuthService for role checking
-import { handleError } from '../ErrorHandler'; // Import the error handler
+import '../../App.css';
+import AuthService from '../../services/AuthService';
+import { handleError } from '../ErrorHandler';
 
 const pageSizeOptions = [5, 10, 15, 20, 25, 50, 100];
 
@@ -46,7 +46,7 @@ const UserStockUserHistoryList = ({ themeMode }) => {
 
     const handleSizeChange = (event) => {
         setSize(event.target.value);
-        setPage(1); // Reset to first page whenever size changes
+        setPage(1);
     };
 
     if (loading) {
@@ -65,7 +65,6 @@ const UserStockUserHistoryList = ({ themeMode }) => {
                 </Toolbar>
             </AppBar>
             <Grid container spacing={3} sx={{ mt: 3 }}>
-                {/* User Stocks List Section */}
                 <Grid item xs={12}>
                     <Grid container spacing={3}>
                         {userStocks.map(userStock => (

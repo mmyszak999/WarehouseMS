@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 1559468596fe
+Revision ID: 32fd44578726
 Revises: 
-Create Date: 2024-09-03 09:51:08.426437
+Create Date: 2024-10-09 06:19:01.250687
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '1559468596fe'
+revision = '32fd44578726'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -204,11 +204,13 @@ def upgrade() -> None:
     sa.Column('from_waiting_room_id', sa.String(), nullable=True),
     sa.Column('to_waiting_room_id', sa.String(), nullable=True),
     sa.Column('issue_id', sa.String(), nullable=True),
+    sa.Column('reception_id', sa.String(), nullable=True),
     sa.Column('to_rack_level_slot_id', sa.String(), nullable=True),
     sa.Column('from_rack_level_slot_id', sa.String(), nullable=True),
     sa.ForeignKeyConstraint(['from_rack_level_slot_id'], ['rack_level_slot.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['from_waiting_room_id'], ['waiting_room.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['issue_id'], ['issue.id'], ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['reception_id'], ['reception.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['stock_id'], ['stock.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['to_rack_level_slot_id'], ['rack_level_slot.id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['to_waiting_room_id'], ['waiting_room.id'], ondelete='SET NULL'),

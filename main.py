@@ -75,10 +75,13 @@ from src.core.exceptions import (
     WarehouseIsNotEmptyException,
     WeightLimitExceededException,
 )
+from src.database.db_connection import Base
+from eralchemy2 import render_er
 
 app = FastAPI(
     title="WarehouseMS", description="Warehouse Management System", version="1.0"
 )
+render_er(Base, 'warehouse-ms-erd.png')
 
 origins = [
     "http://localhost:3000",

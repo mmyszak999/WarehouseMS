@@ -119,7 +119,7 @@
           <AppBar position="static" className={`app-bar ${themeMode}`}>
             <Toolbar>
               <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }}>
-                My App
+                Warehouse Management System
               </Typography>
               {isLoggedIn && (
                 <IconButton color="inherit" component={Link} to="/profile">
@@ -175,73 +175,80 @@
           </AppBar>
           <Container maxWidth="false" sx={{ mt: 4 }} className={`container ${themeMode}`}>
             <Routes>
-              <Route
-                path="/"
-                element={
-                  isLoggedIn ? (
-                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 4 }}>
-                      <Button variant="contained" color="primary" component={Link} to="/products" sx={{ mb: 2 }}>
-                        View Available Products
+            <Route
+              path="/"
+              element={
+                isLoggedIn ? (
+                  <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 3, mt: 4, p: 2 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2, mb: 2 }}>
+                      <Button variant="contained" color="primary" component={Link} to="/products" fullWidth>
+                        View Products
                       </Button>
-                      <Button variant="contained" color="primary" component={Link} to="/categories" sx={{ mb: 2 }}>
+                      <Button variant="contained" color="primary" component={Link} to="/categories" fullWidth>
                         View Categories
                       </Button>
-                      <Button variant="contained" color="primary" component={Link} to="/users" sx={{ mb: 2 }}>
+                      <Button variant="contained" color="primary" component={Link} to="/users" fullWidth>
                         View Users
                       </Button>
-                      <Button variant="contained" color="primary" component={Link} to="/warehouses" sx={{ mb: 2 }}>
+                      <Button variant="contained" color="primary" component={Link} to="/warehouses" fullWidth>
                         View Warehouse
                       </Button>
-                      <Button variant="contained" color="primary" component={Link} to="/waiting_rooms" sx={{ mb: 2 }}>
+                      <Button variant="contained" color="primary" component={Link} to="/waiting_rooms" fullWidth>
                         View Waiting Rooms
                       </Button>
-                      <Button variant="contained" color="primary" component={Link} to="/stocks" sx={{ mb: 2 }}>
-                        View Available Stocks
+                      <Button variant="contained" color="primary" component={Link} to="/stocks" fullWidth>
+                        View Stocks
                       </Button>
-                      <Button variant="contained" color="primary" component={Link} to="/sections" sx={{ mb: 2 }}>
+                      <Button variant="contained" color="primary" component={Link} to="/sections" fullWidth>
                         View Sections
                       </Button>
-                      <Button variant="contained" color="primary" component={Link} to="/racks" sx={{ mb: 2 }}>
+                      <Button variant="contained" color="primary" component={Link} to="/racks" fullWidth>
                         View Racks
                       </Button>
-                      <Button variant="contained" color="primary" component={Link} to="/rack-levels" sx={{ mb: 2 }}>
+                      <Button variant="contained" color="primary" component={Link} to="/rack-levels" fullWidth>
                         View Rack Levels
                       </Button>
-                      <Button variant="contained" color="primary" component={Link} to="/rack-level-slots" sx={{ mb: 2 }}>
+                      <Button variant="contained" color="primary" component={Link} to="/rack-level-slots" fullWidth>
                         View Rack Level Slots
                       </Button>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 2, mb: 2 }}>
                       {(canReceptStocks || isStaff) && (
-                      <Button variant="contained" color="secondary" component={Link} to="/receptions" sx={{ mb: 2 }}>
-                        View Receptions
-                      </Button>
+                        <Button variant="contained" color="secondary" component={Link} to="/receptions" fullWidth>
+                          View Receptions
+                        </Button>
                       )}
                       {(canIssueStocks || isStaff) && (
-                      <Button variant="contained" color="secondary" component={Link} to="/issues" sx={{ mb: 2 }}>
-                        View Issues
-                      </Button>
+                        <Button variant="contained" color="secondary" component={Link} to="/issues" fullWidth>
+                          View Issues
+                        </Button>
                       )}
                       {isStaff && (
                         <>
-                          <Button variant="contained" color="secondary" component={Link} to="/products/all" sx={{ mb: 2 }}>
-                            Get All Products (Staff Only)
+                          <Button variant="contained" color="secondary" component={Link} to="/products/all" fullWidth>
+                            Get All Products
                           </Button>
-                          <Button variant="contained" color="secondary" component={Link} to="/users/all" sx={{ mb: 2 }}>
-                            Get All Users (Staff Only)
+                          <Button variant="contained" color="secondary" component={Link} to="/users/all" fullWidth>
+                            Get All Users
                           </Button>
-                          <Button variant="contained" color="secondary" component={Link} to="/stocks/all" sx={{ mb: 2 }}>
-                            Get All Stocks (Staff Only)
+                          <Button variant="contained" color="secondary" component={Link} to="/stocks/all" fullWidth>
+                            Get All Stocks
                           </Button>
-                          <Button variant="contained" color="secondary" component={Link} to="/user-stocks" sx={{ mb: 2 }}>
-                            Get Stock History (Staff Only)
+                          <Button variant="contained" color="secondary" component={Link} to="/user-stocks" fullWidth>
+                            Stock History
                           </Button>
                         </>
                       )}
                     </Box>
-                  ) : (
-                    <Login handleLogin={handleLogin} />
-                  )
-                }
-              />
+                  </Box>
+                ) : (
+                  <Login handleLogin={handleLogin} />
+                )
+              }
+            />
+
+
+
               <Route path="/login" element={isLoggedIn ? <Navigate to="/" /> : <Login handleLogin={handleLogin} />} />
               <Route path="/products" element={isLoggedIn ? <ProductsList themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/product/:productId" element={isLoggedIn ? <ProductDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
@@ -300,7 +307,7 @@
               <Route path="/waiting_room/create" element={isLoggedIn ? <CreateWaitingRoom themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/waiting_room/:waitingRoomId" element={isLoggedIn ? <WaitingRoomDetail themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/waiting_room/update/:waitingRoomId" element={isLoggedIn && isStaff ? <UpdateWaitingRoom themeMode={themeMode} /> : <Navigate to="/login" />} />
-              <Route path="/activate/:token" element={isLoggedIn ? <ActivateAccount /> : <Navigate to="/login" />} />
+              <Route path="/activate-account/:token" element={<ActivateAccount />} />
               <Route path="/profile" element={isLoggedIn ? <UserProfile themeMode={themeMode} /> : <Navigate to="/login" />} />
               <Route path="/reception/create" element={isLoggedIn || canReceptStocks ? <CreateReception themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />
               <Route path="/receptions" element={isLoggedIn && (canReceptStocks || canMoveStocks) ? <ReceptionsList themeMode={themeMode} /> : <Navigate to={isLoggedIn ? "/" : "/login"} />} />

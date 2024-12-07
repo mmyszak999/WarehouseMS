@@ -14,7 +14,7 @@ const CreateIssue = () => {
   const [rackLevels, setRackLevels] = useState([]);
   const [stocks, setStocks] = useState([]);
   const [formData, setFormData] = useState({
-    stock_entries: [], // Array of stock entries each with stock_id, waiting_room_id, or rack_level_id
+    stock_entries: [],
     description: ''
   });
   const [loading, setLoading] = useState(true);
@@ -37,7 +37,7 @@ const CreateIssue = () => {
     };
 
     fetchWaitingRooms();
-    fetchSections(); // Fetch sections on initial load
+    fetchSections();
   }, []);
 
   const fetchSections = async () => {
@@ -81,8 +81,6 @@ const CreateIssue = () => {
     }
   };
 
-  // Fetch stocks based on location
-  // Fetch stocks based on location for specific index
   const fetchStocks = async (locationId, isRackLevel, index) => {
     try {
       const endpoint = isRackLevel
@@ -96,16 +94,14 @@ const CreateIssue = () => {
       let stocks = [];
       console.log(response.data, "ww");
       if (isRackLevel) {
-        // Iteracja po slotach i zbieranie stocków
         response.data.results.forEach(slot => {
           if (slot.stock) {
-            stocks.push(slot.stock); // Dodanie stocka do listy
+            stocks.push(slot.stock);
           }
         });
       } else {
         console.log(response.data.stocks, "xx");
-        // Zakładam, że stocki dla waiting room są w polu `stocks`
-        stocks = response.data.stocks || [];  // Upewnij się, że `stocks` jest prawidłową nazwą klucza
+        stocks = response.data.stocks || [];
       }
   
       setFormData(prevState => {
@@ -135,9 +131,8 @@ const CreateIssue = () => {
       return { ...prevState, stock_entries: updatedEntries };
     });
   
-    // Fetch stocks for the new location
     if (value) {
-      fetchStocks(value, locationType === 'rack_level', index);  // Pass the index for the specific entry
+      fetchStocks(value, locationType === 'rack_level', index);
     }
   };  
   
@@ -170,9 +165,8 @@ const CreateIssue = () => {
       updatedEntries[index] = { ...updatedEntries[index], rack_level_id: rackLevelId, stock_id: '' };
       return { ...prevState, stock_entries: updatedEntries };
     });
-    // Fetch stocks for the selected rack level
     if (rackLevelId) {
-      fetchStocks(rackLevelId, true, index);  // true indicates it's a rack level, pass index
+      fetchStocks(rackLevelId, true, index);
     }
   };
 
@@ -232,7 +226,6 @@ const CreateIssue = () => {
                           i === index ? { ...entry, locationType: newLocationType, waiting_room_id: '', rack_level_id: '', stock_id: '' } : entry
                         )
                       }));
-                      // Reset stocks when changing location type
                       setStocks([]);
                     }}
                     sx={{ mb: 2 }}
@@ -293,7 +286,7 @@ const CreateIssue = () => {
                         <Select
                           labelId={`rack-level-label-${index}`}
                           value={entry.rack_level_id || ''}
-                          onChange={(e) => handleRackLevelChange(e, index)}  // Zaktualizowana funkcja
+                          onChange={(e) => handleRackLevelChange(e, index)}
                         >
                           {entry.rackLevels.map(level => (
                             <MenuItem key={level.id} value={level.id}>

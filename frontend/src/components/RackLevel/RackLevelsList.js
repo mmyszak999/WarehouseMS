@@ -4,8 +4,8 @@ import {
   Typography, Card, CardContent, CardHeader, CircularProgress, Grid, AppBar, Toolbar, Button, Box, Pagination, TextField, MenuItem, Select, InputLabel, FormControl, Divider
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
-import AuthService from '../../services/AuthService'; // For role checking
-import { handleError } from '../ErrorHandler'; // Error handler
+import AuthService from '../../services/AuthService';
+import { handleError } from '../ErrorHandler';
 
 const operatorOptions = [
   { value: 'eq', label: 'Equals (=)' },
@@ -50,7 +50,6 @@ const RackLevelsList = ({ themeMode }) => {
       setLoading(true);
       let endpoint = `http://localhost:8000/api/rack_levels/?page=${page}&size=${size}`;
 
-      // Append filter and sort params
       for (const [key, filter] of Object.entries(appliedFilters)) {
         if (filter.value) {
           endpoint += `&${key}__${filter.operator}=${filter.value}`;
@@ -121,7 +120,6 @@ const RackLevelsList = ({ themeMode }) => {
         </Toolbar>
       </AppBar>
       <Grid container spacing={3} sx={{ mt: 3 }}>
-        {/* Filters Section */}
         <Grid item xs={12} md={4}>
           <Box sx={{ padding: 2, borderRight: '1px solid #ddd' }}>
             <Typography variant="h6" gutterBottom>Filters</Typography>
@@ -133,7 +131,6 @@ const RackLevelsList = ({ themeMode }) => {
                   <strong>{key.replace(/_/g, ' ')}</strong>
                 </Typography>
                 <Grid container spacing={2}>
-                  {/* Value Input */}
                   <Grid item xs={12}>
                     <TextField
                       label={key.replace(/_/g, ' ')}
@@ -143,7 +140,6 @@ const RackLevelsList = ({ themeMode }) => {
                       fullWidth
                     />
                   </Grid>
-                  {/* Operator Select */}
                   <Grid item xs={12}>
                     <FormControl fullWidth>
                       <InputLabel>Operator</InputLabel>
@@ -161,7 +157,6 @@ const RackLevelsList = ({ themeMode }) => {
                       </Select>
                     </FormControl>
                   </Grid>
-                  {/* Sort By Select */}
                   <Grid item xs={12}>
                     <FormControl fullWidth>
                       <InputLabel>Sort By</InputLabel>
@@ -188,7 +183,6 @@ const RackLevelsList = ({ themeMode }) => {
           </Box>
         </Grid>
 
-        {/* Rack Levels List Section */}
         <Grid item xs={12} md={8}>
           <Grid container spacing={3}>
             {rackLevels.map(level => (

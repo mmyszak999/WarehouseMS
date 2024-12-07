@@ -159,14 +159,14 @@ async def get_all_rack_levels(
     PagedResponseSchema[RackLevelBaseOutputSchema],
     PagedResponseSchema[RackLevelOutputSchema],
 ]:
-    query = select(RackLevel)
+    query = select(RackLevel).join(RackLevel.rack_level_slots)
 
     if rack_id is not None:
         if not (rack_object := await if_exists(Rack, "id", rack_id, session)):
             raise DoesNotExist(Rack.__name__, "id", rack_id)
 
         query = query.filter(RackLevel.rack_id == rack_id)
-
+    query = query.order_by(RackLevelSlot.rack_level_slot_number.asc())
     if query_params:
         query = filter_and_sort_instances(query_params, query, RackLevel)
 
@@ -368,7 +368,11 @@ async def add_single_stock_to_rack_level(
     if not rack_level_object.available_slots:
         raise NoAvailableSlotsInRackLevelException
 
-    if rack_level_object.available_weight < stock_object.weight:
+    if (
+        rack_level_object.available_weight < stock_object.weight
+    ) and (
+        rack_level_object.id != stock_object.rack_level_slot.rack_level_id
+    ):
         raise NoAvailableWeightInRackLevelException
 
     _old_waiting_room_id = None

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Typography, Card, CardContent, CircularProgress, Box, Button } from '@mui/material';
-import { Link } from 'react-router-dom'; // Import Link from react-router-dom
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { handleError } from '../ErrorHandler';
 
@@ -48,12 +48,11 @@ const UserProfile = ({ themeMode }) => {
           <Typography variant="body2">Can Recept Stocks: {user.can_recept_stocks ? 'Yes' : 'No'}</Typography>
           <Typography variant="body2">Can Issue Stocks: {user.can_issue_stocks ? 'Yes' : 'No'}</Typography>
           
-          {/* Add button to check stock history */}
           <Button
             variant="contained"
             color="primary"
-            component={Link} // Using Link to navigate
-            to={`/user/${user.id}/history`} // Navigate to user's history
+            component={Link}
+            to={`/user/${user.id}/history`}
             sx={{ mt: 2 }}
           >
             Check User History
