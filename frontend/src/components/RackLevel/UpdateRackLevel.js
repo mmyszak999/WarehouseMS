@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { TextField, Button, CircularProgress, Box, Typography } from '@mui/material';
-import { handleError } from '../ErrorHandler'; // Import error handler
-import AuthService from '../../services/AuthService'; // Import AuthService for role checking
+import { handleError } from '../ErrorHandler';
+import AuthService from '../../services/AuthService';
 
 const UpdateRackLevel = () => {
-  const { rackLevelId } = useParams(); // Get rack level ID from route params
+  const { rackLevelId } = useParams();
   const navigate = useNavigate();
   const [rackLevel, setRackLevel] = useState({
     description: '',
@@ -16,7 +16,7 @@ const UpdateRackLevel = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const isStaff = AuthService.getUserRole(); // Check if user is staff
+  const isStaff = AuthService.getUserRole();
 
   useEffect(() => {
     const fetchRackLevel = async () => {
@@ -46,7 +46,7 @@ const UpdateRackLevel = () => {
       await axios.patch(`http://localhost:8000/api/rack_levels/${rackLevelId}`, rackLevel, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
       });
-      navigate(`/rack-level/${rackLevelId}`); // Navigate back to rack level details after update
+      navigate(`/rack-level/${rackLevelId}`);
     } catch (error) {
       handleError(error, setError);
     }

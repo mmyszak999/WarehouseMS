@@ -25,7 +25,7 @@ const CreateCategory = () => {
                 }
             });
             console.log('Category created:', response.data);
-            navigate('/categories'); // Redirect to the categories list
+            navigate('/categories');
         } catch (error) {
             handleError(error, setError);
         }

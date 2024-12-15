@@ -12,14 +12,13 @@ const IssueDetail = ({ themeMode }) => {
   const [issue, setIssue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [open, setOpen] = useState(false); // For dialog
-  const [description, setDescription] = useState(''); // For updating issue description
+  const [open, setOpen] = useState(false);
+  const [description, setDescription] = useState('');
   const [isStaff, setIsStaff] = useState(false);
 
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    // Check if the user is staff
     const fetchUserRole = () => {
       setIsStaff(AuthService.getUserRole());
     };
@@ -37,7 +36,7 @@ const IssueDetail = ({ themeMode }) => {
           }
         });
         setIssue(response.data);
-        setDescription(response.data.description || ''); // Set initial description
+        setDescription(response.data.description || '');
       } catch (err) {
         handleError(err, setError);
       } finally {
@@ -48,7 +47,6 @@ const IssueDetail = ({ themeMode }) => {
     fetchIssue();
   }, [issueId, token]);
 
-  // Handle dialog open/close
   const handleUpdateClick = () => {
     setOpen(true);
   };
@@ -57,7 +55,6 @@ const IssueDetail = ({ themeMode }) => {
     setOpen(false);
   };
 
-  // Handle update issue description
   const handleUpdate = async () => {
     try {
       await axios.patch(`http://localhost:8000/api/issues/${issueId}`, {
@@ -67,14 +64,13 @@ const IssueDetail = ({ themeMode }) => {
           'Authorization': `Bearer ${token}`
         }
       });
-      // Refetch the updated issue
       const response = await axios.get(`http://localhost:8000/api/issues/${issueId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       setIssue(response.data);
-      setOpen(false); // Close dialog
+      setOpen(false);
     } catch (err) {
       handleError(err, setError);
     }
@@ -85,7 +81,6 @@ const IssueDetail = ({ themeMode }) => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      {/* Navigation Bar */}
       <AppBar position="static" className={`app-bar ${themeMode}`}>
         <Toolbar>
           <Button color="inherit" component={Link} to="/">Home</Button>
@@ -136,7 +131,6 @@ const IssueDetail = ({ themeMode }) => {
         </List>
       </Box>
 
-      {/* Update Issue Dialog */}
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Update Issue</DialogTitle>
         <DialogContent>

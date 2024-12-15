@@ -1,14 +1,12 @@
-// Import MUI components and other necessary libraries
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
   Typography, Card, CardContent, CardHeader, CircularProgress, Grid, AppBar, Toolbar, Button, Box, Pagination, TextField, MenuItem, Select, InputLabel, FormControl, Divider
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
-import AuthService from '../../services/AuthService'; // For role checking
-import { handleError } from '../ErrorHandler'; // Error handler
+import AuthService from '../../services/AuthService'; 
+import { handleError } from '../ErrorHandler';
 
-// Constants for sorting and filtering options
 const operatorOptions = [
   { value: 'eq', label: 'Equals (=)' },
   { value: 'ne', label: 'Not Equals (!=)' },
@@ -26,7 +24,6 @@ const sortOptions = [
 
 const pageSizeOptions = [5, 10, 15, 20, 25, 50, 100];
 
-// Main component for displaying rack level slots
 const RackLevelSlotsList = ({ themeMode }) => {
   const [rackLevelSlots, setRackLevelSlots] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +32,7 @@ const RackLevelSlotsList = ({ themeMode }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [size, setSize] = useState(10);
   const [filters, setFilters] = useState({
-    is_active: { value: '', operator: 'eq' }, // Only filter for is_active, no sort
+    is_active: { value: '', operator: 'eq' },
     description: { value: '', operator: 'eq', sort: '' },
     rack_level_slot_number: { value: '', operator: 'eq', sort: '' },
     stock__weight: { value: '', operator: 'eq', sort: '' },
@@ -50,7 +47,6 @@ const RackLevelSlotsList = ({ themeMode }) => {
       setLoading(true);
       let endpoint = `http://localhost:8000/api/rack-level-slots/?page=${page}&size=${size}`;
 
-      // Append filter and sort params
       for (const [key, filter] of Object.entries(appliedFilters)) {
         if (filter.value) {
           endpoint += `&${key}__${filter.operator}=${filter.value}`;
@@ -116,7 +112,6 @@ const RackLevelSlotsList = ({ themeMode }) => {
         </Toolbar>
       </AppBar>
       <Grid container spacing={3} sx={{ mt: 3 }}>
-        {/* Filters Section */}
         <Grid item xs={12} md={4}>
           <Box sx={{ padding: 2, borderRight: '1px solid #ddd' }}>
             <Typography variant="h6" gutterBottom>Filters</Typography>
@@ -129,7 +124,6 @@ const RackLevelSlotsList = ({ themeMode }) => {
                 </Typography>
                 <Grid container spacing={2}>
                   {key === 'is_active' ? (
-                    // Special handling for is_active filter with Yes/No/No Filter options
                     <Grid item xs={12}>
                       <FormControl fullWidth>
                         <InputLabel>Is Active</InputLabel>
@@ -147,7 +141,6 @@ const RackLevelSlotsList = ({ themeMode }) => {
                     </Grid>
                   ) : (
                     <>
-                      {/* Value Input for other filters */}
                       <Grid item xs={12}>
                         <TextField
                           label={key.replace(/_/g, ' ')}
@@ -157,7 +150,6 @@ const RackLevelSlotsList = ({ themeMode }) => {
                           fullWidth
                         />
                       </Grid>
-                      {/* Operator Select */}
                       <Grid item xs={12}>
                         <FormControl fullWidth>
                           <InputLabel>Operator</InputLabel>
@@ -175,7 +167,6 @@ const RackLevelSlotsList = ({ themeMode }) => {
                           </Select>
                         </FormControl>
                       </Grid>
-                      {/* Sort By Select */}
                       <Grid item xs={12}>
                         <FormControl fullWidth>
                           <InputLabel>Sort By</InputLabel>
@@ -205,7 +196,6 @@ const RackLevelSlotsList = ({ themeMode }) => {
           </Box>
         </Grid>
 
-        {/* Rack Level Slots List Section */}
         <Grid item xs={12} md={8}>
           <Grid container spacing={3}>
             {rackLevelSlots.map(slot => (

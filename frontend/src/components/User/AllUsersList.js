@@ -56,7 +56,6 @@ const AllUsersList = ({ themeMode }) => {
     const [totalPages, setTotalPages] = useState(1);
     const [size, setSize] = useState(10);
 
-    // State to manage filter input values
     const [filterInputs, setFilterInputs] = useState({
         first_name: { value: '', operator: 'eq', sort: '' },
         last_name: { value: '', operator: 'eq', sort: '' },
@@ -69,7 +68,6 @@ const AllUsersList = ({ themeMode }) => {
         is_active: { value: '' }
     });
 
-    // State to manage the applied filters
     const [filters, setFilters] = useState({
         first_name: { value: '', operator: 'eq', sort: '' },
         last_name: { value: '', operator: 'eq', sort: '' },

@@ -30,7 +30,7 @@ const UserStockUserHistoryList = ({ themeMode }) => {
             setUserStocks(response.data.results);
             setTotalPages(Math.ceil(response.data.total / size));
         } catch (error) {
-            handleError(error, setError); // Handle errors
+            handleError(error, setError);
         } finally {
             setLoading(false);
         }

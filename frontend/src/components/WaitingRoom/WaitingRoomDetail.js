@@ -208,7 +208,6 @@ const WaitingRoomDetail = ({ themeMode }) => {
                     title={<Typography variant="h6" fontWeight="bold">{waitingRoom?.name || 'Unnamed Room'}</Typography>}
                 />
                 <CardContent>
-                    {/* Display waiting room details */}
                     <Box sx={{ mb: 2 }}>
                         <Typography variant="body1">
                             <strong>Max Stocks:</strong> {waitingRoom?.max_stocks}

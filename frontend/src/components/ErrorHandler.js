@@ -1,5 +1,3 @@
-// src/utils/errorHandler.js
-
 export const handleError = (error, setError) => {
     if (error.response) {
         switch (error.response.status) {

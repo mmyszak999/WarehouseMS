@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Typography, Card, CardContent, CardHeader, CircularProgress, Grid, AppBar, Toolbar, Button, Box, Pagination, TextField, MenuItem, Select, InputLabel, FormControl, Divider } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
-import '../../App.css'; // Import your CSS file
-import AuthService from '../../services/AuthService'; // Import the AuthService for role checking
-import { handleError } from '../ErrorHandler'; // Import the error handler
+import '../../App.css';
+import AuthService from '../../services/AuthService';
+import { handleError } from '../ErrorHandler';
 
 const operatorOptions = [
     { value: 'eq', label: 'Equals (=)' },
@@ -40,14 +40,13 @@ const WaitingRoomsList = ({ themeMode }) => {
     });
 
     const navigate = useNavigate();
-    const userRole = AuthService.getUserRole(); // Get the user's role
+    const userRole = AuthService.getUserRole();
 
     const fetchWaitingRooms = async (page, size, appliedFilters) => {
         try {
             setLoading(true);
             let endpoint = `http://localhost:8000/api/waiting_rooms/?page=${page}&size=${size}`;
 
-            // Append filter and sort params
             for (const [key, filter] of Object.entries(appliedFilters)) {
                 if (filter.value) {
                     endpoint += `&${key}__${filter.operator}=${filter.value}`;
@@ -65,7 +64,7 @@ const WaitingRoomsList = ({ themeMode }) => {
             setWaitingRooms(response.data.results);
             setTotalPages(Math.ceil(response.data.total / size));
         } catch (error) {
-            handleError(error, setError); // Handle errors
+            handleError(error, setError);
         } finally {
             setLoading(false);
         }
@@ -81,7 +80,7 @@ const WaitingRoomsList = ({ themeMode }) => {
 
     const handleSizeChange = (event) => {
         setSize(event.target.value);
-        setPage(1); // Reset to first page whenever size changes
+        setPage(1);
     };
 
     const handleFilterChange = (event) => {
@@ -118,7 +117,6 @@ const WaitingRoomsList = ({ themeMode }) => {
                 </Toolbar>
             </AppBar>
             <Grid container spacing={3} sx={{ mt: 3 }}>
-                {/* Filters Section */}
                 <Grid item xs={12} md={4}>
                     <Box sx={{ padding: 2, borderRight: '1px solid #ddd' }}>
                         <Typography variant="h6" gutterBottom>Filters</Typography>
@@ -130,7 +128,7 @@ const WaitingRoomsList = ({ themeMode }) => {
                                     <strong>{key.replace(/_/g, ' ')}</strong>
                                 </Typography>
                                 <Grid container spacing={2}>
-                                    {/* Value Input */}
+
                                     <Grid item xs={12}>
                                         <TextField
                                             label={key.replace(/_/g, ' ')}
@@ -140,7 +138,6 @@ const WaitingRoomsList = ({ themeMode }) => {
                                             fullWidth
                                         />
                                     </Grid>
-                                    {/* Operator Select */}
                                     <Grid item xs={12}>
                                         <FormControl fullWidth>
                                             <InputLabel>Operator</InputLabel>
@@ -158,7 +155,6 @@ const WaitingRoomsList = ({ themeMode }) => {
                                             </Select>
                                         </FormControl>
                                     </Grid>
-                                    {/* Sort By Select */}
                                     <Grid item xs={12}>
                                         <FormControl fullWidth>
                                             <InputLabel>Sort By</InputLabel>
@@ -185,7 +181,6 @@ const WaitingRoomsList = ({ themeMode }) => {
                     </Box>
                 </Grid>
 
-                {/* Waiting Rooms List Section */}
                 <Grid item xs={12} md={8}>
                     <Grid container spacing={3}>
                         {waitingRooms.map(waitingRoom => (
@@ -197,14 +192,14 @@ const WaitingRoomsList = ({ themeMode }) => {
                                                 variant="h6" 
                                                 fontWeight="bold"
                                                 component={Link} 
-                                                to={`/waiting_room/${waitingRoom.id}`} // Link to the detailed page
-                                                style={{ textDecoration: 'none', color: 'inherit' }} // Style to maintain theme
+                                                to={`/waiting_room/${waitingRoom.id}`}
+                                                style={{ textDecoration: 'none', color: 'inherit' }} 
                                             >
                                                 {waitingRoom.name || 'Unnamed Room'}
                                             </Typography>
                                         }
                                     />
-                                    <CardContent onClick={() => navigate(`/waiting_room/${waitingRoom.id}`)}> {/* Navigate on click */}
+                                    <CardContent onClick={() => navigate(`/waiting_room/${waitingRoom.id}`)}>
                                         <Typography variant="body1">Max Stocks: {waitingRoom.max_stocks}</Typography>
                                         <Typography variant="body1">Max Weight: {waitingRoom.max_weight}</Typography>
                                         <Typography variant="body1">Occupied Slots: {waitingRoom.occupied_slots}</Typography>

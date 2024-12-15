@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { TextField, Button, CircularProgress, Box, Typography } from '@mui/material';
-import { handleError } from '../ErrorHandler'; // Error handler
+import { handleError } from '../ErrorHandler';
 import AuthService from '../../services/AuthService';
 
 const UpdateSection = () => {
-  const { sectionId } = useParams(); // Get section ID from route params
+  const { sectionId } = useParams();
   const navigate = useNavigate();
   const [section, setSection] = useState({ section_name: '', max_weight: 0, max_racks: 0 });
   const [loading, setLoading] = useState(true);
@@ -42,7 +42,7 @@ const UpdateSection = () => {
       await axios.patch(`http://localhost:8000/api/sections/${sectionId}`, section, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
       });
-      navigate(`/section/${sectionId}`); // Navigate back to section details after update
+      navigate(`/section/${sectionId}`);
     } catch (error) {
       handleError(error, setError);
     }

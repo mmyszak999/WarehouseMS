@@ -13,8 +13,8 @@ const CategoryDetail = ({ themeMode }) => {
   const [error, setError] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [newName, setNewName] = useState('');
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false); // State to manage delete confirmation dialog
-  const isStaff = AuthService.getUserRole(); // Directly use the boolean result
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const isStaff = AuthService.getUserRole();
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -25,7 +25,7 @@ const CategoryDetail = ({ themeMode }) => {
           }
         });
         setCategory(response.data);
-        setNewName(response.data.name); // Set initial value for the text field
+        setNewName(response.data.name);
       }
       catch (error) {
           handleError(error, setError);
@@ -60,7 +60,7 @@ const CategoryDetail = ({ themeMode }) => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      navigate('/categories'); // Redirect to the categories list after deletion
+      navigate('/categories');
     } catch (error) {
       handleError(error, setError);
     }
@@ -131,7 +131,6 @@ const CategoryDetail = ({ themeMode }) => {
         </Box>
       )}
 
-      {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteDialogOpen}
         onClose={handleCloseDeleteDialog}

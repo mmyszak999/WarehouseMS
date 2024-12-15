@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Typography, Card, CardContent, CardHeader, CircularProgress, Grid, AppBar, Toolbar, Button, Box, Pagination, TextField, MenuItem, Select, InputLabel, FormControl, Divider } from '@mui/material';
 import { Link } from 'react-router-dom';
 import AuthService from '../../services/AuthService';
-import '../../App.css'; // Import your CSS file
+import '../../App.css'; 
 import { debounce } from 'lodash';
 import { handleError } from '../ErrorHandler'
 
@@ -50,7 +50,6 @@ const CategoriesList = ({ themeMode }) => {
             setLoading(true);
             let endpoint = `http://localhost:8000/api/categories?page=${page}&size=${size}`;
 
-            // Append filter params
             for (const [key, filter] of Object.entries(appliedFilters)) {
                 if (filter.value) {
                     endpoint += `&${key}__${filter.operator}=${filter.value}`;
@@ -84,7 +83,7 @@ const CategoriesList = ({ themeMode }) => {
 
     const handleSizeChange = (event) => {
         setSize(event.target.value);
-        setPage(1); // Reset to first page whenever size changes
+        setPage(1);
     };
 
     const handleFilterChange = (event) => {
@@ -99,7 +98,7 @@ const CategoriesList = ({ themeMode }) => {
     const debounceFetchCategories = useCallback(
         debounce((updatedFilters) => {
             fetchCategories(page, size, updatedFilters);
-        }, 500), // Adjust debounce delay as needed
+        }, 500),
         [page, size]
     );
 
@@ -131,14 +130,12 @@ const CategoriesList = ({ themeMode }) => {
                         <Typography variant="h6" gutterBottom>Filters</Typography>
                         <Divider sx={{ mb: 2 }} />
 
-                        {/* Filter Inputs */}
                         {Object.entries(filters).map(([key, filter]) => (
                             <Box key={key} sx={{ mb: 3 }}>
                                 <Typography variant="subtitle1" gutterBottom>
                                     <strong>{key.replace(/_/g, ' ')}</strong>
                                 </Typography>
                                 <Grid container spacing={2}>
-                                    {/* Value Input */}
                                     <Grid item xs={12} md={12}>
                                         <TextField
                                             label={key.replace(/_/g, ' ')}
@@ -148,7 +145,6 @@ const CategoriesList = ({ themeMode }) => {
                                             fullWidth
                                         />
                                     </Grid>
-                                    {/* Operator Select */}
                                     <Grid item xs={12} md={12}>
                                         <FormControl fullWidth>
                                             <InputLabel>Operator</InputLabel>
@@ -166,7 +162,6 @@ const CategoriesList = ({ themeMode }) => {
                                             </Select>
                                         </FormControl>
                                     </Grid>
-                                    {/* Sort By Select */}
                                     <Grid item xs={12} md={12}>
                                         <FormControl fullWidth>
                                             <InputLabel>Sort By</InputLabel>

@@ -7,13 +7,12 @@ import {
 import { handleError } from '../ErrorHandler';
 
 const UpdateRackLevelSlot = ({ themeMode }) => {
-  const { rackLevelSlotId } = useParams(); // Get the rack level slot ID from URL
+  const { rackLevelSlotId } = useParams();
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Fetch existing slot details to pre-fill the form
   useEffect(() => {
     const fetchRackLevelSlot = async () => {
       try {
@@ -33,7 +32,6 @@ const UpdateRackLevelSlot = ({ themeMode }) => {
     fetchRackLevelSlot();
   }, [rackLevelSlotId]);
 
-  // Handle form submission to update the slot description
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
@@ -42,7 +40,7 @@ const UpdateRackLevelSlot = ({ themeMode }) => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      navigate(`/rack-level-slot/${rackLevelSlotId}`); // Redirect after successful update
+      navigate(`/rack-level-slot/${rackLevelSlotId}`);
     } catch (error) {
       handleError(error, setError);
     }

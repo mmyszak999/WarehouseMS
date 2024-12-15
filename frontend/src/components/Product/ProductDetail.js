@@ -2,7 +2,7 @@ import { Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, Di
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import '../../App.css'; // Import your CSS file
+import '../../App.css';
 import AuthService from '../../services/AuthService';
 import { handleError } from '../ErrorHandler';
 
@@ -11,7 +11,7 @@ const ProductDetail = ({ themeMode }) => {
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [legacyDialogOpen, setLegacyDialogOpen] = useState(false); // State to manage legacy confirmation dialog
+    const [legacyDialogOpen, setLegacyDialogOpen] = useState(false);
 
     const userRole = AuthService.getUserRole();
 
@@ -124,7 +124,6 @@ const ProductDetail = ({ themeMode }) => {
                 </Box>
             )}
 
-            {/* Legacy Confirmation Dialog */}
             <Dialog
                 open={legacyDialogOpen}
                 onClose={handleCloseLegacyDialog}

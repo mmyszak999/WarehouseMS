@@ -16,12 +16,12 @@ const ReceptionDetail = ({ themeMode }) => {
 
   const token = localStorage.getItem('token');
   const canReceptStocks = AuthService.canReceptStocks();
-  const isStaff = AuthService.getUserRole(); // Check if the user is a staff member
+  const isStaff = AuthService.getUserRole();
 
   useEffect(() => {
     const fetchReceptionDetails = async () => {
       if (!canReceptStocks) {
-        navigate('/');  // Redirect if the user doesn't have permission
+        navigate('/');
         return;
       }
 
@@ -61,7 +61,6 @@ const ReceptionDetail = ({ themeMode }) => {
           'Authorization': `Bearer ${token}`
         }
       });
-      // Refetch reception details after update
       const response = await axios.get(`http://localhost:8000/api/receptions/${receptionId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
@@ -79,7 +78,6 @@ const ReceptionDetail = ({ themeMode }) => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      {/* Navigation Bar */}
       <AppBar position="static" className={`app-bar ${themeMode}`}>
         <Toolbar>
           <Button color="inherit" component={Link} to="/">Home</Button>
@@ -117,7 +115,6 @@ const ReceptionDetail = ({ themeMode }) => {
                 secondary={`Weight: ${stock.weight}, Product Count: ${stock.product_count}`}
               />
               
-              {/* Link do Waiting Room, jeśli istnieje waiting_room_id */}
               {stock.waiting_room_id && (
                 <Button 
                   component={Link} 
@@ -146,7 +143,6 @@ const ReceptionDetail = ({ themeMode }) => {
         </List>
       </Box>
 
-      {/* Update Dialog */}
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>Update Reception</DialogTitle>
         <DialogContent>

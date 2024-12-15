@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, CircularProgress, MenuItem, Select, TextField, Typography } from '@mui/material';
-import { handleError } from '../ErrorHandler'; // Error handler
+import { handleError } from '../ErrorHandler';
 
 const CreateRackLevel = () => {
   const [sections, setSections] = useState([]);
@@ -21,7 +21,6 @@ const CreateRackLevel = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // Fetch sections
   useEffect(() => {
     const fetchSections = async () => {
       try {
@@ -40,7 +39,6 @@ const CreateRackLevel = () => {
     fetchSections();
   }, []);
 
-  // Fetch racks when a section is selected
   useEffect(() => {
     if (selectedSection) {
       const fetchRacks = async () => {
@@ -103,7 +101,6 @@ const CreateRackLevel = () => {
 
       {error && <Typography variant="h6" color="error">{error}</Typography>}
 
-      {/* Section Selection */}
       <Select
         fullWidth
         value={selectedSection}
@@ -119,7 +116,6 @@ const CreateRackLevel = () => {
         ))}
       </Select>
 
-      {/* Rack Selection */}
       {loadingRacks ? (
         <CircularProgress />
       ) : (
@@ -140,7 +136,6 @@ const CreateRackLevel = () => {
         </Select>
       )}
 
-      {/* Rack Level Form */}
       <form onSubmit={handleSubmit}>
         <TextField
           fullWidth

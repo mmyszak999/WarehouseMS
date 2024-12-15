@@ -10,7 +10,7 @@ const WarehouseDetail = () => {
   const [warehouse, setWarehouse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false); // For confirming deletion
+  const [openDialog, setOpenDialog] = useState(false);
 
   useEffect(() => {
     const fetchWarehouseDetail = async () => {
@@ -38,7 +38,7 @@ const WarehouseDetail = () => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      navigate('/'); // Redirect to home after deletion
+      navigate('/');
     } catch (error) {
       handleError(error, setError);
     }
@@ -66,7 +66,6 @@ const WarehouseDetail = () => {
         <Typography>Occupied Sections: {warehouse.occupied_sections}</Typography>
         <Typography>Occupied Waiting Rooms: {warehouse.occupied_waiting_rooms}</Typography>
 
-        {/* Sections */}
         {warehouse.sections && warehouse.sections.length > 0 && (
           <>
             <Typography variant="h5" gutterBottom>Sections</Typography>
@@ -89,7 +88,6 @@ const WarehouseDetail = () => {
           </>
         )}
 
-        {/* Waiting Rooms */}
         {warehouse.waiting_rooms && warehouse.waiting_rooms.length > 0 && (
           <>
             <Typography variant="h5" gutterBottom>Waiting Rooms</Typography>
@@ -113,7 +111,6 @@ const WarehouseDetail = () => {
           </>
         )}
 
-        {/* Update and Delete Buttons */}
         <Box sx={{ mt: 3 }}>
           <Button component={Link} to={`/warehouse/update/${warehouseId}`} variant="contained" color="secondary" sx={{ mr: 2 }}>
             Update Warehouse
@@ -127,7 +124,6 @@ const WarehouseDetail = () => {
           </Button>
         </Box>
         
-        {/* Confirm Deletion Dialog */}
         <Dialog
           open={openDialog}
           onClose={() => setOpenDialog(false)}

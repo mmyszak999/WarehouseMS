@@ -25,7 +25,7 @@ const UpdateProduct = ({ themeMode }) => {
         name: '',
         wholesale_price: '',
         description: '',
-        category_ids: { id: [] } // Correctly format as an object with an id property
+        category_ids: { id: [] }
     });
 
     useEffect(() => {
@@ -44,7 +44,6 @@ const UpdateProduct = ({ themeMode }) => {
                     })
                 ]);
 
-                // Extract categories from the `results` key
                 const productCategories = productResponse.data.category_ids?.id || [];
                 const categoriesData = categoriesResponse.data.results || [];
 
@@ -54,7 +53,7 @@ const UpdateProduct = ({ themeMode }) => {
                     name: productResponse.data.name || '',
                     wholesale_price: productResponse.data.wholesale_price || '',
                     description: productResponse.data.description || '',
-                    category_ids: { id: productCategories } // Format correctly
+                    category_ids: { id: productCategories }
                 });
             } catch (error) {
                 handleError(error, setError);
@@ -78,20 +77,19 @@ const UpdateProduct = ({ themeMode }) => {
         const { value } = e.target;
         setFormData((prevData) => ({
             ...prevData,
-            category_ids: { id: value } // Ensure format is correct
+            category_ids: { id: value }
         }));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // No need to filter out empty fields if we're sending category_ids in the required format
         const cleanedFormData = {
             ...formData,
-            category_ids: { id: formData.category_ids.id } // Ensure category_ids is in the correct format
+            category_ids: { id: formData.category_ids.id } 
         };
 
-        console.log('Cleaned Form Data:', cleanedFormData); // Debug log
+        console.log('Cleaned Form Data:', cleanedFormData);
 
         try {
             await axios.patch(`http://localhost:8000/api/products/${productId}`, cleanedFormData, {
@@ -119,10 +117,8 @@ const UpdateProduct = ({ themeMode }) => {
                         break;
                 }
             } else if (error.request) {
-                // Handle network errors
                 setError('Network Error: No response received from server');
             } else {
-                // Handle other errors
                 setError('Error: ' + error.message);
             }
             console.error('Error fetching users:', error);
@@ -134,7 +130,7 @@ const UpdateProduct = ({ themeMode }) => {
     }
 
     if (error) {
-        return <Typography variant="h6" color="error">{String(error)}</Typography>; // Convert error to string
+        return <Typography variant="h6" color="error">{String(error)}</Typography>;
     }
 
     return (

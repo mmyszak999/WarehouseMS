@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { TextField, Button, CircularProgress, Box, Typography } from '@mui/material';
-import { handleError } from '../ErrorHandler'; // Import error handler
-import AuthService from '../../services/AuthService'; // Import AuthService for role checking
+import { handleError } from '../ErrorHandler';
+import AuthService from '../../services/AuthService';
 
 const UpdateRack = () => {
-  const { rackId } = useParams(); // Get rack ID from route params
+  const { rackId } = useParams();
   const navigate = useNavigate();
   const [rack, setRack] = useState({
     rack_name: '',
@@ -46,7 +46,7 @@ const UpdateRack = () => {
       await axios.patch(`http://localhost:8000/api/racks/${rackId}`, rack, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
       });
-      navigate(`/rack/${rackId}`); // Navigate back to rack details after update
+      navigate(`/rack/${rackId}`);
     } catch (error) {
       handleError(error, setError);
     }

@@ -17,7 +17,6 @@ const RackLevelSlotDetail = ({ themeMode }) => {
   const isStaff = AuthService.getUserRole();
   const canMoveStocks = AuthService.canMoveStocks();
 
-  // State related to adding stock
   const [isAddStockDialogOpen, setAddStockDialogOpen] = useState(false);
   const [stockSourceType, setStockSourceType] = useState('waitingRoom');
   const [selectedSourceWaitingRoom, setSelectedSourceWaitingRoom] = useState('');
@@ -41,7 +40,7 @@ const RackLevelSlotDetail = ({ themeMode }) => {
       });
       setRackLevelSlot(response.data);
     } catch (error) {
-      handleError(error, setError); // Handle errors
+      handleError(error, setError);
     } finally {
       setLoading(false);
     }
@@ -219,7 +218,6 @@ const RackLevelSlotDetail = ({ themeMode }) => {
                 </>
               )}
 
-              {/* Add Stock Button */}
               {(isStaff || canMoveStocks) && 
   rackLevelSlot.is_active && !rackLevelSlot.stock && (
     <Button 
@@ -236,7 +234,6 @@ const RackLevelSlotDetail = ({ themeMode }) => {
         </Grid>
       </Grid>
 
-      {/* Add Stock Dialog */}
       <Dialog open={isAddStockDialogOpen} onClose={() => setAddStockDialogOpen(false)}>
         <DialogTitle>Select a source to move the stock from</DialogTitle>
         <DialogContent>
@@ -325,7 +322,6 @@ const RackLevelSlotDetail = ({ themeMode }) => {
             </>
           )}
 
-          {/* Stock List */}
           <List>
             {fetchedStocks.map(stock => (
               <ListItem

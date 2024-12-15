@@ -69,7 +69,7 @@ const IssuesList = ({ themeMode }) => {
           }
         });
         setIssues(response.data.results);
-        setTotalPages(Math.ceil(response.data.total / size)); // Assuming 'total' is the total number of items
+        setTotalPages(Math.ceil(response.data.total / size));
       } catch (err) {
         handleError(err, setError);
       } finally {
@@ -86,7 +86,7 @@ const IssuesList = ({ themeMode }) => {
 
   const handleSizeChange = (event) => {
     setSize(event.target.value);
-    setPage(1); // Reset to first page whenever size changes
+    setPage(1);
   };
 
   const handleFilterChange = (event) => {
@@ -113,7 +113,7 @@ const IssuesList = ({ themeMode }) => {
 
   const handleFilterApply = () => {
     setFilters(filterInputs);
-    setPage(1); // Reset to first page whenever filters are applied
+    setPage(1);
   };
 
   if (loading) return <CircularProgress />;
@@ -133,13 +133,11 @@ const IssuesList = ({ themeMode }) => {
       </AppBar>
 
       <Grid container spacing={3} sx={{ mt: 3 }}>
-        {/* Filters Section */}
         <Grid item xs={12} md={4}>
           <Box sx={{ padding: 2, borderRight: '1px solid #ddd' }}>
             <Typography variant="h6" gutterBottom>Filters</Typography>
             <Divider sx={{ mb: 2 }} />
 
-            {/* Issue Date Filter */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="subtitle1" gutterBottom>
                 <strong>Issue Date Range</strong>
@@ -189,7 +187,6 @@ const IssuesList = ({ themeMode }) => {
               </Grid>
             </Box>
 
-            {/* Description Filter */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="subtitle1" gutterBottom>
                 <strong>Description</strong>
@@ -246,7 +243,6 @@ const IssuesList = ({ themeMode }) => {
           </Box>
         </Grid>
 
-        {/* Issues List Section */}
         <Grid item xs={12} md={8}>
           <Container>
             <Typography variant="h4" gutterBottom>
@@ -258,7 +254,7 @@ const IssuesList = ({ themeMode }) => {
                 key={issue.id}
                 button
                 component={Link}
-                to={`/issue/${issue.id}`} // Navigates to the IssueDetail page
+                to={`/issue/${issue.id}`}
                 >
                 <ListItemText
                     primary={`Issue Date: ${issue.issue_date}`}
@@ -268,7 +264,6 @@ const IssuesList = ({ themeMode }) => {
             ))}
             </List>
 
-            {/* Pagination */}
             <Box display="flex" justifyContent="center" mt={2}>
               <FormControl sx={{ mr: 2 }}>
                 <InputLabel>Page Size</InputLabel>

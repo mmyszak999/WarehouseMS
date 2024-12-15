@@ -9,7 +9,7 @@ const CreateRack = ({ themeMode }) => {
   const [maxWeight, setMaxWeight] = useState(0);
   const [maxLevels, setMaxLevels] = useState(0);
   const [sectionId, setSectionId] = useState('');
-  const [sections, setSections] = useState([]); // Initialize as an empty array
+  const [sections, setSections] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -22,8 +22,7 @@ const CreateRack = ({ themeMode }) => {
           },
         });
 
-        // Assuming the response data has a "results" field containing the sections array
-        setSections(response.data.results || []); // Ensure it is an array
+        setSections(response.data.results || []);
       } catch (error) {
         handleError(error, setError);
       }

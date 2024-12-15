@@ -16,7 +16,7 @@ const CreateProduct = () => {
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate(); // Use navigate to programmatically navigate
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -67,7 +67,7 @@ const CreateProduct = () => {
                 }
             });
             console.log('Product created:', response.data);
-            navigate('/products'); // Redirect to /products after creation
+            navigate('/products');
         } catch (error) {
             handleError(error, setError);
         }

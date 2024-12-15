@@ -14,7 +14,7 @@ const UserProfile = ({ themeMode }) => {
       try {
         const response = await axios.get('http://localhost:8000/api/users/me', {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}` // Corrected the syntax
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
         setUser(response.data);

@@ -65,7 +65,6 @@ const UserStockDetail = () => {
                     {userStock.stock.product.name}
                 </MuiLink>
             </Typography>
-            {/* Waiting Room Links */}
             <Typography variant="body1">
                 <strong>From Waiting Room: </strong>
                 {userStock.from_waiting_room ? (
@@ -84,7 +83,6 @@ const UserStockDetail = () => {
                 ) : 'N/A'}
             </Typography>
 
-            {/* Rack Level Slot Links */}
             <Typography variant="body1">
                 <strong>From Rack Slot: </strong>
                 {userStock.from_rack_level_slot ? (
@@ -103,7 +101,6 @@ const UserStockDetail = () => {
                 ) : 'N/A'}
             </Typography>
 
-            {/* Issue Details */}
             <Typography variant="body1">
                 <strong>Issue: </strong>
                 {userStock.issue ? (
@@ -113,12 +110,10 @@ const UserStockDetail = () => {
                 ) : 'N/A'}
             </Typography>
 
-            {/* Timestamps */}
             <Typography variant="body1">
                 <strong>Created At: </strong> {new Date(userStock.stock.created_at).toLocaleDateString()}
             </Typography>
 
-            {/* Additional details if needed */}
             <Typography variant="body1">
                 <strong>Reception: </strong>
                 {userStock.reception ? (

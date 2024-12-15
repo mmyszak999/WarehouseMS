@@ -3,14 +3,14 @@ import axios from 'axios';
 import { Box, Typography, CircularProgress, Link as MuiLink, AppBar, Toolbar, Button } from '@mui/material';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { handleError } from '../ErrorHandler';
-import AuthService from '../../services/AuthService'; // Assuming AuthService provides staff role check
+import AuthService from '../../services/AuthService';
 
 const AllStockDetail = () => {
   const { stockId } = useParams();
   const [stock, setStock] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isStaff, setIsStaff] = useState(false); // State to track if the user is staff
+  const [isStaff, setIsStaff] = useState(false);
   const navigate = useNavigate();
 
   const token = localStorage.getItem('token');
@@ -33,7 +33,7 @@ const AllStockDetail = () => {
     };
 
     const fetchUserRole = () => {
-      setIsStaff(AuthService.getUserRole()); // Assuming AuthService has a method to check if the user is staff
+      setIsStaff(AuthService.getUserRole());
     };
 
     fetchStock();
@@ -47,7 +47,6 @@ const AllStockDetail = () => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      {/* AppBar with Home Link */}
       <AppBar position="static">
         <Toolbar>
           <Button color="inherit" component={Link} to="/">
@@ -61,7 +60,6 @@ const AllStockDetail = () => {
           All Stock Details
         </Typography>
 
-        {/* Product Details */}
         <Typography variant="h6">
           <strong>Product: </strong>
           <MuiLink
@@ -85,7 +83,6 @@ const AllStockDetail = () => {
           <strong>Product Count:</strong> {stock.product_count}
         </Typography>
 
-        {/* Waiting Room and Rack Details */}
         <Typography variant="subtitle1">
           <strong>Waiting Room: </strong>
           {stock.waiting_room ? (
@@ -110,12 +107,10 @@ const AllStockDetail = () => {
           ) : 'N/A'}
         </Typography>
 
-        {/* Additional Fields */}
         <Typography variant="subtitle1">
           <strong>Is Issued:</strong> {stock.is_issued ? 'Yes' : 'No'}
         </Typography>
 
-        {/* Reception Details */}
         {stock.reception ? (
           <Typography variant="subtitle1">
             <MuiLink
@@ -148,7 +143,6 @@ const AllStockDetail = () => {
           </Typography>
         )}
 
-        {/* Timestamps */}
         <Typography variant="subtitle1">
           <strong>Created At:</strong> {stock.created_at}
         </Typography>
@@ -156,7 +150,6 @@ const AllStockDetail = () => {
           <strong>Updated At:</strong> {stock.updated_at}
         </Typography>
 
-        {/* Button to View Stock History (Visible only to Staff) */}
         {isStaff && (
           <Button
             variant="contained"

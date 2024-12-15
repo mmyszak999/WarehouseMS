@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { CircularProgress, Typography, Card, CardContent, CardHeader, Grid, AppBar, Toolbar, Button, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import { handleError } from '../ErrorHandler'; // Import error handler
-import AuthService from '../../services/AuthService'; // Import AuthService for role checking
+import { handleError } from '../ErrorHandler'; 
+import AuthService from '../../services/AuthService';
 
 const RackDetail = ({ themeMode }) => {
   const { rackId } = useParams();
@@ -12,7 +12,7 @@ const RackDetail = ({ themeMode }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const isStaff = AuthService.getUserRole(); // Check if user is staff
+  const isStaff = AuthService.getUserRole(); 
   const canMoveStocks = AuthService.canMoveStocks();
 
   const fetchRackDetails = async () => {
@@ -24,7 +24,7 @@ const RackDetail = ({ themeMode }) => {
       });
       setRack(response.data);
     } catch (error) {
-      handleError(error, setError); // Handle errors
+      handleError(error, setError);
     } finally {
       setLoading(false);
     }
@@ -39,7 +39,7 @@ const RackDetail = ({ themeMode }) => {
   };
 
   const handleDeleteClick = () => {
-    setOpenDialog(true); // Open the confirmation dialog
+    setOpenDialog(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -49,16 +49,16 @@ const RackDetail = ({ themeMode }) => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      navigate('/racks'); // Navigate to the racks list after successful deletion
+      navigate('/racks');
     } catch (error) {
-      handleError(error, setError); // Handle deletion error
+      handleError(error, setError);
     } finally {
-      setOpenDialog(false); // Close the confirmation dialog
+      setOpenDialog(false);
     }
   };
 
   const handleCloseDialog = () => {
-    setOpenDialog(false); // Close the confirmation dialog without deleting
+    setOpenDialog(false);
   };
 
   if (loading) {
@@ -130,7 +130,6 @@ const RackDetail = ({ themeMode }) => {
         </Grid>
       </Grid>
 
-      {/* Confirmation Dialog for Deleting Rack */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>

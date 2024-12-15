@@ -2,17 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { CircularProgress, Typography, Card, CardContent, CardHeader, Grid, AppBar, Toolbar, Button, Box, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
-import { handleError } from '../ErrorHandler'; // Error handler
+import { handleError } from '../ErrorHandler';
 import AuthService from '../../services/AuthService';
 
 const SectionDetail = ({ themeMode }) => {
-  const { sectionId } = useParams(); // Get section ID from route params
+  const { sectionId } = useParams();
   const navigate = useNavigate();
   const [section, setSection] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [openDialog, setOpenDialog] = useState(false); // State for delete confirmation dialog
-  const isStaff = AuthService.getUserRole(); // Check if user is staff
+  const [openDialog, setOpenDialog] = useState(false);
+  const isStaff = AuthService.getUserRole();
   const canMoveStocks = AuthService.canMoveStocks();
 
   const fetchSection = async () => {
@@ -24,7 +24,7 @@ const SectionDetail = ({ themeMode }) => {
       });
       setSection(response.data);
     } catch (error) {
-      handleError(error, setError); // Handle errors
+      handleError(error, setError);
     } finally {
       setLoading(false);
     }
@@ -39,7 +39,7 @@ const SectionDetail = ({ themeMode }) => {
   };
 
   const handleDeleteClick = () => {
-    setOpenDialog(true); // Open the confirmation dialog
+    setOpenDialog(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -49,16 +49,16 @@ const SectionDetail = ({ themeMode }) => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
-      navigate('/'); // Navigate to the home page after successful deletion
+      navigate('/');
     } catch (error) {
-      handleError(error, setError); // Handle deletion error
+      handleError(error, setError);
     } finally {
-      setOpenDialog(false); // Close the confirmation dialog
+      setOpenDialog(false);
     }
   };
 
   const handleCloseDialog = () => {
-    setOpenDialog(false); // Close the confirmation dialog without deleting
+    setOpenDialog(false);
   };
 
   if (loading) {
@@ -106,7 +106,6 @@ const SectionDetail = ({ themeMode }) => {
               <Typography variant="body1">Occupied Racks: {section.occupied_racks}</Typography>
               <Typography variant="body2">Created At: {section.created_at || 'N/A'}</Typography>
 
-              {/* Racks if available */}
               {section.racks && section.racks.length > 0 && (isStaff || canMoveStocks) && (
                 <Box sx={{ mt: 2 }}>
                   <Typography variant="h6" gutterBottom>Racks:</Typography>
@@ -133,7 +132,6 @@ const SectionDetail = ({ themeMode }) => {
         </Grid>
       </Grid>
 
-      {/* Confirmation Dialog for Deleting Section */}
       <Dialog open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>

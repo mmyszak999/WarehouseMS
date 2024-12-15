@@ -4,8 +4,8 @@ import {
   Typography, Card, CardContent, CardHeader, CircularProgress, Grid, AppBar, Toolbar, Button, Box, Pagination, TextField, MenuItem, Select, InputLabel, FormControl, Divider
 } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
-import AuthService from '../../services/AuthService'; // For role checking
-import { handleError } from '../ErrorHandler'; // Error handler
+import AuthService from '../../services/AuthService';
+import { handleError } from '../ErrorHandler';
 
 const operatorOptions = [
   { value: 'eq', label: 'Equals (=)' },
@@ -41,14 +41,13 @@ const RacksList = ({ themeMode }) => {
   });
 
   const navigate = useNavigate();
-  const isStaff = AuthService.getUserRole(); // Get user role
+  const isStaff = AuthService.getUserRole();
 
   const fetchRacks = async (page, size, appliedFilters) => {
     try {
       setLoading(true);
       let endpoint = `http://localhost:8000/api/racks/?page=${page}&size=${size}`;
 
-      // Append filter and sort params
       for (const [key, filter] of Object.entries(appliedFilters)) {
         if (filter.value) {
           endpoint += `&${key}__${filter.operator}=${filter.value}`;
@@ -66,7 +65,7 @@ const RacksList = ({ themeMode }) => {
       setRacks(response.data.results);
       setTotalPages(Math.ceil(response.data.total / size));
     } catch (error) {
-      handleError(error, setError); // Handle errors
+      handleError(error, setError);
     } finally {
       setLoading(false);
     }
@@ -82,7 +81,7 @@ const RacksList = ({ themeMode }) => {
 
   const handleSizeChange = (event) => {
     setSize(event.target.value);
-    setPage(1); // Reset to first page when size changes
+    setPage(1);
   };
 
   const handleFilterChange = (event) => {
@@ -119,7 +118,6 @@ const RacksList = ({ themeMode }) => {
         </Toolbar>
       </AppBar>
       <Grid container spacing={3} sx={{ mt: 3 }}>
-        {/* Filters Section */}
         <Grid item xs={12} md={4}>
           <Box sx={{ padding: 2, borderRight: '1px solid #ddd' }}>
             <Typography variant="h6" gutterBottom>Filters</Typography>
@@ -131,7 +129,6 @@ const RacksList = ({ themeMode }) => {
                   <strong>{key.replace(/_/g, ' ')}</strong>
                 </Typography>
                 <Grid container spacing={2}>
-                  {/* Value Input */}
                   <Grid item xs={12}>
                     <TextField
                       label={key.replace(/_/g, ' ')}
@@ -141,7 +138,6 @@ const RacksList = ({ themeMode }) => {
                       fullWidth
                     />
                   </Grid>
-                  {/* Operator Select */}
                   <Grid item xs={12}>
                     <FormControl fullWidth>
                       <InputLabel>Operator</InputLabel>
@@ -159,7 +155,6 @@ const RacksList = ({ themeMode }) => {
                       </Select>
                     </FormControl>
                   </Grid>
-                  {/* Sort By Select */}
                   <Grid item xs={12}>
                     <FormControl fullWidth>
                       <InputLabel>Sort By</InputLabel>
@@ -186,7 +181,6 @@ const RacksList = ({ themeMode }) => {
           </Box>
         </Grid>
 
-        {/* Racks List Section */}
         <Grid item xs={12} md={8}>
           <Grid container spacing={3}>
             {racks.map(rack => (
@@ -198,8 +192,8 @@ const RacksList = ({ themeMode }) => {
                         variant="h6" 
                         fontWeight="bold"
                         component={Link} 
-                        to={`/rack/${rack.id}`} // Link to the detailed page
-                        style={{ textDecoration: 'none', color: 'inherit' }} // Maintain theme
+                        to={`/rack/${rack.id}`}
+                        style={{ textDecoration: 'none', color: 'inherit' }}
                       >
                         {rack.rack_name || 'Unnamed Rack'}
                       </Typography>                      
